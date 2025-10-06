@@ -66,19 +66,25 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         updated_at: new Date().toISOString(),
       }
 
-      if (product) {
-        const { error } = await supabase.from("products").update(dataToSave).eq("id", product.id)
+      console.log('💾 Saving product data:', dataToSave)
 
+      if (product) {
+        console.log('🔄 Updating existing product:', product.id)
+        const { data, error } = await supabase.from("products").update(dataToSave).eq("id", product.id).select()
+        console.log('✅ Update result:', { data, error })
         if (error) throw error
       } else {
-        const { error } = await supabase.from("products").insert([dataToSave])
-
+        console.log('✨ Creating new product')
+        const { data, error } = await supabase.from("products").insert([dataToSave]).select()
+        console.log('✅ Insert result:', { data, error })
         if (error) throw error
       }
 
+      console.log('🎉 Product saved successfully! Redirecting...')
       router.push("/admin/products")
       router.refresh()
     } catch (err) {
+      console.error('❌ Product save error:', err)
       let errorMessage = "An error occurred"
 
       if (err instanceof Error) {

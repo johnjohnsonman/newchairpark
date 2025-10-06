@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import { createServerClient } from "@/lib/supabase/server"
 import StoreClientPage from "./store-client"
 
 const categories = [
@@ -11,16 +11,32 @@ const categories = [
   { id: "design-chair", name: "Design Chair", displayName: "디자인 체어" },
 ]
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "스토어 | 프리미엄 오피스 가구",
   description:
     "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어와 가구를 만나보세요. 인체공학적 디자인과 최고의 품질을 경험하세요.",
-  openGraph: {
-    title: "체어파크 스토어 | 프리미엄 오피스 가구",
-    description: "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어와 가구",
-  },
 }
 
-export default function StorePage() {
-  return <StoreClientPage categories={categories} />
+export default async function StorePage() {
+  const supabase = await createServerClient()
+
+  // 서버에서 미리 데이터 로드 (빠름!)
+  const [productsResult, brandsResult] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, brands(name, slug)")
+      .order("created_at", { ascending: false }),
+    supabase.from("brands").select("*").order("name"),
+  ])
+
+  const initialProducts = productsResult.data || []
+  const initialBrands = brandsResult.data || []
+
+  return (
+    <StoreClientPage 
+      categories={categories} 
+      initialProducts={initialProducts}
+      initialBrands={initialBrands}
+    />
+  )
 }

@@ -50,7 +50,17 @@ interface CategoryBanner {
   background_image: string
 }
 
-export default function StoreClientPage({ categories }: { categories: Category[] }) {
+interface StoreClientPageProps {
+  categories: Category[]
+  initialProducts?: Product[]
+  initialBrands?: Brand[]
+}
+
+export default function StoreClientPage({ 
+  categories, 
+  initialProducts = [],
+  initialBrands = []
+}: StoreClientPageProps) {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const supabase = createBrowserClient()
@@ -68,38 +78,43 @@ export default function StoreClientPage({ categories }: { categories: Category[]
   const [categoryBanners, setCategoryBanners] = useState<CategoryBanner[]>([])
   const [heroCarouselIndex, setHeroCarouselIndex] = useState(0)
   const [carouselIndex, setCarouselIndex] = useState(0)
-  const [products, setProducts] = useState<Product[]>([])
-  const [brands, setBrands] = useState<Brand[]>([])
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [brands, setBrands] = useState<Brand[]>(initialBrands)
+  const [loading, setLoading] = useState(false)
+
+  // 초기 데이터가 없을 때만 로드
+  useEffect(() => {
+    if (initialProducts.length === 0) {
+      const fetchProducts = async () => {
+        setLoading(true)
+        const { data, error } = await supabase
+          .from("products")
+          .select("*, brands(name, slug)")
+          .order("created_at", { ascending: false })
+
+        if (data) {
+          setProducts(data)
+        }
+        setLoading(false)
+      }
+
+      fetchProducts()
+    }
+  }, [initialProducts.length])
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from("products")
-        .select("*, brands(name, slug)")
-        .order("created_at", { ascending: false })
+    if (initialBrands.length === 0) {
+      const fetchBrands = async () => {
+        const { data } = await supabase.from("brands").select("*").order("name")
 
-      if (data) {
-        setProducts(data)
+        if (data) {
+          setBrands(data)
+        }
       }
-      setLoading(false)
+
+      fetchBrands()
     }
-
-    fetchProducts()
-  }, [])
-
-  useEffect(() => {
-    const fetchBrands = async () => {
-      const { data } = await supabase.from("brands").select("*").order("name")
-
-      if (data) {
-        setBrands(data)
-      }
-    }
-
-    fetchBrands()
-  }, [])
+  }, [initialBrands.length])
 
   useEffect(() => {
     if (categoryParam) {
