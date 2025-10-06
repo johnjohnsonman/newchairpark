@@ -316,94 +316,21 @@ export default function StoreClientPage({
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div
-        className="relative bg-neutral-200 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            categoryBanners.length > 0 && categoryBanners[heroCarouselIndex]?.background_image
-              ? `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${categoryBanners[heroCarouselIndex].background_image})`
-              : "none",
-        }}
-      >
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="grid items-center gap-6 md:grid-cols-2">
-            <div
-              className={
-                categoryBanners.length > 0 && categoryBanners[heroCarouselIndex]?.background_image ? "text-white" : ""
-              }
-            >
-              <h1 className="mb-3 text-3xl font-bold md:text-4xl">
-                {categoryBanners.length > 0 ? categoryBanners[heroCarouselIndex]?.title : "오피스 체어"}
+      {/* 스틸케이스 스타일 컴팩트 배너 */}
+      <div className="border-b bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-4">
+              <h1 className="text-3xl font-bold text-neutral-900">
+                {selectedCategory
+                  ? categories.find((c) => c.id === selectedCategory)?.displayName || "제품"
+                  : "전체 제품"}
               </h1>
-              <p
-                className={`text-base ${categoryBanners.length > 0 && categoryBanners[heroCarouselIndex]?.background_image ? "text-white/90" : "text-muted-foreground"}`}
-              >
-                {categoryBanners.length > 0
-                  ? categoryBanners[heroCarouselIndex]?.description
-                  : "장시간 업무에 최적화된 인체공학적 오피스 체어 컬렉션"}
+              <p className="mt-2 text-base text-muted-foreground">
+                {selectedCategory
+                  ? "최고의 품질과 디자인을 경험하세요"
+                  : "체어파크의 모든 프리미엄 제품을 만나보세요"}
               </p>
-            </div>
-            <div className="relative">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-white/95 backdrop-blur">
-                {displayProducts.length > 0 && (
-                  <>
-                    <Image
-                      src={
-                        displayProducts[carouselIndex]?.images?.[0]?.url ||
-                        displayProducts[carouselIndex]?.image_url ||
-                        "/placeholder.svg" ||
-                        "/placeholder.svg" ||
-                        "/placeholder.svg" ||
-                        "/placeholder.svg"
-                      }
-                      alt={displayProducts[carouselIndex]?.name || "Product"}
-                      fill
-                      className="object-contain p-6 transition-opacity duration-300"
-                    />
-                    <div className="absolute bottom-4 left-4 right-4 rounded-lg bg-white/90 p-3 backdrop-blur">
-                      <p className="text-xs font-semibold text-neutral-500">
-                        {displayProducts[carouselIndex]?.brands?.name}
-                      </p>
-                      <p className="text-sm font-bold">{displayProducts[carouselIndex]?.name}</p>
-                      <p className="text-sm font-semibold text-neutral-900">
-                        ₩{Number(displayProducts[carouselIndex]?.price).toLocaleString()}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-              {displayProducts.length > 1 && (
-                <>
-                  <button
-                    onClick={() =>
-                      setCarouselIndex((prev) => (prev - 1 + displayProducts.length) % displayProducts.length)
-                    }
-                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur transition-colors hover:bg-white"
-                    aria-label="Previous product"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => setCarouselIndex((prev) => (prev + 1) % displayProducts.length)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur transition-colors hover:bg-white"
-                    aria-label="Next product"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                  <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
-                    {displayProducts.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCarouselIndex(idx)}
-                        className={`h-1.5 rounded-full transition-all ${
-                          idx === carouselIndex ? "w-6 bg-white" : "w-1.5 bg-white/50"
-                        }`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </div>
