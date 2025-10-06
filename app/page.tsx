@@ -74,7 +74,7 @@ export default function Home() {
             <div className="mb-1">
               <h3 className="text-xs font-semibold uppercase tracking-wider opacity-60">인기 제품</h3>
             </div>
-            <Link href="/store/의자" className="group rounded-lg bg-white/10 p-3 transition-all hover:bg-white/20">
+            <Link href="/store?category=office-chair" className="group rounded-lg bg-white/10 p-3 transition-all hover:bg-white/20">
               <div className="mb-1.5 flex items-center gap-2">
                 <TrendingUp className="h-3.5 w-3.5" />
                 <span className="text-xs font-semibold">오피스 체어</span>
@@ -106,7 +106,7 @@ export default function Home() {
             <p className="text-base text-muted-foreground">체어파크에서 가장 사랑받는 제품들</p>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
-            <Link href="/store/의자" className="group relative overflow-hidden rounded-2xl shadow-lg">
+            <Link href="/store?category=office-chair" className="group relative overflow-hidden rounded-2xl shadow-lg">
               <div className="relative h-80">
                 <Image
                   src="/herman-miller-aeron.png"
