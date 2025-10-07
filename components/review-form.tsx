@@ -35,6 +35,9 @@ export function ReviewForm({ user }: ReviewFormProps) {
     user_email: user?.email || "",
     age: "",
     occupation: "",
+    height: "",
+    gender: "",
+    sitting_duration: "",
     sitting_style: "",
     satisfaction_score: 5,
     design_score: 5,
@@ -99,29 +102,48 @@ export function ReviewForm({ user }: ReviewFormProps) {
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
-    if (images.length >= 5) {
-      setError("최대 5개의 이미지만 업로드할 수 있습니다")
+    const newFiles = Array.from(files)
+    const totalImages = images.length + newFiles.length
+
+    if (totalImages > 5) {
+      setError("최대 5개의 이미지만 업로드 가능합니다.")
       return
     }
 
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
+    setIsLoading(true)
+    setError(null)
 
-      const response = await fetch("/api/reviews/upload-image", {
-        method: "POST",
-        body: formData,
+    try {
+      const uploadPromises = newFiles.map(async (file) => {
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const response = await fetch("/api/reviews/upload-image", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "이미지 업로드에 실패했습니다")
+        }
+
+        const data = await response.json()
+        return data.url
       })
 
-      if (!response.ok) throw new Error("이미지 업로드 실패")
-
-      const data = await response.json()
-      setImages([...images, data.url])
+      const uploadedUrls = await Promise.all(uploadPromises)
+      setImages((prevImages) => [...prevImages, ...uploadedUrls])
     } catch (err) {
-      setError("이미지 업로드 중 오류가 발생했습니다")
+      console.error("Image upload error:", err)
+      setError(err instanceof Error ? err.message : "이미지 업로드 중 오류가 발생했습니다")
+    } finally {
+      setIsLoading(false)
+      // 파일 입력 초기화
+      e.target.value = ""
     }
   }
 
@@ -314,6 +336,34 @@ export function ReviewForm({ user }: ReviewFormProps) {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="height">키 (cm)</Label>
+              <Input
+                id="height"
+                type="number"
+                min="100"
+                max="250"
+                value={formData.height}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, height: e.target.value })}
+                placeholder="키 (cm)"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="gender">성별</Label>
+              <Select 
+                value={formData.gender} 
+                onValueChange={(value: string) => setFormData({ ...formData, gender: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="성별을 선택해주세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">남성</SelectItem>
+                  <SelectItem value="female">여성</SelectItem>
+                  <SelectItem value="other">기타</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="occupation">직업</Label>
               <Input
                 id="occupation"
@@ -324,23 +374,43 @@ export function ReviewForm({ user }: ReviewFormProps) {
             </div>
           </div>
 
-          {/* 앉는 스타일 */}
-          <div className="space-y-2">
-            <Label htmlFor="sitting_style">앉는 스타일</Label>
-            <Input
-              id="sitting_style"
-              value={formData.sitting_style}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, sitting_style: e.target.value })}
-              placeholder="앉는 스타일을 입력하세요 (예: 장시간 앉아서 작업)"
-              list="sitting-styles"
-            />
-            <datalist id="sitting-styles">
-              <option value="장시간 앉아서 작업" />
-              <option value="자주 자세를 바꿈" />
-              <option value="바른 자세 유지" />
-              <option value="다리를 꼬고 앉음" />
-              <option value="장시간 회의" />
-            </datalist>
+          {/* 앉는 스타일 및 시간 */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="sitting_style">앉는 스타일</Label>
+              <Input
+                id="sitting_style"
+                value={formData.sitting_style}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, sitting_style: e.target.value })}
+                placeholder="앉는 스타일을 입력하세요 (예: 장시간 앉아서 작업)"
+                list="sitting-styles"
+              />
+              <datalist id="sitting-styles">
+                <option value="장시간 앉아서 작업" />
+                <option value="자주 자세를 바꿈" />
+                <option value="바른 자세 유지" />
+                <option value="다리를 꼬고 앉음" />
+                <option value="장시간 회의" />
+              </datalist>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="sitting_duration">하루 앉는 시간</Label>
+              <Select 
+                value={formData.sitting_duration} 
+                onValueChange={(value: string) => setFormData({ ...formData, sitting_duration: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="하루 앉는 시간을 선택해주세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="under-4">4시간 미만</SelectItem>
+                  <SelectItem value="4-6">4-6시간</SelectItem>
+                  <SelectItem value="6-8">6-8시간</SelectItem>
+                  <SelectItem value="8-10">8-10시간</SelectItem>
+                  <SelectItem value="over-10">10시간 이상</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* 구매 인증 */}
@@ -388,6 +458,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
                     type="file"
                     id="image-upload"
                     accept="image/*"
+                    multiple
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleImageUpload(e)}
                     className="hidden"
                     disabled={isLoading}
@@ -400,8 +471,12 @@ export function ReviewForm({ user }: ReviewFormProps) {
                   >
                     <Upload className="h-8 w-8 text-gray-400" />
                     <div>
-                      <p className="text-sm font-medium text-gray-700">사진 업로드</p>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF (최대 5개)</p>
+                      <p className="text-sm font-medium text-gray-700">
+                        {isLoading ? "업로드 중..." : "사진 업로드"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG, GIF (최대 5개) {images.length > 0 && `- ${images.length}/5`}
+                      </p>
                     </div>
                   </label>
                 </div>
