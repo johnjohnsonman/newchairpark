@@ -127,8 +127,15 @@ export function ReviewForm({ user }: ReviewFormProps) {
         })
 
         if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || "이미지 업로드에 실패했습니다")
+          let errorMessage = "이미지 업로드에 실패했습니다"
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } catch (parseError) {
+            console.error("Error parsing response:", parseError)
+            errorMessage = `서버 오류 (${response.status}): ${response.statusText}`
+          }
+          throw new Error(errorMessage)
         }
 
         const data = await response.json()
