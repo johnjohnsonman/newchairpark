@@ -3,16 +3,22 @@ import { notFound } from "next/navigation"
 import { ProductForm } from "@/components/admin/product-form"
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const supabase = await createClient()
+  try {
+    const { id } = await params
+    console.log('Edit product page - ID:', id)
+    
+    const supabase = await createClient()
 
-  const { data: product } = await supabase.from("products").select("*").eq("id", id).single()
+    const { data: product, error: productError } = await supabase.from("products").select("*").eq("id", id).single()
 
-  if (!product) {
-    notFound()
-  }
+    console.log('Product fetch result:', { product, productError })
 
-  const { data: brands } = await supabase.from("brands").select("*").order("name")
+    if (productError || !product) {
+      console.error('Product not found:', { id, productError })
+      notFound()
+    }
+
+    const { data: brands } = await supabase.from("brands").select("*").order("name")
 
   return (
     <div className="p-6">
@@ -22,4 +28,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       <ProductForm product={product} brands={brands || []} />
     </div>
   )
+  } catch (error) {
+    console.error('Edit product page error:', error)
+    notFound()
+  }
 }
