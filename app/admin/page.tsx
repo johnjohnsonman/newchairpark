@@ -1,103 +1,20 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, TrendingUp, ArrowUpRight, Tag, ImageIcon, Recycle, Users, ShoppingCart, AlertTriangle, Mail } from "lucide-react"
-import { createServerClient } from "@/lib/supabase/server"
+import { Package, TrendingUp, ArrowUpRight, Tag, ImageIcon, Recycle, Users, ShoppingCart, AlertTriangle } from "lucide-react"
+import { getDashboardStats } from "./dashboard-stats"
 
 export default async function AdminDashboard() {
-  const supabase = await createServerClient()
-
+  // 최적화된 데이터 로딩
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // 기본 데이터 초기화
-  let productsCount = 0
-  let brandsCount = 0
-  let galleryCount = 0
-  let recycleCount = 0
-  let usersCount = 0
-  let ordersCount = 0
-  let totalSales = 0
-  let pendingOrders = 0
-  let processingOrders = 0
-  let completedOrders = 0
-  let cancelledOrders = 0
-  let outOfStockCount = 0
-  let recentOrders: any[] = []
-
-  try {
-    // 기본 카운트 데이터
-    const results = await Promise.allSettled([
-      supabase.from("products").select("*", { count: "exact", head: true }),
-      supabase.from("brands").select("*", { count: "exact", head: true }),
-      supabase.from("gallery").select("*", { count: "exact", head: true }),
-      supabase.from("recycle_items").select("*", { count: "exact", head: true }),
-    ])
-
-    if (results[0].status === 'fulfilled') productsCount = results[0].value.count || 0
-    if (results[1].status === 'fulfilled') brandsCount = results[1].value.count || 0
-    if (results[2].status === 'fulfilled') galleryCount = results[2].value.count || 0
-    if (results[3].status === 'fulfilled') recycleCount = results[3].value.count || 0
-
-    // 사용자 관련 데이터 (에러 무시)
-    try {
-      const [usersResult, ordersResult] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("orders").select("*", { count: "exact", head: true }),
-      ])
-      usersCount = usersResult.count || 0
-      ordersCount = ordersResult.count || 0
-
-      // 매출 데이터
-      const { data: salesData } = await supabase
-        .from("orders")
-        .select("total_amount, created_at, status")
-        .eq("status", "completed")
-
-      totalSales = salesData?.reduce((sum, order) => sum + order.total_amount, 0) || 0
-
-      // 주문 상태별 카운트
-      const statusResults = await Promise.allSettled([
-        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "processing"),
-        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "completed"),
-        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "cancelled"),
-      ])
-
-      if (statusResults[0].status === 'fulfilled') pendingOrders = statusResults[0].value.count || 0
-      if (statusResults[1].status === 'fulfilled') processingOrders = statusResults[1].value.count || 0
-      if (statusResults[2].status === 'fulfilled') completedOrders = statusResults[2].value.count || 0
-      if (statusResults[3].status === 'fulfilled') cancelledOrders = statusResults[3].value.count || 0
-
-      // 최근 주문
-      const { data } = await supabase
-        .from("orders")
-        .select(`
-          id,
-          total_amount,
-          status,
-          created_at,
-          shipping_name
-        `)
-        .order("created_at", { ascending: false })
-        .limit(5)
-
-      recentOrders = data || []
-    } catch (error) {
-      console.error('Orders data error:', error)
-    }
-
-    // 재고 부족 상품
-    const { count } = await supabase
-      .from("products")
-      .select("*", { count: "exact", head: true })
-      .eq("in_stock", false)
-    
-    outOfStockCount = count || 0
-  } catch (error) {
-    console.error('Dashboard data loading error:', error)
-  }
+    productsCount,
+    brandsCount,
+    galleryCount,
+    usersCount,
+    ordersCount,
+    totalSales,
+    recentOrders,
+  } = await getDashboardStats()
 
   return (
     <div className="p-8">
@@ -165,50 +82,14 @@ export default async function AdminDashboard() {
 
       {/* Quick Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className={`${(pendingOrders || 0) > 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+        <Card className="bg-green-50 border-green-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-sm font-medium ${(pendingOrders || 0) > 0 ? 'text-red-900' : 'text-green-900'}`}>
-                  대기 중인 주문
-                </p>
-                <p className={`text-2xl font-bold mt-1 ${(pendingOrders || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {pendingOrders || 0}건
-                </p>
+                <p className="text-sm font-medium text-green-900">브랜드 수</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">{brandsCount}개</p>
               </div>
-              <Package className={`w-8 h-8 ${(pendingOrders || 0) > 0 ? 'text-red-600' : 'text-green-600'}`} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`${(processingOrders || 0) > 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200'}`}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${(processingOrders || 0) > 0 ? 'text-yellow-900' : 'text-gray-900'}`}>
-                  처리 중인 주문
-                </p>
-                <p className={`text-2xl font-bold mt-1 ${(processingOrders || 0) > 0 ? 'text-yellow-600' : 'text-gray-600'}`}>
-                  {processingOrders || 0}건
-                </p>
-              </div>
-              <ShoppingCart className={`w-8 h-8 ${(processingOrders || 0) > 0 ? 'text-yellow-600' : 'text-gray-600'}`} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`${(outOfStockCount || 0) > 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${(outOfStockCount || 0) > 0 ? 'text-red-900' : 'text-green-900'}`}>
-                  품절 상품
-                </p>
-                <p className={`text-2xl font-bold mt-1 ${(outOfStockCount || 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {outOfStockCount || 0}개
-                </p>
-              </div>
-              <AlertTriangle className={`w-8 h-8 ${(outOfStockCount || 0) > 0 ? 'text-red-600' : 'text-green-600'}`} />
+              <Tag className="w-8 h-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -217,10 +98,34 @@ export default async function AdminDashboard() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-900">완료된 주문</p>
-                <p className="text-2xl font-bold text-blue-600 mt-1">{completedOrders || 0}건</p>
+                <p className="text-sm font-medium text-blue-900">갤러리 이미지</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">{galleryCount}개</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-blue-600" />
+              <ImageIcon className="w-8 h-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-purple-50 border-purple-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-900">총 매출</p>
+                <p className="text-2xl font-bold text-purple-600 mt-1">{(totalSales / 100000000).toFixed(1)}억</p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-orange-50 border-orange-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-900">주문 수</p>
+                <p className="text-2xl font-bold text-orange-600 mt-1">{ordersCount}건</p>
+              </div>
+              <ShoppingCart className="w-8 h-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>

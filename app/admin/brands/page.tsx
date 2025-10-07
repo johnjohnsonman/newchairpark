@@ -8,7 +8,15 @@ import { DeleteBrandButton } from "@/components/admin/delete-brand-button"
 export default async function BrandsManagementPage() {
   const supabase = await createClient()
 
-  const { data: brands } = await supabase.from("brands").select("*").order("name")
+  const { data: brands, error } = await supabase
+    .from("brands")
+    .select("id, name, logo_url, description, created_at")
+    .order("name")
+    .limit(50)
+
+  if (error) {
+    console.error('Brands fetch error:', error)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

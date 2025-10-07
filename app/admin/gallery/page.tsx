@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus, Edit } from "lucide-react"
@@ -8,7 +9,16 @@ import { DeleteGalleryButton } from "@/components/admin/delete-gallery-button"
 export default async function GalleryManagementPage() {
   const supabase = await createClient()
 
-  const { data: galleryItems } = await supabase.from("gallery").select("*").order("created_at", { ascending: false })
+  // 필요한 필드만 선택하고 제한된 수만 가져오기
+  const { data: galleryItems, error } = await supabase
+    .from("gallery")
+    .select("id, title, description, image_url, created_at, updated_at")
+    .order("created_at", { ascending: false })
+    .limit(50) // 최대 50개만 가져오기
+
+  if (error) {
+    console.error('Gallery fetch error:', error)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,10 +59,13 @@ export default async function GalleryManagementPage() {
             {galleryItems.map((item) => (
               <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-square relative bg-gray-100">
-                  <img
+                  <Image
                     src={item.image_url || "/placeholder.svg"}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
+                    alt={item.title || "Gallery image"}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    priority={false}
                   />
                 </div>
                 <CardContent className="p-4">

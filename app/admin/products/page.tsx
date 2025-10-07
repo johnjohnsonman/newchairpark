@@ -11,11 +11,12 @@ export default async function ProductsManagementPage() {
   let products: any[] = []
   
   try {
-    // 먼저 brands JOIN 없이 products만 가져오기
+    // 필요한 필드만 선택하고 제한된 수만 가져오기
     const { data, error } = await supabase
       .from("products")
-      .select("*")
+      .select("id, name, price, image_url, in_stock, brand_id, created_at")
       .order("created_at", { ascending: false })
+      .limit(100) // 최대 100개만 가져오기
 
     if (error) {
       console.error('Products fetch error:', error)
