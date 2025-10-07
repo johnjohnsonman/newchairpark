@@ -23,38 +23,49 @@ export function UserNav() {
   const supabase = createClient()
 
   useEffect(() => {
-    const getUser = async () => {
+    let mounted = true
+
+    const initializeAuth = async () => {
       try {
-        // 타임아웃 설정 (3초)
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Auth timeout')), 3000)
-        )
+        // 먼저 세션 확인 (더 빠름)
+        const { data: { session }, error } = await supabase.auth.getSession()
         
-        const authPromise = supabase.auth.getUser()
-        const {
-          data: { user },
-        } = await Promise.race([authPromise, timeoutPromise]) as any
-        
-        setUser(user)
+        if (mounted) {
+          if (error) {
+            console.warn('Session check failed:', error.message)
+            setUser(null)
+          } else {
+            setUser(session?.user ?? null)
+          }
+          setLoading(false)
+        }
       } catch (error) {
-        console.error('Auth error:', error)
-        setUser(null)
-      } finally {
-        setLoading(false)
+        if (mounted) {
+          console.warn('Auth initialization failed:', error)
+          setUser(null)
+          setLoading(false)
+        }
       }
     }
-    
-    getUser()
 
+    // 즉시 세션 확인
+    initializeAuth()
+
+    // 인증 상태 변경 감지
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (mounted) {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
     })
 
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

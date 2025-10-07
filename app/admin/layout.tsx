@@ -15,6 +15,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginPage = pathname === "/admin/login"
 
   useEffect(() => {
+    let mounted = true
+
     const checkAuth = async () => {
       if (isLoginPage) {
         setIsLoading(false)
@@ -24,44 +26,50 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       try {
         const supabase = createBrowserClient()
         
-        // 타임아웃 설정 (5초)
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Auth check timeout')), 5000)
-        )
+        // 먼저 세션 확인 (더 빠름)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        const authPromise = supabase.auth.getUser()
-        const {
-          data: { user },
-        } = await Promise.race([authPromise, timeoutPromise]) as any
+        if (!mounted) return
 
-        if (!user) {
+        if (sessionError || !session?.user) {
           router.push("/admin/login")
           return
         }
 
-        // 역할 확인도 타임아웃 설정
+        // 관리자 역할 확인 (타임아웃 설정)
+        const rolePromise = supabase.from("user_roles").select("role").eq("user_id", session.user.id).maybeSingle()
         const roleTimeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Role check timeout')), 3000)
         )
         
-        const rolePromise = supabase.from("user_roles").select("role").eq("user_id", user.id).maybeSingle()
-        const { data: roleData } = await Promise.race([rolePromise, roleTimeoutPromise]) as any
+        const { data: roleData, error: roleError } = await Promise.race([rolePromise, roleTimeoutPromise]) as any
 
-        if (!roleData || roleData.role !== "admin") {
+        if (!mounted) return
+
+        if (roleError || !roleData || roleData.role !== "admin") {
+          console.warn('Admin role check failed:', roleError?.message || 'No admin role')
           router.push("/admin/login")
           return
         }
 
         setIsAuthenticated(true)
       } catch (error) {
-        console.error('Admin auth error:', error)
-        router.push("/admin/login")
+        if (mounted) {
+          console.warn('Admin auth error:', error)
+          router.push("/admin/login")
+        }
       } finally {
-        setIsLoading(false)
+        if (mounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     checkAuth()
+
+    return () => {
+      mounted = false
+    }
   }, [isLoginPage, router, pathname])
 
   if (isLoginPage) {
@@ -74,6 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <div className="text-muted-foreground">관리자 권한 확인 중...</div>
+          <div className="text-xs text-muted-foreground/60 mt-2">잠시만 기다려주세요</div>
         </div>
       </div>
     )
