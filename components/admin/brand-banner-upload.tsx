@@ -30,10 +30,38 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
   const [banners, setBanners] = useState<BrandBanner[]>(initialBanners)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  
+  // 임시 브랜드 ID인 경우 업로드 비활성화
+  const isTemporaryBrand = brandId === 'temp'
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    // 임시 브랜드 ID인 경우 로컬 상태에만 저장 (실제 업로드 없음)
+    if (isTemporaryBrand) {
+      console.log('New brand - storing banner locally:', file.name)
+      
+      const newBanner: BrandBanner = {
+        image_url: URL.createObjectURL(file), // 임시 URL
+        title: '',
+        description: '',
+        order_index: banners.length,
+      }
+
+      const updatedBanners = [...banners, newBanner]
+      setBanners(updatedBanners)
+      onBannersChange?.(updatedBanners)
+      return
+    }
+
+    console.log('Starting file upload:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      brandId,
+      category: `brand-${brandId}`
+    })
 
     // 파일 크기 체크 (5MB 제한)
     if (file.size > 5 * 1024 * 1024) {
@@ -60,10 +88,15 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
       formData.append('file', file)
       formData.append('category', `brand-${brandId}`)
 
+      console.log('Sending upload request to:', '/api/category-banners/upload')
+
       const response = await fetch('/api/category-banners/upload', {
         method: 'POST',
         body: formData,
       })
+
+      console.log('Upload response status:', response.status)
+      console.log('Upload response headers:', Object.fromEntries(response.headers.entries()))
 
       if (!response.ok) {
         let errorMessage = 'Upload failed'
@@ -206,6 +239,11 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
                 {isUploading ? "업로드 중..." : "배너 이미지 업로드"}
               </p>
               <p className="text-xs text-gray-500">PNG, JPG, GIF, WebP (최대 5MB)</p>
+              {isTemporaryBrand && (
+                <p className="text-xs text-blue-600 mt-1">
+                  새 브랜드 생성 시 함께 저장됩니다
+                </p>
+              )}
             </div>
           </label>
         </div>

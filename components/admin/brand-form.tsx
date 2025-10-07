@@ -55,14 +55,76 @@ export function BrandForm({ brand, initialBanners = [] }: BrandFormProps) {
         if (error) throw error
       } else {
         // Create new brand
-        const { error } = await supabase.from("brands").insert([formData])
+        const { data: newBrand, error: brandError } = await supabase
+          .from("brands")
+          .insert([formData])
+          .select()
+          .single()
 
-        if (error) throw error
+        if (brandError) throw brandError
+
+        // 새 브랜드 생성 후 배너도 저장
+        if (newBrand && banners.length > 0) {
+          const bannerPromises = banners.map(async (banner, index) => {
+            // 임시 URL인 경우 실제 파일 업로드
+            let imageUrl = banner.image_url
+            
+            if (banner.image_url.startsWith('blob:')) {
+              try {
+                // Blob URL을 File 객체로 변환
+                const response = await fetch(banner.image_url)
+                const blob = await response.blob()
+                const file = new File([blob], `banner-${index}.jpg`, { type: blob.type })
+                
+                // 실제 파일 업로드
+                const formData = new FormData()
+                formData.append('file', file)
+                formData.append('category', `brand-${newBrand.id}`)
+                
+                const uploadResponse = await fetch('/api/category-banners/upload', {
+                  method: 'POST',
+                  body: formData,
+                })
+                
+                if (uploadResponse.ok) {
+                  const uploadData = await uploadResponse.json()
+                  imageUrl = uploadData.url
+                } else {
+                  throw new Error('File upload failed')
+                }
+              } catch (uploadError) {
+                console.error('Banner upload error:', uploadError)
+                throw uploadError
+              }
+            }
+            
+            return supabase
+              .from("category_banners")
+              .insert({
+                category: `brand-${newBrand.id}`,
+                image_url: imageUrl,
+                title: banner.title || '',
+                description: banner.description || '',
+                order_index: index,
+                is_active: true
+              })
+          })
+
+          const bannerResults = await Promise.all(bannerPromises)
+          const bannerErrors = bannerResults.filter(result => result.error)
+          
+          if (bannerErrors.length > 0) {
+            console.error('Some banners failed to save:', bannerErrors)
+            // 브랜드는 생성되었으므로 경고만 표시
+            setError("브랜드는 생성되었지만 일부 배너 저장에 실패했습니다.")
+          }
+        }
       }
 
       router.push("/admin/brands")
       router.refresh()
     } catch (err) {
+      console.error('Brand form submission error:', err)
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
       setIsLoading(false)
@@ -128,15 +190,13 @@ export function BrandForm({ brand, initialBanners = [] }: BrandFormProps) {
             </div>
 
             {/* 브랜드 배너 관리 */}
-            {brand && (
-              <div className="grid gap-2">
-                <BrandBannerUpload
-                  brandId={brand.id}
-                  initialBanners={initialBanners}
-                  onBannersChange={setBanners}
-                />
-              </div>
-            )}
+            <div className="grid gap-2">
+              <BrandBannerUpload
+                brandId={brand?.id || 'temp'}
+                initialBanners={initialBanners}
+                onBannersChange={setBanners}
+              />
+            </div>
 
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
