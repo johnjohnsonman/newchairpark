@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import type { Gallery } from "@/types/database"
 import Link from "next/link"
-import { MultipleImageUpload } from "@/components/admin/multiple-image-upload"
+import { GalleryImageUpload } from "@/components/admin/gallery-image-upload"
 
 interface GalleryFormProps {
   galleryItem?: Gallery
@@ -47,6 +47,11 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
       return
     }
 
+    if (!formData.title.trim()) {
+      setError("제목을 입력해주세요.")
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
@@ -54,8 +59,8 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
     try {
       const dataToSubmit: any = {
-        title: formData.title,
-        description: formData.description,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
         image_url: formData.images[formData.featuredIndex], // 대표 이미지를 image_url에 저장
       }
 
@@ -67,32 +72,48 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
       console.log('Submitting gallery data:', dataToSubmit)
 
-      if (galleryItem) {
-        // Update existing gallery item
-        const { data, error } = await supabase
-          .from("gallery")
-          .update({
-            ...dataToSubmit,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", galleryItem.id)
-          .select()
+      // 타임아웃 설정 (30초)
+      const submitPromise = galleryItem 
+        ? supabase
+            .from("gallery")
+            .update({
+              ...dataToSubmit,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", galleryItem.id)
+            .select()
+        : supabase.from("gallery").insert([dataToSubmit]).select()
 
-        console.log('Update response:', { data, error })
-        if (error) throw error
-      } else {
-        // Create new gallery item
-        const { data, error } = await supabase.from("gallery").insert([dataToSubmit]).select()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('제출 시간이 초과되었습니다. 다시 시도해주세요.')), 30000)
+      )
 
-        console.log('Insert response:', { data, error })
-        if (error) throw error
+      const { data, error } = await Promise.race([submitPromise, timeoutPromise]) as any
+
+      console.log('Submit response:', { data, error })
+      
+      if (error) {
+        console.error('Supabase error:', error)
+        throw new Error(error.message || '데이터베이스 오류가 발생했습니다.')
       }
 
-      router.push("/admin/gallery")
-      router.refresh()
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        throw new Error('데이터 저장에 실패했습니다.')
+      }
+
+      // 성공 메시지 표시 후 리다이렉트
+      console.log('Gallery saved successfully:', data)
+      
+      // 잠시 대기 후 리다이렉트
+      setTimeout(() => {
+        router.push("/admin/gallery")
+        router.refresh()
+      }, 1000)
+
     } catch (err) {
       console.error('Gallery form error:', err)
-      setError(err instanceof Error ? err.message : "An error occurred")
+      const errorMessage = err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +137,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
             <div className="grid gap-2">
               <Label>Images * (다중 업로드 가능)</Label>
-              <MultipleImageUpload
+              <GalleryImageUpload
                 images={formData.images}
                 featuredIndex={formData.featuredIndex}
                 onChange={(images, featuredIndex) => 
@@ -141,12 +162,16 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
           {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
 
           <div className="flex gap-3">
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? "Saving..." : galleryItem ? "Update Image" : "Add Image"}
+            <Button 
+              type="submit" 
+              disabled={isLoading || formData.images.length === 0 || !formData.title.trim()} 
+              className="flex-1"
+            >
+              {isLoading ? "저장 중..." : galleryItem ? "이미지 수정" : "이미지 추가"}
             </Button>
             <Link href="/admin/gallery">
-              <Button type="button" variant="outline">
-                Cancel
+              <Button type="button" variant="outline" disabled={isLoading}>
+                취소
               </Button>
             </Link>
           </div>
