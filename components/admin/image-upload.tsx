@@ -67,11 +67,16 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
     const imageToDelete = images[index]
 
     try {
-      await fetch("/api/products/delete-image", {
-        method: "DELETE",
+      // POST 메서드 사용 (API에서 POST만 처리)
+      const response = await fetch("/api/products/delete-image", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: imageToDelete.url }),
       })
+
+      if (!response.ok) {
+        throw new Error('Delete failed')
+      }
 
       const newImages = images
         .filter((_, i) => i !== index)
