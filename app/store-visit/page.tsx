@@ -40,89 +40,107 @@ export default function StoreVisitPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="name">이름 *</Label>
-                    <Input id="name" placeholder="홍길동" required />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">연락처 *</Label>
-                    <Input id="phone" placeholder="010-1234-5678" required />
+                {/* 네이버 예약 안내 */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-blue-500 text-white rounded-full p-1">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-blue-900 mb-1">간편한 네이버 예약</h3>
+                      <p className="text-sm text-blue-700">
+                        네이버 예약을 통해 원하는 날짜와 시간을 쉽게 예약하실 수 있습니다.
+                        예약 시 전화번호만 입력하면 즉시 예약이 완료됩니다.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="email">이메일</Label>
-                  <Input id="email" type="email" placeholder="example@email.com" />
+                <div className="text-center">
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700 text-white" 
+                    size="lg"
+                    onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
+                  >
+                    <Calendar className="h-5 w-5 mr-2" />
+                    네이버 예약으로 바로 예약하기
+                  </Button>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="visit-date">희망 방문일 *</Label>
-                    <Input id="visit-date" type="date" required />
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
                   </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-muted-foreground">또는</span>
+                  </div>
+                </div>
+
+                {/* 대안 연락 방법 */}
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="visit-time">희망 시간 *</Label>
+                    <Label className="text-base font-medium">직접 연락하기</Label>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      네이버 예약이 어려우시거나 특별한 요청사항이 있으시면 직접 연락해주세요.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="name">이름 *</Label>
+                      <Input id="name" placeholder="홍길동" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">연락처 *</Label>
+                      <Input id="phone" placeholder="010-1234-5678" required />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="interest">관심 제품</Label>
                     <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="시간 선택" />
+                        <SelectValue placeholder="관심 있는 제품을 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="10:00">오전 10:00</SelectItem>
-                        <SelectItem value="11:00">오전 11:00</SelectItem>
-                        <SelectItem value="14:00">오후 2:00</SelectItem>
-                        <SelectItem value="15:00">오후 3:00</SelectItem>
-                        <SelectItem value="16:00">오후 4:00</SelectItem>
-                        <SelectItem value="17:00">오후 5:00</SelectItem>
+                        <SelectItem value="herman-miller">허먼밀러 (Herman Miller)</SelectItem>
+                        <SelectItem value="steelcase">스틸케이스 (Steelcase)</SelectItem>
+                        <SelectItem value="knoll">놀 (Knoll)</SelectItem>
+                        <SelectItem value="vitra">비트라 (Vitra)</SelectItem>
+                        <SelectItem value="all">전체 제품</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
 
-                <div>
-                  <Label htmlFor="interest">관심 제품</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="관심 있는 제품을 선택하세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="herman-miller">허먼밀러 (Herman Miller)</SelectItem>
-                      <SelectItem value="steelcase">스틸케이스 (Steelcase)</SelectItem>
-                      <SelectItem value="knoll">놀 (Knoll)</SelectItem>
-                      <SelectItem value="vitra">비트라 (Vitra)</SelectItem>
-                      <SelectItem value="all">전체 제품</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div>
+                    <Label htmlFor="purpose">방문 목적</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="방문 목적을 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="purchase">구매 예정</SelectItem>
+                        <SelectItem value="consultation">상담 및 체험</SelectItem>
+                        <SelectItem value="rental">렌탈 문의</SelectItem>
+                        <SelectItem value="repair">수리 문의</SelectItem>
+                        <SelectItem value="other">기타</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <Label htmlFor="purpose">방문 목적</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="방문 목적을 선택하세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="purchase">구매 예정</SelectItem>
-                      <SelectItem value="consultation">상담 및 체험</SelectItem>
-                      <SelectItem value="rental">렌탈 문의</SelectItem>
-                      <SelectItem value="repair">수리 문의</SelectItem>
-                      <SelectItem value="other">기타</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div>
+                    <Label htmlFor="message">요청사항</Label>
+                    <Textarea 
+                      id="message" 
+                      placeholder="희망 방문일, 시간, 특별한 요청사항 등을 적어주세요"
+                      rows={4}
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="message">추가 요청사항</Label>
-                  <Textarea 
-                    id="message" 
-                    placeholder="특별한 요청사항이나 궁금한 점이 있으시면 적어주세요"
-                    rows={4}
-                  />
+                  <Button className="w-full" size="lg" variant="outline">
+                    전화 상담 요청하기
+                  </Button>
                 </div>
-
-                <Button className="w-full" size="lg">
-                  예약 신청하기
-                </Button>
               </CardContent>
             </Card>
           </div>
@@ -143,6 +161,14 @@ export default function StoreVisitPage() {
                   <div>
                     <p className="font-medium">체어파크 본점</p>
                     <p className="text-sm text-slate-600">서울시 강남구 테헤란로 123</p>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="mt-2"
+                      onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196', '_blank')}
+                    >
+                      네이버 지도에서 보기
+                    </Button>
                   </div>
                 </div>
                 
@@ -161,6 +187,21 @@ export default function StoreVisitPage() {
                   <div>
                     <p className="font-medium">전화 문의</p>
                     <p className="text-sm text-slate-600">02-1234-5678</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-5 w-5 text-slate-500 mt-1" />
+                  <div>
+                    <p className="font-medium">네이버 예약</p>
+                    <p className="text-sm text-slate-600">온라인 예약 시스템 운영</p>
+                    <Button 
+                      size="sm" 
+                      className="mt-2 bg-green-600 hover:bg-green-700"
+                      onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
+                    >
+                      네이버 예약하기
+                    </Button>
                   </div>
                 </div>
               </CardContent>

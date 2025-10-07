@@ -357,10 +357,12 @@ export default function Home() {
               <p className="text-lg opacity-90">온라인으로는 느낄 수 없는 진짜 편안함을 경험해보세요</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-white text-slate-900 shadow-lg hover:bg-white/90 w-full sm:w-auto" asChild>
-                <Link href="/store-visit">
-                  매장 방문 예약하기 <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+              <Button 
+                size="lg" 
+                className="bg-white text-slate-900 shadow-lg hover:bg-white/90 w-full sm:w-auto"
+                onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
+              >
+                네이버 예약으로 바로 예약하기 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button
                 size="lg"

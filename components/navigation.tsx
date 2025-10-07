@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { Menu, X, ChevronDown, Calendar } from "lucide-react"
 import { useState } from "react"
 import { UserNav } from "@/components/user-nav"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -94,6 +94,14 @@ export default function Navigation() {
           </div>
 
           <div className="hidden md:flex md:items-center md:gap-3">
+            <Button 
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
+            >
+              <Calendar className="h-4 w-4 mr-1" />
+              네이버 예약
+            </Button>
             <Button size="sm" variant="default" asChild>
               <Link href="/bulk-inquiry">특판가 문의</Link>
             </Button>

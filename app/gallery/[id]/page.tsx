@@ -227,8 +227,11 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
             전문 상담을 통해 더 자세한 정보를 받아보실 수 있습니다.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild>
-              <Link href="/store-visit">매장에서 직접 체험하기</Link>
+            <Button 
+              size="lg"
+              onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
+            >
+              네이버 예약으로 매장 체험하기
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link href="/bulk-inquiry">구매 문의하기</Link>
