@@ -64,13 +64,27 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Upload failed')
+        let errorMessage = 'Upload failed'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+          errorMessage = `Upload failed with status: ${response.status}`
+        }
+        throw new Error(errorMessage)
       }
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        console.error('Failed to parse success response:', parseError)
+        throw new Error('Invalid response from server')
+      }
       
       const newBanner: BrandBanner = {
+        id: data.id,
         image_url: data.url,
         title: '',
         description: '',
@@ -89,18 +103,56 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
     }
   }
 
-  const removeBanner = (index: number) => {
+  const removeBanner = async (index: number) => {
+    const bannerToRemove = banners[index]
+    
+    // 데이터베이스에서 삭제 (ID가 있는 경우)
+    if (bannerToRemove.id) {
+      try {
+        const response = await fetch(`/api/category-banners/${bannerToRemove.id}`, {
+          method: 'DELETE',
+        })
+        
+        if (!response.ok) {
+          console.error('Failed to delete banner from database')
+        }
+      } catch (error) {
+        console.error('Error deleting banner:', error)
+      }
+    }
+    
+    // 로컬 상태에서 제거
     const updatedBanners = banners.filter((_, i) => i !== index)
       .map((banner, i) => ({ ...banner, order_index: i }))
     setBanners(updatedBanners)
     onBannersChange?.(updatedBanners)
   }
 
-  const updateBanner = (index: number, field: keyof BrandBanner, value: string) => {
+  const updateBanner = async (index: number, field: keyof BrandBanner, value: string) => {
+    const banner = banners[index]
     const updatedBanners = [...banners]
     updatedBanners[index] = { ...updatedBanners[index], [field]: value }
     setBanners(updatedBanners)
     onBannersChange?.(updatedBanners)
+
+    // 데이터베이스 업데이트 (ID가 있는 경우)
+    if (banner.id) {
+      try {
+        await fetch(`/api/category-banners/${banner.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: field === 'title' ? value : banner.title,
+            description: field === 'description' ? value : banner.description,
+            order_index: updatedBanners[index].order_index,
+          }),
+        })
+      } catch (error) {
+        console.error('Error updating banner:', error)
+      }
+    }
   }
 
   const moveBanner = (fromIndex: number, toIndex: number) => {
