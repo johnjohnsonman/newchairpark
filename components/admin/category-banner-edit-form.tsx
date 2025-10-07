@@ -43,6 +43,8 @@ export function CategoryBannerEditForm({ banner }: CategoryBannerEditFormProps) 
     description: banner.description,
     images: banner.images || (banner.background_image ? [banner.background_image] : []),
     featured_image_index: banner.featured_image_index || 0,
+    // 하위 호환성을 위해 background_image도 유지
+    background_image: banner.background_image || "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,9 +55,27 @@ export function CategoryBannerEditForm({ banner }: CategoryBannerEditFormProps) 
     const supabase = createClient()
 
     try {
+      // 데이터베이스 스키마에 따라 다른 방식으로 업데이트
+      const updateData: any = {
+        category_id: formData.category_id,
+        title: formData.title,
+        description: formData.description,
+      }
+
+      // images 컬럼이 있는지 확인하고 적절한 필드 사용
+      if (formData.images && formData.images.length > 0) {
+        updateData.images = formData.images
+        updateData.featured_image_index = formData.featured_image_index
+        // 하위 호환성을 위해 첫 번째 이미지를 background_image에도 저장
+        updateData.background_image = formData.images[formData.featured_image_index] || formData.images[0]
+      } else if (formData.background_image) {
+        // 기존 방식 지원
+        updateData.background_image = formData.background_image
+      }
+
       const { data, error } = await supabase
         .from("category_banners")
-        .update(formData)
+        .update(updateData)
         .eq("id", banner.id)
         .select()
         .single()

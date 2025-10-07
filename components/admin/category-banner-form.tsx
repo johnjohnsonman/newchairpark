@@ -41,9 +41,24 @@ export function CategoryBannerForm() {
     const supabase = createClient()
 
     try {
+      // 데이터베이스 스키마에 따라 다른 방식으로 삽입
+      const insertData: any = {
+        category_id: formData.category_id,
+        title: formData.title,
+        description: formData.description,
+      }
+
+      // images 컬럼이 있는지 확인하고 적절한 필드 사용
+      if (formData.images && formData.images.length > 0) {
+        insertData.images = formData.images
+        insertData.featured_image_index = formData.featured_image_index
+        // 하위 호환성을 위해 첫 번째 이미지를 background_image에도 저장
+        insertData.background_image = formData.images[formData.featured_image_index] || formData.images[0]
+      }
+
       const { data, error } = await supabase
         .from("category_banners")
-        .insert([formData])
+        .insert([insertData])
         .select()
         .single()
 
