@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     const {
-      brand,
+      brand_id,
       product_name,
       title,
       comment,
@@ -38,9 +38,23 @@ export async function POST(request: NextRequest) {
     } = body
 
     // 필수 필드 검증
-    if (!brand || !product_name || !title || !comment || !rating || !user_name) {
+    if (!brand_id || !product_name || !title || !comment || !rating || !user_name) {
       return NextResponse.json(
         { error: "필수 필드가 누락되었습니다" },
+        { status: 400 }
+      )
+    }
+
+    // 브랜드 존재 확인
+    const { data: brand, error: brandError } = await supabase
+      .from("brands")
+      .select("id, name")
+      .eq("id", brand_id)
+      .single()
+
+    if (brandError || !brand) {
+      return NextResponse.json(
+        { error: "존재하지 않는 브랜드입니다" },
         { status: 400 }
       )
     }
@@ -58,7 +72,8 @@ export async function POST(request: NextRequest) {
       .from("reviews")
       .insert([
         {
-          brand,
+          brand_id,
+          brand: brand.name, // 브랜드명도 함께 저장
           product_name,
           title,
           comment,

@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Star, Upload, X } from "lucide-react"
 import { TouchOptimizedButton } from "@/components/ui/touch-optimized-button"
-import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
+import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
 
 interface ReviewFormProps {
@@ -21,9 +22,11 @@ export function ReviewForm({ user }: ReviewFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [images, setImages] = useState<string[]>([])
+  const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([])
+  const [loadingBrands, setLoadingBrands] = useState(true)
 
   const [formData, setFormData] = useState({
-    brand: "",
+    brand_id: "",
     product_name: "",
     title: "",
     comment: "",
@@ -39,6 +42,29 @@ export function ReviewForm({ user }: ReviewFormProps) {
     value_score: 5,
     verified_purchase: false,
   })
+
+  // 브랜드 목록 가져오기
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from("brands")
+          .select("id, name")
+          .order("name")
+
+        if (error) throw error
+        setBrands(data || [])
+      } catch (err) {
+        console.error("브랜드 목록 가져오기 실패:", err)
+        setError("브랜드 목록을 불러오는데 실패했습니다")
+      } finally {
+        setLoadingBrands(false)
+      }
+    }
+
+    fetchBrands()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -107,7 +133,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
     <div className="space-y-2">
       <Label className="text-sm font-medium">{label}</Label>
       <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
+        {[1, 2, 3, 4, 5].map((star: number) => (
           <button
             key={star}
             type="button"
@@ -137,27 +163,43 @@ export function ReviewForm({ user }: ReviewFormProps) {
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">{error}</div>
           )}
 
-          {/* 브랜드 입력 */}
+          {/* 브랜드 선택 */}
           <div className="space-y-2">
-            <UnifiedAutocompleteInput
-              label="브랜드 *"
-              placeholder="브랜드명을 입력하세요 (예: Herman Miller)"
-              value={formData.brand}
-              onChange={(value) => setFormData({ ...formData, brand: value })}
-              type="brand"
-            />
+            <Label htmlFor="brand">브랜드 *</Label>
+            <Select 
+              value={formData.brand_id} 
+              onValueChange={(value: string) => setFormData({ ...formData, brand_id: value })}
+              disabled={loadingBrands}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingBrands ? "브랜드 목록 로딩 중..." : "브랜드를 선택해주세요"} />
+              </SelectTrigger>
+              <SelectContent>
+                {brands.map((brand: { id: string; name: string }) => (
+                  <SelectItem key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              체어파크에서 등록된 브랜드만 선택 가능합니다
+            </p>
           </div>
 
           {/* 제품명 입력 */}
           <div className="space-y-2">
-            <UnifiedAutocompleteInput
-              label="제품명 *"
-              placeholder="제품명을 입력하세요 (예: Aeron Chair)"
+            <Label htmlFor="product_name">제품명 *</Label>
+            <Input
+              id="product_name"
+              required
               value={formData.product_name}
-              onChange={(value) => setFormData({ ...formData, product_name: value })}
-              type="product"
-              selectedBrand={formData.brand}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, product_name: e.target.value })}
+              placeholder="제품명을 입력하세요 (예: Aeron Chair)"
             />
+            <p className="text-xs text-muted-foreground">
+              자유롭게 제품명을 입력해주세요
+            </p>
           </div>
 
           {/* 리뷰 제목 */}
@@ -167,7 +209,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
               id="title"
               required
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
               placeholder="리뷰 제목을 입력해주세요"
             />
           </div>
@@ -202,7 +244,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
               required
               rows={6}
               value={formData.comment}
-              onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, comment: e.target.value })}
               placeholder="사용 후기를 자세히 작성해주세요"
             />
           </div>
@@ -239,7 +281,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
                 id="user_name"
                 required
                 value={formData.user_name}
-                onChange={(e) => setFormData({ ...formData, user_name: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, user_name: e.target.value })}
                 placeholder="닉네임 또는 이름"
               />
             </div>
@@ -250,7 +292,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
                 type="email"
                 required={!user}
                 value={formData.user_email}
-                onChange={(e) => setFormData({ ...formData, user_email: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, user_email: e.target.value })}
                 placeholder="이메일 주소"
                 disabled={!!user}
               />
@@ -267,7 +309,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
                 min="10"
                 max="100"
                 value={formData.age}
-                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, age: e.target.value })}
                 placeholder="나이"
               />
             </div>
@@ -276,7 +318,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
               <Input
                 id="occupation"
                 value={formData.occupation}
-                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, occupation: e.target.value })}
                 placeholder="직업"
               />
             </div>
@@ -288,7 +330,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
             <Input
               id="sitting_style"
               value={formData.sitting_style}
-              onChange={(e) => setFormData({ ...formData, sitting_style: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, sitting_style: e.target.value })}
               placeholder="앉는 스타일을 입력하세요 (예: 장시간 앉아서 작업)"
               list="sitting-styles"
             />
@@ -307,7 +349,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
               type="checkbox"
               id="verified_purchase"
               checked={formData.verified_purchase}
-              onChange={(e) => setFormData({ ...formData, verified_purchase: e.target.checked })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, verified_purchase: e.target.checked })}
               className="h-4 w-4 rounded border-gray-300"
             />
             <Label htmlFor="verified_purchase" className="text-sm">
@@ -321,7 +363,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
             <div className="space-y-4">
               {images.length > 0 && (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  {images.map((image, index) => (
+                  {images.map((image: string, index: number) => (
                     <div key={index} className="relative">
                       <div className="relative aspect-square overflow-hidden rounded-lg border">
                         <Image src={image} alt={`Review image ${index + 1}`} fill className="object-cover" />
@@ -346,7 +388,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
                     type="file"
                     id="image-upload"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleImageUpload(e)}
                     className="hidden"
                     disabled={isLoading}
                   />

@@ -282,3 +282,22 @@
     image-rendering: crisp-edges;
   }
 }
+
+/* 백스페이스 키 뒤로가기 방지 */
+input:focus,
+textarea:focus,
+[contenteditable="true"]:focus {
+  outline: none;
+}
+
+/* 입력 필드에서 백스페이스 키 동작 개선 */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  /* 포커스된 입력 필드에서 백스페이스 키가 정상 작동하도록 함 */
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
