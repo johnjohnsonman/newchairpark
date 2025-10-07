@@ -3,10 +3,68 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Store, Award, Wrench, Recycle, Newspaper, Sparkles, TrendingUp, Package } from "lucide-react"
 import Image from "next/image"
+import type { Metadata } from "next"
+import { StructuredData } from "@/components/structured-data"
+
+export const metadata: Metadata = {
+  title: "체어파크 | 프리미엄 오피스 가구 전문점 - 허먼밀러, 스틸케이스 정품",
+  description: "허먼밀러 에어론, 스틸케이스 제스처 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에 만나보세요. 정품 보증, 전국 매장, 렌탈 서비스, 중고 거래까지 원스톱 가구 솔루션을 제공합니다.",
+  keywords: [
+    "허먼밀러",
+    "스틸케이스", 
+    "에어론 체어",
+    "제스처 체어",
+    "프리미엄 오피스 체어",
+    "인체공학 의자",
+    "오피스 가구",
+    "스탠딩 데스크",
+    "가구 렌탈",
+    "중고 가구",
+    "체어파크"
+  ],
+  openGraph: {
+    title: "체어파크 | 프리미엄 오피스 가구 전문점",
+    description: "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에",
+    type: "website",
+    locale: "ko_KR",
+    siteName: "체어파크",
+    images: [
+      {
+        url: "/herman-miller-aeron.png",
+        width: 1200,
+        height: 630,
+        alt: "체어파크 프리미엄 오피스 체어",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "체어파크 | 프리미엄 오피스 가구 전문점",
+    description: "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에",
+    images: ["/herman-miller-aeron.png"],
+  },
+  alternates: {
+    canonical: "https://chairpark.co.kr",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
+    <>
+      <StructuredData type="organization" />
+      <StructuredData type="website" />
+      <div className="flex flex-col">
       <section className="relative bg-gradient-to-br from-slate-50 to-white">
         <div className="container mx-auto flex">
           <div className="flex flex-1 items-center px-6 py-8 lg:py-10">
@@ -275,6 +333,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
 }

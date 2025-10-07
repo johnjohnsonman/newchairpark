@@ -7,11 +7,78 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { GalleryViewer } from "@/components/gallery-viewer"
+import type { Metadata } from "next"
+import { StructuredData } from "@/components/structured-data"
 
 interface GalleryDetailPageProps {
   params: Promise<{
     id: string
   }>
+}
+
+export async function generateMetadata({ params }: GalleryDetailPageProps): Promise<Metadata> {
+  try {
+    const { id } = await params
+    const supabase = await createClient()
+    
+    const { data: galleryItem } = await supabase
+      .from("gallery")
+      .select("*")
+      .eq("id", id)
+      .single()
+
+    if (!galleryItem) {
+      return {
+        title: "갤러리 작품을 찾을 수 없습니다 | 체어파크",
+        description: "요청하신 갤러리 작품을 찾을 수 없습니다.",
+      }
+    }
+
+    const title = `${galleryItem.title} | ${galleryItem.brand || ''} ${galleryItem.product_name || ''} | 체어파크 갤러리`
+    const description = galleryItem.description || `${galleryItem.brand} ${galleryItem.product_name} 프리미엄 가구 작품입니다. 체어파크에서 직접 체험해보세요.`
+    const imageUrl = galleryItem.images?.[0] || galleryItem.image_url || "/herman-miller-aeron.png"
+
+    return {
+      title,
+      description,
+      keywords: [
+        galleryItem.title,
+        galleryItem.brand,
+        galleryItem.product_name,
+        "프리미엄 가구",
+        "오피스 체어",
+        "체어파크",
+        "갤러리"
+      ].filter(Boolean),
+      openGraph: {
+        title,
+        description,
+        type: "article",
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: `${galleryItem.title} - ${galleryItem.brand} ${galleryItem.product_name}`,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [imageUrl],
+      },
+      alternates: {
+        canonical: `https://chairpark.co.kr/gallery/${id}`,
+      },
+    }
+  } catch (error) {
+    return {
+      title: "갤러리 작품 | 체어파크",
+      description: "프리미엄 가구 갤러리 작품을 확인하세요.",
+    }
+  }
 }
 
 export default async function GalleryDetailPage({ params }: GalleryDetailPageProps) {
@@ -39,8 +106,37 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
     
     const featuredIndex = galleryItem.featured_image_index || 0
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    return (
+    <>
+      <StructuredData 
+        type="product" 
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": galleryItem.title,
+          "description": galleryItem.description,
+          "brand": {
+            "@type": "Brand",
+            "name": galleryItem.brand
+          },
+          "image": images.map(img => ({
+            "@type": "ImageObject",
+            "url": img,
+            "name": galleryItem.title
+          })),
+          "offers": {
+            "@type": "Offer",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "체어파크"
+            }
+          },
+          "category": "Office Furniture"
+        }}
+      />
+      <StructuredData type="breadcrumb" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* 네비게이션 바 */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -139,7 +235,8 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
   } catch (error) {
     console.error('Gallery detail page error:', error)
