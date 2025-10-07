@@ -83,6 +83,15 @@ export function AutocompleteInput({
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setOpen(false)
+            }
+            // 백스페이스 키로 브라우저 뒤로가기 방지
+            if (e.key === "Backspace" && inputValue.length === 0) {
+              e.preventDefault()
+            }
+          }}
           placeholder={placeholder}
           disabled={disabled}
           className="pr-8"

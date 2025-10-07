@@ -5,6 +5,7 @@ import "./globals.css"
 import Navigation from "@/components/navigation"
 import { Suspense } from "react"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { BackspacePrevention } from "@/components/backspace-prevention"
 
 const notoSans = Noto_Sans({
   subsets: ["latin", "latin-ext"],
@@ -68,6 +69,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`font-sans ${notoSans.variable}`}>
+        <BackspacePrevention />
         <ErrorBoundary>
           <Suspense fallback={
             <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
