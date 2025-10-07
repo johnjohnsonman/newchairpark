@@ -13,15 +13,18 @@ import { createClient } from "@/lib/supabase/client"
 import type { Brand } from "@/types/database"
 import Link from "next/link"
 import { SingleImageUpload } from "@/components/admin/single-image-upload"
+import { BrandBannerUpload } from "@/components/admin/brand-banner-upload"
 
 interface BrandFormProps {
   brand?: Brand
+  initialBanners?: any[]
 }
 
-export function BrandForm({ brand }: BrandFormProps) {
+export function BrandForm({ brand, initialBanners = [] }: BrandFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [banners, setBanners] = useState<any[]>(initialBanners)
 
   const [formData, setFormData] = useState({
     name: brand?.name || "",
@@ -123,6 +126,17 @@ export function BrandForm({ brand }: BrandFormProps) {
                 aspectRatio="video"
               />
             </div>
+
+            {/* 브랜드 배너 관리 */}
+            {brand && (
+              <div className="grid gap-2">
+                <BrandBannerUpload
+                  brandId={brand.id}
+                  initialBanners={initialBanners}
+                  onBannersChange={setBanners}
+                />
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>

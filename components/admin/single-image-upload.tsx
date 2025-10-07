@@ -59,9 +59,9 @@ export function SingleImageUpload({ value, onChange, label, aspectRatio = "auto"
   }
 
   const aspectClasses = {
-    square: "aspect-square",
-    video: "aspect-video",
-    auto: "h-48",
+    square: "aspect-square max-w-xs",
+    video: "aspect-video max-w-md",
+    auto: "h-32 max-w-xs",
   }
 
   return (

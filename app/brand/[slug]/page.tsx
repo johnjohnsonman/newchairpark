@@ -75,34 +75,36 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
     const { slug } = await params
     const supabase = await createClient()
 
-    // 브랜드 정보와 관련 데이터를 병렬로 가져오기
-    const [
-      { data: brand, error: brandError },
-      { data: products, error: productsError },
-      { data: banners, error: bannersError }
-    ] = await Promise.all([
-      supabase.from("brands").select("*").eq("slug", slug).single(),
-      supabase.from("products").select("id, name, slug, price, category, image_url, in_stock, featured").eq("brand_id", "").order("created_at", { ascending: false }),
-      supabase.from("category_banners").select("*").eq("category", slug).order("order_index")
-    ])
+    // 브랜드 정보를 먼저 가져오기
+    const { data: brand, error: brandError } = await supabase
+      .from("brands")
+      .select("*")
+      .eq("slug", slug)
+      .single()
 
     if (brandError || !brand) {
       console.error('Brand not found:', { slug, brandError })
       notFound()
     }
 
-    // 브랜드 ID로 제품 다시 조회
-    const { data: brandProducts, error: brandProductsError } = await supabase
-      .from("products")
-      .select("id, name, slug, price, category, image_url, in_stock, featured")
-      .eq("brand_id", brand.id)
-      .order("created_at", { ascending: false })
+    // 브랜드 ID를 알았으니 관련 데이터를 병렬로 가져오기
+    const [
+      { data: products, error: productsError },
+      { data: banners, error: bannersError }
+    ] = await Promise.all([
+      supabase.from("products").select("id, name, slug, price, category, image_url, in_stock, featured").eq("brand_id", brand.id).order("created_at", { ascending: false }),
+      supabase.from("category_banners").select("*").eq("category", `brand-${brand.id}`).order("order_index")
+    ])
 
-    if (brandProductsError) {
-      console.error('Products fetch error:', brandProductsError)
+    if (productsError) {
+      console.error('Products fetch error:', productsError)
     }
 
-    const displayProducts = brandProducts || []
+    if (bannersError) {
+      console.error('Banners fetch error:', bannersError)
+    }
+
+    const displayProducts = products || []
 
     return (
       <div className="bg-white">
