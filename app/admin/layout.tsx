@@ -32,6 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         if (!mounted) return
 
         if (sessionError || !session?.user) {
+          console.warn('No valid session found')
           router.push("/admin/login")
           return
         }
@@ -65,10 +66,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     }
 
-    checkAuth()
+    // 약간의 지연을 두고 인증 체크 (페이지 로드 후)
+    const timeoutId = setTimeout(checkAuth, 100)
 
     return () => {
       mounted = false
+      clearTimeout(timeoutId)
     }
   }, [isLoginPage, router, pathname])
 

@@ -129,8 +129,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
       
       // 잠시 대기 후 리다이렉트
       setTimeout(() => {
-        router.push("/admin/gallery")
-        router.refresh()
+        window.location.href = "/admin/gallery"
       }, 2000)
 
     } catch (err) {
