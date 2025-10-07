@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,8 @@ import { createClient } from "@/lib/supabase/client"
 import type { Gallery } from "@/types/database"
 import Link from "next/link"
 import { GalleryImageUpload } from "@/components/admin/gallery-image-upload"
+import { AutocompleteInput } from "@/components/ui/autocomplete-input"
+import { useBrandProductData } from "@/hooks/use-brand-product-data"
 
 interface GalleryFormProps {
   galleryItem?: Gallery
@@ -22,6 +24,10 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // 브랜드 및 제품 데이터 로드
+  const { brands, getProductsByBrand, loadingBrands } = useBrandProductData()
+  const [productSuggestions, setProductSuggestions] = useState<string[]>([])
 
   // 기존 데이터가 있으면 images 배열 또는 image_url을 사용
   const initialImages = galleryItem?.images && galleryItem.images.length > 0 
@@ -40,6 +46,16 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
     images: initialImages,
     featuredIndex: initialFeaturedIndex,
   })
+
+  // 브랜드 변경 시 해당 브랜드의 제품 목록 업데이트
+  useEffect(() => {
+    if (formData.brand) {
+      const products = getProductsByBrand(formData.brand)
+      setProductSuggestions(products)
+    } else {
+      setProductSuggestions([])
+    }
+  }, [formData.brand, getProductsByBrand])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,23 +157,52 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="brand">브랜드</Label>
-                <Input
+                <Label htmlFor="brand">
+                  브랜드
+                  {loadingBrands && <span className="text-xs text-muted-foreground ml-2">(로딩중...)</span>}
+                </Label>
+                <AutocompleteInput
                   id="brand"
                   value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, brand: value })}
+                  suggestions={brands}
                   placeholder="예: Herman Miller, Steelcase"
+                  allowCustom={true}
+                  disabled={loadingBrands}
                 />
+                <p className="text-xs text-muted-foreground">
+                  기존 브랜드 선택 또는 새 브랜드 입력 가능
+                </p>
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="product_name">제품명</Label>
-                <Input
+                <Label htmlFor="product_name">
+                  제품명
+                  {formData.brand && productSuggestions.length > 0 && (
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({productSuggestions.length}개 제안)
+                    </span>
+                  )}
+                </Label>
+                <AutocompleteInput
                   id="product_name"
                   value={formData.product_name}
-                  onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
-                  placeholder="예: Aeron Chair, Gesture Chair"
+                  onChange={(value) => setFormData({ ...formData, product_name: value })}
+                  suggestions={productSuggestions}
+                  placeholder={
+                    formData.brand 
+                      ? `${formData.brand}의 제품 선택 또는 입력`
+                      : "예: Aeron Chair, Gesture Chair"
+                  }
+                  allowCustom={true}
+                  disabled={!formData.brand && productSuggestions.length === 0}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {formData.brand 
+                    ? "해당 브랜드의 기존 제품 선택 또는 새 제품 입력"
+                    : "먼저 브랜드를 선택하면 제품 제안이 나타납니다"
+                  }
+                </p>
               </div>
             </div>
 

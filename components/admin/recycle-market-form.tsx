@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/client"
 import type { RecycleMarket } from "@/types/database"
 import Link from "next/link"
 import { SingleImageUpload } from "@/components/admin/single-image-upload"
+import { AutocompleteInput } from "@/components/ui/autocomplete-input"
+import { useBrandProductData } from "@/hooks/use-brand-product-data"
 
 interface RecycleMarketFormProps {
   recycleItem?: RecycleMarket
@@ -24,16 +26,30 @@ export function RecycleMarketForm({ recycleItem, brands }: RecycleMarketFormProp
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // 브랜드 및 제품 데이터 로드
+  const { brands: allBrands, getProductsByBrand, loadingBrands } = useBrandProductData()
+  const [productSuggestions, setProductSuggestions] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     title: recycleItem?.title || "",
     description: recycleItem?.description || "",
     price: recycleItem?.price || 0,
-    brand_id: recycleItem?.brand_id || "",
+    brand: recycleItem?.brand || "",
     image_url: recycleItem?.image_url || "",
     status: recycleItem?.status || "available",
     contact_info: recycleItem?.contact_info || "",
   })
+
+  // 브랜드 변경 시 해당 브랜드의 제품 목록 업데이트
+  useEffect(() => {
+    if (formData.brand) {
+      const products = getProductsByBrand(formData.brand)
+      setProductSuggestions(products)
+    } else {
+      setProductSuggestions([])
+    }
+  }, [formData.brand, getProductsByBrand])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,23 +102,54 @@ export function RecycleMarketForm({ recycleItem, brands }: RecycleMarketFormProp
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="brand_id">Brand</Label>
-              <Select
-                value={formData.brand_id}
-                onValueChange={(value) => setFormData({ ...formData, brand_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a brand" />
-                </SelectTrigger>
-                <SelectContent>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="brand">
+                  브랜드
+                  {loadingBrands && <span className="text-xs text-muted-foreground ml-2">(로딩중...)</span>}
+                </Label>
+                <AutocompleteInput
+                  id="brand"
+                  value={formData.brand}
+                  onChange={(value) => setFormData({ ...formData, brand: value })}
+                  suggestions={allBrands}
+                  placeholder="예: Herman Miller, Steelcase"
+                  allowCustom={true}
+                  disabled={loadingBrands}
+                />
+                <p className="text-xs text-muted-foreground">
+                  기존 브랜드 선택 또는 새 브랜드 입력 가능
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="title_autocomplete">
+                  제품명 (자동완성)
+                  {formData.brand && productSuggestions.length > 0 && (
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({productSuggestions.length}개 제안)
+                    </span>
+                  )}
+                </Label>
+                <AutocompleteInput
+                  id="title_autocomplete"
+                  value={formData.title}
+                  onChange={(value) => setFormData({ ...formData, title: value })}
+                  suggestions={productSuggestions}
+                  placeholder={
+                    formData.brand 
+                      ? `${formData.brand}의 제품 선택 또는 입력`
+                      : "브랜드 선택 후 제품명 입력"
+                  }
+                  allowCustom={true}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {formData.brand 
+                    ? "해당 브랜드의 기존 제품 선택 또는 새 제품 입력"
+                    : "먼저 브랜드를 선택하면 제품 제안이 나타납니다"
+                  }
+                </p>
+              </div>
             </div>
 
             <div className="grid gap-2">

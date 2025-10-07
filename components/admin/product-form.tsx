@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/client"
 import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
+import { AutocompleteInput } from "@/components/ui/autocomplete-input"
+import { useBrandProductData } from "@/hooks/use-brand-product-data"
 
 interface ProductFormProps {
   product?: Product
@@ -33,6 +35,11 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // 브랜드 및 제품 데이터 로드
+  const { getProductsByBrand } = useBrandProductData()
+  const [productSuggestions, setProductSuggestions] = useState<string[]>([])
+  const [selectedBrandName, setSelectedBrandName] = useState("")
 
   // images를 JSON 파싱하여 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
@@ -64,6 +71,19 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     in_stock: product?.in_stock ?? true,
     featured: product?.featured ?? false,
   })
+
+  // 브랜드 변경 시 해당 브랜드의 제품 목록 업데이트
+  useEffect(() => {
+    const brand = brands.find(b => b.id === formData.brand_id)
+    if (brand) {
+      setSelectedBrandName(brand.name)
+      const products = getProductsByBrand(brand.name)
+      setProductSuggestions(products)
+    } else {
+      setSelectedBrandName("")
+      setProductSuggestions([])
+    }
+  }, [formData.brand_id, brands, getProductsByBrand])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -155,14 +175,32 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Product Name *</Label>
-              <Input
+              <Label htmlFor="name">
+                Product Name *
+                {selectedBrandName && productSuggestions.length > 0 && (
+                  <span className="text-xs text-muted-foreground ml-2">
+                    ({productSuggestions.length}개 기존 제품 제안)
+                  </span>
+                )}
+              </Label>
+              <AutocompleteInput
                 id="name"
-                required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Aeron Chair"
+                onChange={(value) => setFormData({ ...formData, name: value })}
+                suggestions={productSuggestions}
+                placeholder={
+                  selectedBrandName 
+                    ? `${selectedBrandName}의 기존 제품 선택 또는 새 제품 입력`
+                    : "Aeron Chair"
+                }
+                allowCustom={true}
               />
+              <p className="text-xs text-muted-foreground">
+                {selectedBrandName 
+                  ? `${selectedBrandName}의 기존 제품명을 선택하거나 새 제품명을 입력하세요`
+                  : "브랜드를 먼저 선택하면 해당 브랜드의 제품 제안이 나타납니다"
+                }
+              </p>
             </div>
 
             <div className="grid gap-2">
