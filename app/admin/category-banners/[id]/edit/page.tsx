@@ -1,28 +1,35 @@
 import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
-import CategoryBannerForm from "@/components/admin/category-banner-form"
+import { CategoryBannerEditForm } from "@/components/admin/category-banner-edit-form"
 
-export default async function EditCategoryBannerPage({ params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params
-    const supabase = await createServerClient()
-    const { data: banner, error: bannerError } = await supabase.from("category_banners").select("*").eq("id", id).single()
+interface EditCategoryBannerPageProps {
+  params: {
+    id: string
+  }
+}
 
-    if (bannerError || !banner) {
-      console.error('Banner not found:', { id, bannerError })
-      notFound()
-    }
+export default async function EditCategoryBannerPage({ params }: EditCategoryBannerPageProps) {
+  const supabase = await createServerClient()
+  const { data: banner } = await supabase
+    .from("category_banners")
+    .select("*")
+    .eq("id", params.id)
+    .single()
 
-    return (
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">카테고리 배너 수정</h1>
-        </div>
-        <CategoryBannerForm banner={banner} />
-      </div>
-    )
-  } catch (error) {
-    console.error('Edit banner page error:', error)
+  if (!banner) {
     notFound()
   }
+
+  return (
+    <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">카테고리 배너 수정</h1>
+          <p className="mt-2 text-muted-foreground">스토어 카테고리별 배너 이미지와 설명을 수정합니다</p>
+        </div>
+
+        <CategoryBannerEditForm banner={banner} />
+      </div>
+    </div>
+  )
 }
