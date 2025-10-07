@@ -18,22 +18,39 @@ import Link from "next/link"
 
 export function UserNav() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
+      try {
+        // 타임아웃 설정 (3초)
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Auth timeout')), 3000)
+        )
+        
+        const authPromise = supabase.auth.getUser()
+        const {
+          data: { user },
+        } = await Promise.race([authPromise, timeoutPromise]) as any
+        
+        setUser(user)
+      } catch (error) {
+        console.error('Auth error:', error)
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
     }
+    
     getUser()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
@@ -42,6 +59,15 @@ export function UserNav() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.refresh()
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+        <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+      </div>
+    )
   }
 
   if (!user) {
