@@ -162,3 +162,123 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 모바일 최적화 스타일 */
+@layer utilities {
+  /* 터치 최적화 */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* 모바일 스크롤 개선 */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* 모바일 뷰포트 최적화 */
+  .mobile-viewport {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+  }
+  
+  /* 모바일 탭 하이라이트 제거 */
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* 모바일 폰트 크기 최적화 */
+  .mobile-text {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* 모바일 이미지 최적화 */
+  .mobile-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  
+  /* 모바일 버튼 최소 크기 보장 */
+  .mobile-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* 모바일 입력 필드 최적화 */
+  .mobile-input {
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+  
+  /* 모바일 그리드 개선 */
+  .mobile-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  /* 모바일 카드 간격 */
+  .mobile-spacing {
+    gap: 1rem;
+  }
+  
+  /* 모바일에서 더 큰 클릭 영역 */
+  .mobile-clickable {
+    position: relative;
+  }
+  
+  .mobile-clickable::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    z-index: -1;
+  }
+}
+
+/* 모바일 전용 스타일 */
+@media (max-width: 768px) {
+  /* 모바일에서 텍스트 크기 조정 */
+  .mobile-responsive-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  
+  /* 모바일에서 패딩 조정 */
+  .mobile-responsive-padding {
+    padding: 1rem;
+  }
+  
+  /* 모바일에서 마진 조정 */
+  .mobile-responsive-margin {
+    margin: 0.75rem 0;
+  }
+  
+  /* 모바일에서 버튼 크기 조정 */
+  .mobile-responsive-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  /* 모바일에서 이미지 최적화 */
+  .mobile-responsive-image {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* 모바일 랜드스케이프 최적화 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-landscape {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* 고해상도 디스플레이 최적화 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}

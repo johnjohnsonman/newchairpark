@@ -3,14 +3,17 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
+import { Menu, X, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { UserNav } from "@/components/user-nav"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [storeDropdownOpen, setStoreDropdownOpen] = useState(false)
+  const [mobileStoreOpen, setMobileStoreOpen] = useState(false)
+  const isMobile = useIsMobile()
 
   const navItems = [
     { name: "홈", href: "/" },
@@ -41,7 +44,7 @@ export default function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-primary">Chairpark</div>
+            <div className="text-xl font-bold text-primary sm:text-2xl">Chairpark</div>
           </Link>
 
           <div className="hidden md:flex md:items-center md:space-x-1">
@@ -97,32 +100,73 @@ export default function Navigation() {
             <UserNav />
           </div>
 
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <Menu className="h-5 w-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden h-10 w-10" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
 
+        {/* 모바일 메뉴 - 개선된 디자인 */}
         {mobileMenuOpen && (
-          <div className="border-t py-4 md:hidden">
-            <div className="flex flex-col space-y-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
-                  className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
-                    pathname === item.href ? "text-primary" : "text-muted-foreground"
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <div className="px-4 pt-2">
-                <Button size="sm" variant="default" className="w-full mb-2" asChild>
-                  <Link href="/bulk-inquiry">특판가 문의</Link>
+          <div className="border-t bg-background/95 backdrop-blur md:hidden">
+            <div className="px-4 py-4">
+              <div className="space-y-1">
+                {navItems.map((item) =>
+                  item.name === "스토어" ? (
+                    <div key={item.href} className="space-y-1">
+                      <button
+                        onClick={() => setMobileStoreOpen(!mobileStoreOpen)}
+                        className={`flex w-full items-center justify-between px-3 py-3 text-sm font-medium transition-colors rounded-lg hover:bg-accent ${
+                          pathname === item.href || pathname.startsWith("/store") ? "text-primary bg-accent" : "text-muted-foreground"
+                        }`}
+                      >
+                        {item.name}
+                        <ChevronDown className={`h-4 w-4 transition-transform ${mobileStoreOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      {mobileStoreOpen && (
+                        <div className="ml-4 space-y-1">
+                          {storeSubMenu.map((subItem) => (
+                            <Link
+                              key={subItem.href}
+                              href={subItem.href}
+                              className="block px-3 py-2 text-sm text-muted-foreground transition-colors rounded-lg hover:bg-accent hover:text-primary"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
+                      className={`block px-3 py-3 text-sm font-medium transition-colors rounded-lg hover:bg-accent ${
+                        pathname === item.href ? "text-primary bg-accent" : "text-muted-foreground"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  )
+                )}
+              </div>
+              
+              <div className="mt-4 pt-4 border-t space-y-3">
+                <Button size="sm" variant="default" className="w-full" asChild>
+                  <Link href="/bulk-inquiry" onClick={() => setMobileMenuOpen(false)}>
+                    특판가 문의
+                  </Link>
                 </Button>
-                <UserNav />
+                <div className="flex justify-center">
+                  <UserNav />
+                </div>
               </div>
             </div>
           </div>
