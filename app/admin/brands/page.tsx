@@ -8,11 +8,28 @@ import { DeleteBrandButton } from "@/components/admin/delete-brand-button"
 export default async function BrandsManagementPage() {
   const supabase = await createClient()
 
-  const { data: brands, error } = await supabase
+  // 브랜드 데이터 가져오기 (타임아웃 설정)
+  const brandsPromise = supabase
     .from("brands")
     .select("id, name, logo_url, description, created_at")
     .order("name")
-    .limit(50)
+    .limit(30) // 최대 30개로 줄임
+
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Brands fetch timeout')), 3000)
+  )
+
+  let brands: any[] = []
+  let error: any = null
+
+  try {
+    const result = await Promise.race([brandsPromise, timeoutPromise]) as any
+    brands = result.data || []
+    error = result.error
+  } catch (timeoutError) {
+    console.error('Brands fetch timeout:', timeoutError)
+    error = timeoutError
+  }
 
   if (error) {
     console.error('Brands fetch error:', error)

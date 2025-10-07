@@ -9,8 +9,8 @@ import { DeleteResourceButton } from "@/components/admin/delete-resource-button"
 export default async function ResourcesManagementPage() {
   const supabase = await createClient()
 
-  // 자료와 브랜드 정보를 가져오기
-  const [resourcesResult, brandsResult] = await Promise.all([
+  // 자료와 브랜드 정보를 가져오기 (타임아웃 설정)
+  const dataPromise = Promise.allSettled([
     supabase
       .from("resources")
       .select(`
@@ -30,15 +30,34 @@ export default async function ResourcesManagementPage() {
         )
       `)
       .order("created_at", { ascending: false })
-      .limit(100),
+      .limit(50), // 최대 50개로 줄임
     supabase
       .from("brands")
       .select("id, name, logo_url")
       .order("name")
+      .limit(30) // 브랜드도 30개로 제한
   ])
 
-  const resources = resourcesResult.data || []
-  const brands = brandsResult.data || []
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Resources fetch timeout')), 4000)
+  )
+
+  let resources: any[] = []
+  let brands: any[] = []
+
+  try {
+    const results = await Promise.race([dataPromise, timeoutPromise]) as PromiseSettledResult<any>[]
+    
+    if (results[0].status === 'fulfilled' && results[0].value.data) {
+      resources = results[0].value.data
+    }
+    
+    if (results[1].status === 'fulfilled' && results[1].value.data) {
+      brands = results[1].value.data
+    }
+  } catch (error) {
+    console.error('Resources/Brands fetch error:', error)
+  }
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes"

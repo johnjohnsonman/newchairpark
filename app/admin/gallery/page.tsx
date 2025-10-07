@@ -9,12 +9,28 @@ import { DeleteGalleryButton } from "@/components/admin/delete-gallery-button"
 export default async function GalleryManagementPage() {
   const supabase = await createClient()
 
-  // 필요한 필드만 선택하고 제한된 수만 가져오기
-  const { data: galleryItems, error } = await supabase
+  // 필요한 필드만 선택하고 제한된 수만 가져오기 (타임아웃 설정)
+  const galleryPromise = supabase
     .from("gallery")
     .select("id, title, description, image_url, created_at, updated_at")
     .order("created_at", { ascending: false })
-    .limit(50) // 최대 50개만 가져오기
+    .limit(30) // 최대 30개로 줄임
+
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Gallery fetch timeout')), 3000)
+  )
+
+  let galleryItems: any[] = []
+  let error: any = null
+
+  try {
+    const result = await Promise.race([galleryPromise, timeoutPromise]) as any
+    galleryItems = result.data || []
+    error = result.error
+  } catch (timeoutError) {
+    console.error('Gallery fetch timeout:', timeoutError)
+    error = timeoutError
+  }
 
   if (error) {
     console.error('Gallery fetch error:', error)

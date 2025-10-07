@@ -11,28 +11,39 @@ export default async function ProductsManagementPage() {
   let products: any[] = []
   
   try {
-    // 필요한 필드만 선택하고 제한된 수만 가져오기
-    const { data, error } = await supabase
+    // 제품 데이터 가져오기 (타임아웃 설정)
+    const productsPromise = supabase
       .from("products")
       .select("id, name, price, image_url, in_stock, brand_id, created_at")
       .order("created_at", { ascending: false })
-      .limit(100) // 최대 100개만 가져오기
+      .limit(50) // 최대 50개로 줄임
 
-    if (error) {
-      console.error('Products fetch error:', error)
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Products fetch timeout')), 3000)
+    )
+
+    const result = await Promise.race([productsPromise, timeoutPromise]) as any
+
+    if (result.error) {
+      console.error('Products fetch error:', result.error)
     } else {
-      products = data || []
+      products = result.data || []
       
-      // brands 데이터 별도로 가져오기 (실패해도 계속 진행)
+      // brands 데이터는 별도로 가져오기 (실패해도 계속 진행)
       try {
-        const { data: brandsData } = await supabase.from("brands").select("id, name")
-        const brandsMap = new Map(brandsData?.map(b => [b.id, b]) || [])
-        
-        // products에 brands 정보 추가
-        products = products.map(p => ({
-          ...p,
-          brands: p.brand_id ? brandsMap.get(p.brand_id) : null
-        }))
+        const brandsPromise = supabase.from("brands").select("id, name")
+        const brandsResult = await Promise.race([
+          brandsPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Brands timeout')), 2000))
+        ]) as any
+
+        if (brandsResult.data) {
+          const brandsMap = new Map(brandsResult.data.map((b: any) => [b.id, b]))
+          products = products.map(p => ({
+            ...p,
+            brands: p.brand_id ? brandsMap.get(p.brand_id) : null
+          }))
+        }
       } catch (brandError) {
         console.error('Brands fetch error:', brandError)
         // brands 없이 계속 진행
