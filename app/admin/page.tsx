@@ -11,68 +11,93 @@ export default async function AdminDashboard() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // 기본 카운트 데이터
-  const [{ count: productsCount }, { count: brandsCount }, { count: galleryCount }, { count: recycleCount }] =
-    await Promise.all([
+  // 기본 데이터 초기화
+  let productsCount = 0
+  let brandsCount = 0
+  let galleryCount = 0
+  let recycleCount = 0
+  let usersCount = 0
+  let ordersCount = 0
+  let totalSales = 0
+  let pendingOrders = 0
+  let processingOrders = 0
+  let completedOrders = 0
+  let cancelledOrders = 0
+  let outOfStockCount = 0
+  let recentOrders: any[] = []
+
+  try {
+    // 기본 카운트 데이터
+    const results = await Promise.allSettled([
       supabase.from("products").select("*", { count: "exact", head: true }),
       supabase.from("brands").select("*", { count: "exact", head: true }),
       supabase.from("gallery").select("*", { count: "exact", head: true }),
       supabase.from("recycle_items").select("*", { count: "exact", head: true }),
     ])
 
-  // 사용자 관련 데이터
-  const [{ count: usersCount }, { count: ordersCount }] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("*", { count: "exact", head: true }),
-  ])
+    if (results[0].status === 'fulfilled') productsCount = results[0].value.count || 0
+    if (results[1].status === 'fulfilled') brandsCount = results[1].value.count || 0
+    if (results[2].status === 'fulfilled') galleryCount = results[2].value.count || 0
+    if (results[3].status === 'fulfilled') recycleCount = results[3].value.count || 0
 
-  // 매출 데이터
-  const { data: salesData } = await supabase
-    .from("orders")
-    .select("total_amount, created_at, status")
-    .eq("status", "completed")
+    // 사용자 관련 데이터 (에러 무시)
+    try {
+      const [usersResult, ordersResult] = await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("orders").select("*", { count: "exact", head: true }),
+      ])
+      usersCount = usersResult.count || 0
+      ordersCount = ordersResult.count || 0
 
-  const totalSales = salesData?.reduce((sum, order) => sum + order.total_amount, 0) || 0
+      // 매출 데이터
+      const { data: salesData } = await supabase
+        .from("orders")
+        .select("total_amount, created_at, status")
+        .eq("status", "completed")
 
-  // 주문 상태별 카운트
-  const [
-    { count: pendingOrders },
-    { count: processingOrders },
-    { count: completedOrders },
-    { count: cancelledOrders }
-  ] = await Promise.all([
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "pending"),
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "processing"),
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "completed"),
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "cancelled"),
-  ])
+      totalSales = salesData?.reduce((sum, order) => sum + order.total_amount, 0) || 0
 
-  // 재고 부족 상품
-  const { count: outOfStockCount } = await supabase
-    .from("products")
-    .select("*", { count: "exact", head: true })
-    .eq("in_stock", false)
+      // 주문 상태별 카운트
+      const statusResults = await Promise.allSettled([
+        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "processing"),
+        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "completed"),
+        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "cancelled"),
+      ])
 
-  // 최근 등록 상품
-  const { data: recentProducts } = await supabase
-    .from("products")
-    .select("id, name, price, created_at, in_stock")
-    .order("created_at", { ascending: false })
-    .limit(5)
+      if (statusResults[0].status === 'fulfilled') pendingOrders = statusResults[0].value.count || 0
+      if (statusResults[1].status === 'fulfilled') processingOrders = statusResults[1].value.count || 0
+      if (statusResults[2].status === 'fulfilled') completedOrders = statusResults[2].value.count || 0
+      if (statusResults[3].status === 'fulfilled') cancelledOrders = statusResults[3].value.count || 0
 
-  // 최근 주문
-  const { data: recentOrders } = await supabase
-    .from("orders")
-    .select(`
-      id,
-      total_amount,
-      status,
-      created_at,
-      shipping_name,
-      profiles!inner(display_name, email)
-    `)
-    .order("created_at", { ascending: false })
-    .limit(5)
+      // 최근 주문
+      const { data } = await supabase
+        .from("orders")
+        .select(`
+          id,
+          total_amount,
+          status,
+          created_at,
+          shipping_name
+        `)
+        .order("created_at", { ascending: false })
+        .limit(5)
+
+      recentOrders = data || []
+    } catch (error) {
+      console.error('Orders data error:', error)
+    }
+
+    // 재고 부족 상품
+    const { count } = await supabase
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("in_stock", false)
+    
+    outOfStockCount = count || 0
+  } catch (error) {
+    console.error('Dashboard data loading error:', error)
+  }
 
   return (
     <div className="p-8">
@@ -224,7 +249,7 @@ export default async function AdminDashboard() {
                     className="flex items-center justify-between py-3 border-b last:border-0 border-border/50"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{order.profiles?.display_name || order.shipping_name || '고객'}</p>
+                      <p className="font-medium text-sm">{order.shipping_name || '고객'}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {new Date(order.created_at).toLocaleDateString("ko-KR")}
                       </p>
@@ -248,7 +273,7 @@ export default async function AdminDashboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">주문이 없습니다</p>
+                <p className="text-sm text-muted-foreground text-center py-8">주문 데이터가 없습니다</p>
               )}
             </div>
           </CardContent>
