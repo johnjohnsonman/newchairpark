@@ -41,6 +41,18 @@ export interface Gallery {
   updated_at: string
 }
 
+export interface Resource {
+  id: string
+  title: string
+  description: string | null
+  file_url: string
+  file_type: string
+  file_size: number | null
+  brand_id: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface RecycleItem {
   id: string
   title: string

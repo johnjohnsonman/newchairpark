@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Package, Tag, ImageIcon, Recycle, LayoutGrid, LogOut, ChevronRight, ShoppingCart, Users } from "lucide-react"
+import { LayoutDashboard, Package, Tag, ImageIcon, Recycle, LayoutGrid, LogOut, ChevronRight, ShoppingCart, Users, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const menuItems = [
@@ -25,6 +25,7 @@ const menuItems = [
       { title: "상품 관리", href: "/admin/products", icon: Package },
       { title: "브랜드 관리", href: "/admin/brands", icon: Tag },
       { title: "갤러리 관리", href: "/admin/gallery", icon: ImageIcon },
+      { title: "자료실 관리", href: "/admin/resources", icon: FileText },
       { title: "중고마켓 관리", href: "/admin/recycle-market", icon: Recycle },
     ],
   },

@@ -19,6 +19,7 @@ export default function Navigation() {
     { name: "회사소개", href: "/about" },
     { name: "갤러리", href: "/gallery" },
     { name: "리뷰", href: "/reviews" },
+    { name: "자료실", href: "/resources" },
     { name: "블로그", href: "https://blog.naver.com/chairforyou", external: true },
     { name: "수리", href: "/repair" },
     { name: "리싸이클", href: "/recycle" },
