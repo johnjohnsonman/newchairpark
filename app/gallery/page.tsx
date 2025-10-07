@@ -7,7 +7,7 @@ export const metadata = {
 }
 
 export default async function GalleryPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: galleryItems } = await supabase.from("gallery").select("id, title, description, brand, product_name, image_url, images, featured_image_index, created_at").order("created_at", { ascending: false })
 

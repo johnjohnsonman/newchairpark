@@ -20,7 +20,7 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
     
     console.log('Gallery detail page - ID:', id)
     
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // 갤러리 아이템 조회
     const { data: galleryItem, error: galleryError } = await supabase
