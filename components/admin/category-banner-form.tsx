@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
-import { SingleImageUpload } from "./single-image-upload"
+import { MultipleImageUpload } from "./multiple-image-upload"
 
 const categories = [
   { id: "all-chairs", name: "전체체어" },
@@ -29,7 +29,8 @@ export function CategoryBannerForm() {
     category_id: "",
     title: "",
     description: "",
-    background_image: "",
+    images: [] as string[],
+    featured_image_index: 0,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,10 +110,12 @@ export function CategoryBannerForm() {
             </div>
 
             <div className="grid gap-2">
-              <Label>배경 이미지 *</Label>
-              <SingleImageUpload
-                value={formData.background_image}
-                onChange={(url) => setFormData({ ...formData, background_image: url })}
+              <Label>배너 이미지들 * (최대 5개)</Label>
+              <MultipleImageUpload
+                images={formData.images}
+                featuredIndex={formData.featured_image_index}
+                maxImages={5}
+                onChange={(images, featuredIndex) => setFormData({ ...formData, images, featured_image_index: featuredIndex })}
               />
             </div>
           </div>

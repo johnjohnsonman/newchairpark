@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
-import { SingleImageUpload } from "./single-image-upload"
+import { MultipleImageUpload } from "./multiple-image-upload"
 
 const categories = [
   { id: "all-chairs", name: "전체체어" },
@@ -27,7 +27,9 @@ interface CategoryBannerEditFormProps {
     category_id: string
     title: string
     description: string
-    background_image: string
+    background_image?: string
+    images?: string[]
+    featured_image_index?: number
   }
 }
 
@@ -39,7 +41,8 @@ export function CategoryBannerEditForm({ banner }: CategoryBannerEditFormProps) 
     category_id: banner.category_id,
     title: banner.title,
     description: banner.description,
-    background_image: banner.background_image,
+    images: banner.images || (banner.background_image ? [banner.background_image] : []),
+    featured_image_index: banner.featured_image_index || 0,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,10 +123,12 @@ export function CategoryBannerEditForm({ banner }: CategoryBannerEditFormProps) 
             </div>
 
             <div className="grid gap-2">
-              <Label>배경 이미지 *</Label>
-              <SingleImageUpload
-                value={formData.background_image}
-                onChange={(url) => setFormData({ ...formData, background_image: url })}
+              <Label>배너 이미지들 * (최대 5개)</Label>
+              <MultipleImageUpload
+                images={formData.images}
+                featuredIndex={formData.featured_image_index}
+                maxImages={5}
+                onChange={(images, featuredIndex) => setFormData({ ...formData, images, featured_image_index: featuredIndex })}
               />
             </div>
           </div>

@@ -49,7 +49,9 @@ interface CategoryBanner {
   category_id: string
   title: string
   description: string
-  background_image: string
+  background_image?: string
+  images?: string[]
+  featured_image_index?: number
 }
 
 interface StoreClientPageProps {
@@ -350,34 +352,58 @@ export default function StoreClientPage({
             <div className="max-w-5xl mx-auto">
               <Carousel className="mb-6">
                 <CarouselContent>
-                  {currentBanners.map((banner, index) => (
-                    <CarouselItem key={banner.id}>
-                      <div 
-                        className="relative h-48 rounded-lg overflow-hidden bg-cover bg-center"
-                        style={{
-                          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${banner.background_image})`
-                        }}
-                      >
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <h2 className="text-2xl font-bold mb-2">
-                              {banner.title}
-                            </h2>
-                            <p className="text-lg opacity-90">
-                              {banner.description}
-                            </p>
+                  {currentBanners.map((banner) => {
+                    // 다중 이미지가 있으면 각 이미지를 별도 캐러셀 아이템으로 표시
+                    const bannerImages = banner.images && banner.images.length > 0 
+                      ? banner.images 
+                      : banner.background_image 
+                      ? [banner.background_image] 
+                      : []
+
+                    return bannerImages.map((imageUrl, imageIndex) => (
+                      <CarouselItem key={`${banner.id}-${imageIndex}`}>
+                        <div 
+                          className="relative h-48 rounded-lg overflow-hidden bg-cover bg-center"
+                          style={{
+                            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${imageUrl})`
+                          }}
+                        >
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center text-white">
+                              <h2 className="text-2xl font-bold mb-2">
+                                {banner.title}
+                              </h2>
+                              <p className="text-lg opacity-90">
+                                {banner.description}
+                              </p>
+                              {bannerImages.length > 1 && (
+                                <p className="text-sm opacity-75 mt-2">
+                                  {imageIndex + 1} / {bannerImages.length}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CarouselItem>
-                  ))}
+                      </CarouselItem>
+                    ))
+                  })}
                 </CarouselContent>
-                {currentBanners.length > 1 && (
-                  <>
-                    <CarouselPrevious />
-                    <CarouselNext />
-                  </>
-                )}
+                {(() => {
+                  const totalImages = currentBanners.reduce((total, banner) => {
+                    const bannerImages = banner.images && banner.images.length > 0 
+                      ? banner.images 
+                      : banner.background_image 
+                      ? [banner.background_image] 
+                      : []
+                    return total + bannerImages.length
+                  }, 0)
+                  return totalImages > 1 ? (
+                    <>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </>
+                  ) : null
+                })()}
               </Carousel>
             </div>
           </div>
