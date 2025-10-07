@@ -285,18 +285,20 @@ export function ReviewForm({ user }: ReviewFormProps) {
           {/* 앉는 스타일 */}
           <div className="space-y-2">
             <Label htmlFor="sitting_style">앉는 스타일</Label>
-            <Select value={formData.sitting_style} onValueChange={(value) => setFormData({ ...formData, sitting_style: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="앉는 스타일을 선택해주세요" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="장시간 앉아서 작업">장시간 앉아서 작업</SelectItem>
-                <SelectItem value="자주 자세를 바꿈">자주 자세를 바꿈</SelectItem>
-                <SelectItem value="바른 자세 유지">바른 자세 유지</SelectItem>
-                <SelectItem value="다리를 꼬고 앉음">다리를 꼬고 앉음</SelectItem>
-                <SelectItem value="장시간 회의">장시간 회의</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              id="sitting_style"
+              value={formData.sitting_style}
+              onChange={(e) => setFormData({ ...formData, sitting_style: e.target.value })}
+              placeholder="앉는 스타일을 입력하세요 (예: 장시간 앉아서 작업)"
+              list="sitting-styles"
+            />
+            <datalist id="sitting-styles">
+              <option value="장시간 앉아서 작업" />
+              <option value="자주 자세를 바꿈" />
+              <option value="바른 자세 유지" />
+              <option value="다리를 꼬고 앉음" />
+              <option value="장시간 회의" />
+            </datalist>
           </div>
 
           {/* 구매 인증 */}
