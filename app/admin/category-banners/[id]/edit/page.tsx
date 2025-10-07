@@ -11,11 +11,11 @@ export default async function EditCategoryBannerPage({ params }: { params: { id:
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="mb-8 text-3xl font-bold">카테고리 배너 수정</h1>
-        <CategoryBannerForm banner={banner} />
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">카테고리 배너 수정</h1>
       </div>
+      <CategoryBannerForm banner={banner} />
     </div>
   )
 }

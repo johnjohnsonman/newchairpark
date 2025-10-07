@@ -15,16 +15,11 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const { data: brands } = await supabase.from("brands").select("*").order("name")
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold">Edit Product</h1>
-        </div>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Edit Product</h1>
       </div>
-
-      <div className="container mx-auto px-6 py-8 max-w-3xl">
-        <ProductForm product={product} brands={brands || []} />
-      </div>
+      <ProductForm product={product} brands={brands || []} />
     </div>
   )
 }

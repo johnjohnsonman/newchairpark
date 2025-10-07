@@ -17,6 +17,9 @@ interface GalleryDetailPageProps {
 export default async function GalleryDetailPage({ params }: GalleryDetailPageProps) {
   try {
     const { id } = await params
+    
+    console.log('Gallery detail page - ID:', id)
+    
     const supabase = createClient()
     
     // 갤러리 아이템 조회
@@ -26,8 +29,10 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
       .eq("id", id)
       .single()
 
+    console.log('Gallery item fetch result:', { galleryItem, galleryError })
+
     if (galleryError || !galleryItem) {
-      console.error('Gallery item not found:', galleryError)
+      console.error('Gallery item not found:', { id, galleryError })
       notFound()
     }
 

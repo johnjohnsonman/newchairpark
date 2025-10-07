@@ -11,16 +11,11 @@ export default async function NewResourcePage() {
     .order("name")
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold">자료 추가</h1>
-        </div>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">자료 추가</h1>
       </div>
-
-      <div className="container mx-auto px-6 py-8 max-w-3xl">
-        <ResourceForm brands={brands || []} />
-      </div>
+      <ResourceForm brands={brands || []} />
     </div>
   )
 }

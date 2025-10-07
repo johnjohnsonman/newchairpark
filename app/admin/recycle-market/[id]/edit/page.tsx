@@ -16,16 +16,11 @@ export default async function EditRecycleMarketPage({ params }: { params: Promis
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="border-b bg-white">
-        <div className="container mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold">Edit Recycle Market Item</h1>
-        </div>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Edit Recycle Market Item</h1>
       </div>
-
-      <div className="container mx-auto px-6 py-8 max-w-3xl">
-        <RecycleMarketForm recycleItem={recycleItem} brands={brands || []} />
-      </div>
+      <RecycleMarketForm recycleItem={recycleItem} brands={brands || []} />
     </div>
   )
 }
