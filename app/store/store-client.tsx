@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider"
 import Link from "next/link"
 import Image from "next/image"
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SlidersHorizontal, Star, ShoppingCart, ArrowRight, Store, Award, Package } from "lucide-react"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { NaverBookingButtonWhite } from "@/components/naver-booking-button"
 import { useSearchParams } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/client"
@@ -55,12 +56,14 @@ interface StoreClientPageProps {
   categories: Category[]
   initialProducts?: Product[]
   initialBrands?: Brand[]
+  categoryBanners?: CategoryBanner[]
 }
 
 export default function StoreClientPage({ 
   categories, 
   initialProducts = [],
-  initialBrands = []
+  initialBrands = [],
+  categoryBanners = []
 }: StoreClientPageProps) {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
@@ -96,9 +99,20 @@ export default function StoreClientPage({
     brand: true,
     price: true,
   })
+
+  // 현재 카테고리에 맞는 배너들 찾기
+  const getCurrentBanners = () => {
+    if (selectedCategory === "all") {
+      // 전체 카테고리일 때는 모든 배너 표시
+      return categoryBanners
+    }
+    // 특정 카테고리일 때는 해당 카테고리 배너만 표시
+    return categoryBanners.filter(banner => banner.category_id === selectedCategory)
+  }
+
+  const currentBanners = getCurrentBanners()
   const [sortBy, setSortBy] = useState("featured")
   const [reviewStats, setReviewStats] = useState<Record<string, ReviewStat>>({})
-  const [categoryBanners, setCategoryBanners] = useState<CategoryBanner[]>([])
   const [heroCarouselIndex, setHeroCarouselIndex] = useState(0)
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [products, setProducts] = useState<Product[]>(initialProducts)
@@ -148,17 +162,6 @@ export default function StoreClientPage({
     }
   }, [categoryParam])
 
-  useEffect(() => {
-    const fetchCategoryBanners = async () => {
-      const { data } = await supabase.from("category_banners").select("*").order("category_id")
-
-      if (data) {
-        setCategoryBanners(data)
-      }
-    }
-
-    fetchCategoryBanners()
-  }, [])
 
   useEffect(() => {
     if (!selectedCategory && categoryBanners.length > 0) {
@@ -340,33 +343,51 @@ export default function StoreClientPage({
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* 스틸케이스 스타일 컴팩트 배너 */}
+      {/* 카테고리 배너 캐러셀 */}
+      {currentBanners.length > 0 && (
+        <div className="border-b bg-white">
+          <div className="container mx-auto px-4 py-8">
+            <div className="max-w-5xl mx-auto">
+              <Carousel className="mb-6">
+                <CarouselContent>
+                  {currentBanners.map((banner, index) => (
+                    <CarouselItem key={banner.id}>
+                      <div 
+                        className="relative h-48 rounded-lg overflow-hidden bg-cover bg-center"
+                        style={{
+                          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${banner.background_image})`
+                        }}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <h2 className="text-2xl font-bold mb-2">
+                              {banner.title}
+                            </h2>
+                            <p className="text-lg opacity-90">
+                              {banner.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {currentBanners.length > 1 && (
+                  <>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </>
+                )}
+              </Carousel>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* 제품 헤더 */}
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-5xl mx-auto">
-            {/* 배너 이미지가 있는 경우 */}
-            {categoryBanners.length > 0 && categoryBanners.find(b => b.category_id === selectedCategory) && (
-              <div className="mb-6">
-                <div 
-                  className="relative h-48 rounded-lg overflow-hidden bg-cover bg-center"
-                  style={{
-                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${categoryBanners.find(b => b.category_id === selectedCategory)?.background_image})`
-                  }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <h2 className="text-2xl font-bold mb-2">
-                        {categoryBanners.find(b => b.category_id === selectedCategory)?.title}
-                      </h2>
-                      <p className="text-lg opacity-90">
-                        {categoryBanners.find(b => b.category_id === selectedCategory)?.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-neutral-900">
                 {selectedCategory

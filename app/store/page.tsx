@@ -21,22 +21,25 @@ export default async function StorePage() {
   const supabase = await createServerClient()
 
   // 서버에서 미리 데이터 로드 (빠름!)
-  const [productsResult, brandsResult] = await Promise.all([
+  const [productsResult, brandsResult, bannersResult] = await Promise.all([
     supabase
       .from("products")
       .select("*, brands(name, slug)")
       .order("created_at", { ascending: false }),
     supabase.from("brands").select("*").order("name"),
+    supabase.from("category_banners").select("*").order("created_at", { ascending: false }),
   ])
 
   const initialProducts = productsResult.data || []
   const initialBrands = brandsResult.data || []
+  const categoryBanners = bannersResult.data || []
 
   return (
     <StoreClientPage 
       categories={categories} 
       initialProducts={initialProducts}
       initialBrands={initialBrands}
+      categoryBanners={categoryBanners}
     />
   )
 }

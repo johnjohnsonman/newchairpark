@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client"
 import { SingleImageUpload } from "./single-image-upload"
 
 const categories = [
+  { id: "all-chairs", name: "전체체어" },
   { id: "office-chair", name: "오피스 체어" },
   { id: "executive-chair", name: "임원용 체어" },
   { id: "lounge-chair", name: "라운지 체어" },
@@ -121,7 +122,7 @@ export function CategoryBannerEditForm({ banner }: CategoryBannerEditFormProps) 
             <div className="grid gap-2">
               <Label>배경 이미지 *</Label>
               <SingleImageUpload
-                image={formData.background_image}
+                value={formData.background_image}
                 onChange={(url) => setFormData({ ...formData, background_image: url })}
               />
             </div>
