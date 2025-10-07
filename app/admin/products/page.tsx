@@ -8,10 +8,38 @@ import { DeleteProductButton } from "@/components/admin/delete-product-button"
 export default async function ProductsManagementPage() {
   const supabase = await createClient()
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("*, brands(name)")
-    .order("created_at", { ascending: false })
+  let products: any[] = []
+  
+  try {
+    // 먼저 brands JOIN 없이 products만 가져오기
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error('Products fetch error:', error)
+    } else {
+      products = data || []
+      
+      // brands 데이터 별도로 가져오기 (실패해도 계속 진행)
+      try {
+        const { data: brandsData } = await supabase.from("brands").select("id, name")
+        const brandsMap = new Map(brandsData?.map(b => [b.id, b]) || [])
+        
+        // products에 brands 정보 추가
+        products = products.map(p => ({
+          ...p,
+          brands: p.brand_id ? brandsMap.get(p.brand_id) : null
+        }))
+      } catch (brandError) {
+        console.error('Brands fetch error:', brandError)
+        // brands 없이 계속 진행
+      }
+    }
+  } catch (error) {
+    console.error('Products page error:', error)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,8 +102,10 @@ export default async function ProductsManagementPage() {
                     <p className="text-sm text-gray-500">{product.brands?.name || "No brand"}</p>
                   </div>
                   <div className="mb-4">
-                    <p className="text-lg font-bold">${product.price.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500 capitalize">{product.category.replace("-", " ")}</p>
+                    <p className="text-lg font-bold">₩{product.price.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500 capitalize">
+                      {(product.category || product.category_id || 'uncategorized').replace("-", " ")}
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/admin/products/${product.id}/edit`} className="flex-1">
