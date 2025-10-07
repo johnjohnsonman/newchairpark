@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -6,12 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Clock, MapPin, Phone, Mail, Store, Users, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "매장 방문 예약 | 체어파크 - 직접 앉아보고 선택하세요",
-  description: "체어파크 매장에서 허먼밀러, 스틸케이스 등 프리미엄 오피스 체어를 직접 체험해보세요. 전문 상담과 맞춤형 솔루션을 제공합니다.",
-}
+// Note: metadata는 클라이언트 컴포넌트에서 사용할 수 없으므로 제거됨
 
 export default function StoreVisitPage() {
   return (
