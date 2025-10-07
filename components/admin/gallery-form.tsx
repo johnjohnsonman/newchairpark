@@ -72,7 +72,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
       console.log('Submitting gallery data:', dataToSubmit)
 
-      // 타임아웃 설정 (30초)
+      // 타임아웃 설정 (5분으로 증가)
       const submitPromise = galleryItem 
         ? supabase
             .from("gallery")
@@ -85,7 +85,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
         : supabase.from("gallery").insert([dataToSubmit]).select()
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('제출 시간이 초과되었습니다. 다시 시도해주세요.')), 30000)
+        setTimeout(() => reject(new Error('제출 시간이 초과되었습니다. 파일 크기가 클 수 있습니다. 다시 시도해주세요.')), 300000) // 5분
       )
 
       const { data, error } = await Promise.race([submitPromise, timeoutPromise]) as any
@@ -167,7 +167,14 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
               disabled={isLoading || formData.images.length === 0 || !formData.title.trim()} 
               className="flex-1"
             >
-              {isLoading ? "저장 중..." : galleryItem ? "이미지 수정" : "이미지 추가"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  저장 중...
+                </div>
+              ) : (
+                galleryItem ? "이미지 수정" : "이미지 추가"
+              )}
             </Button>
             <Link href="/admin/gallery">
               <Button type="button" variant="outline" disabled={isLoading}>

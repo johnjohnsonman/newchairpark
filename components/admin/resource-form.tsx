@@ -47,10 +47,10 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // 파일 크기 제한 (50MB)
-    const maxSize = 50 * 1024 * 1024 // 50MB
+    // 파일 크기 제한 (100MB로 증가)
+    const maxSize = 100 * 1024 * 1024 // 100MB
     if (file.size > maxSize) {
-      toast.error("파일 크기가 너무 큽니다. 최대 50MB까지 업로드 가능합니다.")
+      toast.error("파일 크기가 너무 큽니다. 최대 100MB까지 업로드 가능합니다.")
       return
     }
 
@@ -232,7 +232,7 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
                         <span className="font-semibold">클릭하여 파일 업로드</span>
                       </p>
                       <p className="text-xs text-neutral-400">
-                        PDF, Word, Excel, PowerPoint (최대 50MB)
+                        PDF, Word, Excel, PowerPoint (최대 100MB)
                       </p>
                     </div>
                     <input 
@@ -257,13 +257,25 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
                   )}
 
                   {uploading && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-neutral-500">업로드 중...</p>
-                      <div className="w-full bg-neutral-200 rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
+                    <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <p className="text-sm text-blue-700 font-medium">대용량 파일 업로드 중...</p>
+                      </div>
+                      <p className="text-xs text-blue-600">
+                        파일이 큰 경우 시간이 오래 걸릴 수 있습니다. 페이지를 닫지 마세요.
+                      </p>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs text-blue-700">
+                          <span>업로드 진행률</span>
+                          <span>{Math.round(uploadProgress)}%</span>
+                        </div>
+                        <div className="w-full bg-blue-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -313,7 +325,14 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
               disabled={isLoading || uploading || !formData.title.trim() || !formData.brand_id} 
               className="flex-1"
             >
-              {isLoading ? "저장 중..." : resource ? "자료 수정" : "자료 추가"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  저장 중...
+                </div>
+              ) : (
+                resource ? "자료 수정" : "자료 추가"
+              )}
             </Button>
             <Link href="/admin/resources">
               <Button type="button" variant="outline" disabled={isLoading}>

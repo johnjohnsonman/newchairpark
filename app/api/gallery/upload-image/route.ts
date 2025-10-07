@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    // 파일 크기 제한 (10MB)
-    const maxSize = 10 * 1024 * 1024 // 10MB
+    // 파일 크기 제한 (50MB로 증가)
+    const maxSize = 50 * 1024 * 1024 // 50MB
     if (file.size > maxSize) {
-      return NextResponse.json({ error: "File size too large (max 10MB)" }, { status: 400 })
+      return NextResponse.json({ error: "파일 크기가 너무 큽니다. 최대 50MB까지 업로드 가능합니다." }, { status: 400 })
     }
 
     // 파일 타입 검증
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)
 
-    // Upload to Supabase Storage with timeout
+    // Upload to Supabase Storage with extended timeout
     const uploadPromise = supabase.storage
       .from('images')
       .upload(filePath, buffer, {
@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
         upsert: false
       })
 
-    // 30초 타임아웃 설정
+    // 10분 타임아웃 설정 (대용량 파일 고려)
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Upload timeout')), 30000)
+      setTimeout(() => reject(new Error('Upload timeout - 파일이 너무 큽니다. 파일 크기를 줄이거나 다시 시도해주세요.')), 600000)
     )
 
     const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any

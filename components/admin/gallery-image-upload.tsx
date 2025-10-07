@@ -54,17 +54,19 @@ export function GalleryImageUpload({
         const formData = new FormData()
         formData.append("file", file)
 
-        // 업로드 진행률 시뮬레이션
+        // 업로드 진행률 시뮬레이션 (더 세밀하게)
         const progressInterval = setInterval(() => {
           setUploadProgress(prev => ({
             ...prev,
-            [fileId]: Math.min((prev[fileId] || 0) + Math.random() * 20, 90)
+            [fileId]: Math.min((prev[fileId] || 0) + Math.random() * 10, 85)
           }))
-        }, 200)
+        }, 500)
 
         const response = await fetch("/api/gallery/upload-image", {
           method: "POST",
           body: formData,
+          // 타임아웃 설정 (10분)
+          signal: AbortSignal.timeout(600000)
         })
 
         clearInterval(progressInterval)
@@ -266,7 +268,7 @@ export function GalleryImageUpload({
               PNG, JPG, GIF, WebP (최대 {maxImages}개, {images.length}/{maxImages})
             </p>
             <p className="text-xs text-neutral-400">
-              파일 크기: 최대 10MB
+              파일 크기: 최대 50MB
             </p>
             {images.length > 0 && (
               <p className="text-xs text-primary mt-2">
@@ -286,14 +288,26 @@ export function GalleryImageUpload({
       )}
 
       {uploading && (
-        <div className="space-y-2">
-          <p className="text-sm text-neutral-500 text-center">업로드 중...</p>
+        <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <p className="text-sm text-blue-700 font-medium">대용량 파일 업로드 중...</p>
+          </div>
+          <p className="text-xs text-blue-600">
+            파일이 큰 경우 시간이 오래 걸릴 수 있습니다. 페이지를 닫지 마세요.
+          </p>
           {Object.entries(uploadProgress).map(([fileId, progress]) => (
-            <div key={fileId} className="w-full bg-neutral-200 rounded-full h-2">
-              <div 
-                className="bg-primary h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+            <div key={fileId} className="space-y-1">
+              <div className="flex justify-between text-xs text-blue-700">
+                <span>업로드 진행률</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
           ))}
         </div>
