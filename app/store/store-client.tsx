@@ -75,8 +75,11 @@ export default function StoreClientPage({
   const getCategoryDescription = (categoryId: string | null) => {
     if (!categoryId) return "최고의 품질과 디자인을 경험하세요"
     
+    // "all" 카테고리는 "all-chairs" 배너에서 설명 가져오기
+    const searchCategoryId = categoryId === "all" ? "all-chairs" : categoryId
+    
     // 현재 카테고리에 맞는 배너에서 설명 가져오기
-    const currentBanner = categoryBanners.find(banner => banner.category_id === categoryId)
+    const currentBanner = categoryBanners.find(banner => banner.category_id === searchCategoryId)
     if (currentBanner && currentBanner.description) {
       return currentBanner.description
     }
@@ -114,8 +117,8 @@ export default function StoreClientPage({
   // 현재 카테고리에 맞는 배너들 찾기
   const getCurrentBanners = () => {
     if (selectedCategory === "all") {
-      // 전체 카테고리일 때는 모든 배너 표시
-      return categoryBanners
+      // 전체 카테고리일 때는 "all-chairs" 카테고리 배너 표시
+      return categoryBanners.filter(banner => banner.category_id === "all-chairs")
     }
     // 특정 카테고리일 때는 해당 카테고리 배너만 표시
     return categoryBanners.filter(banner => banner.category_id === selectedCategory)
@@ -361,13 +364,14 @@ export default function StoreClientPage({
             <Carousel>
               <CarouselContent>
                 {currentBanners.map((banner) => {
-                  // 다중 이미지가 있으면 각 이미지를 별도 캐러셀 아이템으로 표시
+                  // 각 카테고리별로 배너의 이미지들을 가져오기
                   const bannerImages = banner.images && banner.images.length > 0 
                     ? banner.images 
                     : banner.background_image 
                     ? [banner.background_image] 
                     : []
 
+                  // 이 카테고리의 이미지들을 캐러셀 아이템으로 표시
                   return bannerImages.map((imageUrl, imageIndex) => (
                     <CarouselItem key={`${banner.id}-${imageIndex}`}>
                       <div 
@@ -382,6 +386,7 @@ export default function StoreClientPage({
                 })}
               </CarouselContent>
               {(() => {
+                // 현재 카테고리의 총 이미지 수 계산
                 const totalImages = currentBanners.reduce((total, banner) => {
                   const bannerImages = banner.images && banner.images.length > 0 
                     ? banner.images 
@@ -390,6 +395,8 @@ export default function StoreClientPage({
                     : []
                   return total + bannerImages.length
                 }, 0)
+                
+                // 이미지가 2개 이상이면 화살표 표시
                 return totalImages > 1 ? (
                   <>
                     <CarouselPrevious />
@@ -411,8 +418,11 @@ export default function StoreClientPage({
                 {(() => {
                   if (!selectedCategory) return "전체 제품"
                   
+                  // "all" 카테고리는 "all-chairs" 배너에서 제목 가져오기
+                  const searchCategoryId = selectedCategory === "all" ? "all-chairs" : selectedCategory
+                  
                   // 배너에서 제목 가져오기
-                  const currentBanner = categoryBanners.find(banner => banner.category_id === selectedCategory)
+                  const currentBanner = categoryBanners.find(banner => banner.category_id === searchCategoryId)
                   if (currentBanner && currentBanner.title) {
                     return currentBanner.title
                   }
