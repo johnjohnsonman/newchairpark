@@ -14,8 +14,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
-import { AutocompleteInput } from "@/components/ui/autocomplete-input"
-import { useBrandProductData } from "@/hooks/use-brand-product-data"
+import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
 
 interface ProductFormProps {
   product?: Product
@@ -36,9 +35,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // 브랜드 및 제품 데이터 로드
-  const { getProductsByBrand } = useBrandProductData()
-  const [productSuggestions, setProductSuggestions] = useState<string[]>([])
+  // 브랜드 이름 표시용
   const [selectedBrandName, setSelectedBrandName] = useState("")
 
   // images를 JSON 파싱하여 초기화
@@ -72,18 +69,11 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     featured: product?.featured ?? false,
   })
 
-  // 브랜드 변경 시 해당 브랜드의 제품 목록 업데이트
+  // 통합 자동완성 시스템으로 브랜드와 제품 제안이 자동으로 처리됨
   useEffect(() => {
     const brand = brands.find(b => b.id === formData.brand_id)
-    if (brand) {
-      setSelectedBrandName(brand.name)
-      const products = getProductsByBrand(brand.name)
-      setProductSuggestions(products)
-    } else {
-      setSelectedBrandName("")
-      setProductSuggestions([])
-    }
-  }, [formData.brand_id, brands, getProductsByBrand])
+    setSelectedBrandName(brand ? brand.name : "")
+  }, [formData.brand_id, brands])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -174,34 +164,14 @@ export function ProductForm({ product, brands }: ProductFormProps) {
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">
-                Product Name *
-                {selectedBrandName && productSuggestions.length > 0 && (
-                  <span className="text-xs text-muted-foreground ml-2">
-                    ({productSuggestions.length}개 기존 제품 제안)
-                  </span>
-                )}
-              </Label>
-              <AutocompleteInput
-                id="name"
-                value={formData.name}
-                onChange={(value) => setFormData({ ...formData, name: value })}
-                suggestions={productSuggestions}
-                placeholder={
-                  selectedBrandName 
-                    ? `${selectedBrandName}의 기존 제품 선택 또는 새 제품 입력`
-                    : "Aeron Chair"
-                }
-                allowCustom={true}
-              />
-              <p className="text-xs text-muted-foreground">
-                {selectedBrandName 
-                  ? `${selectedBrandName}의 기존 제품명을 선택하거나 새 제품명을 입력하세요`
-                  : "브랜드를 먼저 선택하면 해당 브랜드의 제품 제안이 나타납니다"
-                }
-              </p>
-            </div>
+            <UnifiedAutocompleteInput
+              label="Product Name *"
+              placeholder="예: Aeron Chair, Gesture Chair"
+              value={formData.name}
+              onChange={(value) => setFormData({ ...formData, name: value })}
+              type="product"
+              selectedBrand={selectedBrandName}
+            />
 
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
@@ -219,25 +189,17 @@ export function ProductForm({ product, brands }: ProductFormProps) {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="brand">Brand</Label>
-              <Select
-                value={formData.brand_id}
-                onValueChange={(value) => setFormData({ ...formData, brand_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a brand" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no-brand">No brand</SelectItem>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <UnifiedAutocompleteInput
+              label="Brand"
+              placeholder="예: Herman Miller, Steelcase"
+              value={selectedBrandName || ""}
+              onChange={(value) => {
+                // 브랜드 이름으로 브랜드 ID 찾기
+                const brand = brands.find(b => b.name === value)
+                setFormData({ ...formData, brand_id: brand ? brand.id : null })
+              }}
+              type="brand"
+            />
 
             <div className="grid gap-2">
               <Label htmlFor="category">Category *</Label>

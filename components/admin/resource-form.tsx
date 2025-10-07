@@ -14,6 +14,7 @@ import type { Database } from "@/types/database"
 import Link from "next/link"
 import { Upload, FileText, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
+import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
 
 type Brand = {
   id: string
@@ -39,6 +40,7 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
     title: resource?.title || "",
     description: resource?.description || "",
     brand_id: resource?.brand_id || "",
+    product_name: resource?.product_name || "",
     file: null as File | null,
     file_url: resource?.file_url || "",
   })
@@ -144,6 +146,7 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
         title: formData.title.trim(),
         description: formData.description.trim(),
         brand_id: formData.brand_id,
+        product_name: formData.product_name.trim(),
         file_url: fileUrl,
         file_type: formData.file?.type.split('/')[1] || resource?.file_type,
         file_size: formData.file?.size || resource?.file_size,
@@ -205,20 +208,26 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="brand">브랜드 *</Label>
-              <Select value={formData.brand_id} onValueChange={(value) => setFormData({ ...formData, brand_id: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="브랜드를 선택하세요" />
-                </SelectTrigger>
-                <SelectContent>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <UnifiedAutocompleteInput
+                label="브랜드 *"
+                placeholder="예: Herman Miller, Steelcase"
+                value={brands.find(b => b.id === formData.brand_id)?.name || ""}
+                onChange={(value) => {
+                  const brand = brands.find(b => b.name === value)
+                  setFormData({ ...formData, brand_id: brand ? brand.id : "" })
+                }}
+                type="brand"
+              />
+
+              <UnifiedAutocompleteInput
+                label="제품명"
+                placeholder="예: Aeron Chair, Gesture Chair"
+                value={formData.product_name}
+                onChange={(value) => setFormData({ ...formData, product_name: value })}
+                type="product"
+                selectedBrand={brands.find(b => b.id === formData.brand_id)?.name}
+              />
             </div>
 
             <div className="grid gap-2">
