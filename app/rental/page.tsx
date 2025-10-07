@@ -24,12 +24,20 @@ export default function RentalPage() {
     email: "",
     product: "",
     quantity: "",
+    rentalPeriod: "",
     preferredDate: "",
     message: "",
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // 렌탈 선택시 렌탈 기간 필수 검증
+    if (serviceType === "rental" && !formData.rentalPeriod) {
+      alert("렌탈 기간을 선택해주세요.")
+      return
+    }
+    
     // 폼 제출 로직
     console.log("폼 제출:", { serviceType, selectedDate, formData })
   }
@@ -46,6 +54,16 @@ export default function RentalPage() {
     "스탠딩 데스크",
     "회의용 테이블",
     "기타 (메시지에 기재)",
+  ]
+
+  const rentalPeriodOptions = [
+    "3개월",
+    "6개월", 
+    "9개월",
+    "12개월",
+    "18개월",
+    "2년",
+    "2년 이상",
   ]
 
   return (
@@ -204,6 +222,28 @@ export default function RentalPage() {
                   />
                 </div>
               </div>
+
+              {/* 렌탈 기간 (렌탈 선택시에만 표시) */}
+              {serviceType === "rental" && (
+                <div className="space-y-2">
+                  <Label htmlFor="rentalPeriod" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    렌탈 기간 * (최소 3개월)
+                  </Label>
+                  <Select value={formData.rentalPeriod} onValueChange={(value) => handleInputChange("rentalPeriod", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="렌탈 기간을 선택해주세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rentalPeriodOptions.map((period) => (
+                        <SelectItem key={period} value={period}>
+                          {period}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* 희망 날짜 */}
               <div className="space-y-2">
