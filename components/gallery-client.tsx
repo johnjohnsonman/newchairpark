@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { useRouter } from "next/navigation"
 
 type GalleryItem = {
   id: string
@@ -25,9 +25,9 @@ type Brand = {
 }
 
 export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryItem[]; brands: Brand[] }) {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null)
   const [featuredIndex, setFeaturedIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
@@ -61,7 +61,8 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
   }
 
   const openGalleryItem = (item: GalleryItem) => {
-    setSelectedItem(item)
+    // 상세 페이지로 이동
+    router.push(`/gallery/${item.id}`)
   }
 
   if (displayFeaturedItems.length === 0) {
@@ -104,10 +105,13 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
           <ChevronRight className="h-8 w-8 text-white" />
         </button>
 
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-20">
+        <div 
+          className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-20 cursor-pointer"
+          onClick={() => openGalleryItem(displayFeaturedItems[featuredIndex])}
+        >
           <div className="container mx-auto px-4 text-center">
             <p className="mb-2 text-sm font-light uppercase tracking-widest text-white/70">Featured Gallery</p>
-            <h1 className="mb-4 font-serif text-5xl font-light text-white md:text-6xl lg:text-7xl">
+            <h1 className="mb-4 font-serif text-5xl font-light text-white md:text-6xl lg:text-7xl hover:text-white/90 transition-colors">
               {displayFeaturedItems[featuredIndex].title}
             </h1>
             
@@ -194,17 +198,18 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
             <div
               key={item.id}
               onClick={() => openGalleryItem(item)}
-              className="group cursor-pointer overflow-hidden rounded-lg border bg-card transition-all hover:shadow-lg"
+              className="group cursor-pointer overflow-hidden rounded-lg border bg-card transition-all hover:shadow-xl hover:scale-[1.02] duration-300"
             >
               <div className="relative aspect-square overflow-hidden">
                 <img
                   src={item.image_url || "/placeholder.svg"}
                   alt={item.title}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
               </div>
               <div className="p-4">
-                <h3 className="mb-1 font-semibold">{item.title}</h3>
+                <h3 className="mb-1 font-semibold group-hover:text-primary transition-colors">{item.title}</h3>
                 
                 {(item.brand || item.product_name) && (
                   <div className="mb-2 flex flex-wrap gap-1">
@@ -235,44 +240,6 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
         )}
       </div>
 
-      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-        <DialogContent className="max-w-5xl">
-          <DialogTitle className="sr-only">{selectedItem?.title} 갤러리</DialogTitle>
-          {selectedItem && (
-            <div className="space-y-4">
-              <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
-                <img
-                  src={selectedItem.image_url || "/placeholder.svg"}
-                  alt={selectedItem.title}
-                  className="h-full w-full object-contain"
-                />
-              </div>
-
-              <div className="space-y-2 border-t pt-4">
-                <h2 className="text-2xl font-bold">{selectedItem.title}</h2>
-                
-                {(selectedItem.brand || selectedItem.product_name) && (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedItem.brand && (
-                      <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-                        {selectedItem.brand}
-                      </span>
-                    )}
-                    {selectedItem.product_name && (
-                      <span className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
-                        {selectedItem.product_name}
-                      </span>
-                    )}
-                  </div>
-                )}
-                
-                {selectedItem.category && <p className="text-lg text-muted-foreground">{selectedItem.category}</p>}
-                {selectedItem.description && <p className="text-sm">{selectedItem.description}</p>}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
