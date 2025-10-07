@@ -170,18 +170,22 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
     setBanners(updatedBanners)
     onBannersChange?.(updatedBanners)
 
-    // 데이터베이스 업데이트 (ID가 있는 경우)
-    if (banner.id) {
+    // 브랜드 테이블 업데이트
+    if (brandId !== 'temp') {
       try {
-        await fetch(`/api/category-banners/${banner.id}`, {
+        const bannerImages = updatedBanners.map(b => b.image_url)
+        const bannerTitles = updatedBanners.map(b => b.title || '')
+        const bannerDescriptions = updatedBanners.map(b => b.description || '')
+
+        await fetch(`/api/brands/${brandId}/banners`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title: field === 'title' ? value : banner.title,
-            description: field === 'description' ? value : banner.description,
-            order_index: updatedBanners[index].order_index,
+            banner_images: bannerImages,
+            banner_titles: bannerTitles,
+            banner_descriptions: bannerDescriptions,
           }),
         })
       } catch (error) {

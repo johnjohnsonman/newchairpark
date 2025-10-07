@@ -19,15 +19,18 @@ export default async function EditBrandPage({ params }: { params: Promise<{ id: 
       notFound()
     }
 
-    // 브랜드 ID를 알았으니 배너 정보를 가져오기
-    const { data: banners, error: bannersError } = await supabase
-      .from("category_banners")
-      .select("*")
-      .eq("category", `brand-${brand.id}`)
-      .order("order_index")
-
-    if (bannersError) {
-      console.error('Banners fetch error:', bannersError)
+    // 브랜드 정보에서 배너 데이터 추출
+    const banners = []
+    if (brand.banner_images && Array.isArray(brand.banner_images)) {
+      for (let i = 0; i < brand.banner_images.length; i++) {
+        banners.push({
+          id: `${brand.id}-${i}`,
+          image_url: brand.banner_images[i],
+          title: brand.banner_titles?.[i] || '',
+          description: brand.banner_descriptions?.[i] || '',
+          order_index: i
+        })
+      }
     }
 
     return (

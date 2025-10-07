@@ -57,34 +57,60 @@ export async function POST(request: NextRequest) {
       .from('images')
       .getPublicUrl(filePath)
 
-    // 배너 정보를 데이터베이스에 저장
-    const { data: bannerData, error: dbError } = await supabase
-      .from('category_banners')
-      .insert({
-        category: category,
-        image_url: urlData.publicUrl,
-        title: '',
-        description: '',
-        order_index: 0,
-        created_at: new Date().toISOString()
+    // 브랜드 ID 추출 (brand-{brandId} 형식에서)
+    const brandId = category.replace('brand-', '')
+    
+    // 기존 브랜드 정보 가져오기
+    const { data: existingBrand, error: brandFetchError } = await supabase
+      .from('brands')
+      .select('banner_images, banner_titles, banner_descriptions')
+      .eq('id', brandId)
+      .single()
+
+    if (brandFetchError) {
+      console.error("Brand fetch error:", brandFetchError)
+      // 파일은 업로드되었지만 DB 저장 실패 시 파일 삭제
+      await supabase.storage.from('images').remove([filePath])
+      return NextResponse.json({ error: `Brand not found: ${brandFetchError.message}` }, { status: 404 })
+    }
+
+    // 기존 배너 배열에 새 배너 추가
+    const existingImages = existingBrand.banner_images || []
+    const existingTitles = existingBrand.banner_titles || []
+    const existingDescriptions = existingBrand.banner_descriptions || []
+
+    const newImages = [...existingImages, urlData.publicUrl]
+    const newTitles = [...existingTitles, '']
+    const newDescriptions = [...existingDescriptions, '']
+
+    // 브랜드 정보 업데이트
+    const { data: updatedBrand, error: updateError } = await supabase
+      .from('brands')
+      .update({
+        banner_images: newImages,
+        banner_titles: newTitles,
+        banner_descriptions: newDescriptions,
+        updated_at: new Date().toISOString()
       })
+      .eq('id', brandId)
       .select()
       .single()
 
-    if (dbError) {
-      console.error("Database insert error:", dbError)
+    if (updateError) {
+      console.error("Brand update error:", updateError)
       // 파일은 업로드되었지만 DB 저장 실패 시 파일 삭제
       await supabase.storage.from('images').remove([filePath])
-      return NextResponse.json({ error: `Database error: ${dbError.message}` }, { status: 500 })
+      return NextResponse.json({ error: `Database error: ${updateError.message}` }, { status: 500 })
     }
 
     return NextResponse.json({
-      id: bannerData.id,
+      id: `${brandId}-${newImages.length - 1}`, // 임시 ID 생성
       url: urlData.publicUrl,
       filename: file.name,
       size: file.size,
       type: file.type,
-      category: category
+      category: category,
+      index: newImages.length - 1
     })
   } catch (error) {
     console.error("Upload error:", error)

@@ -65,58 +65,68 @@ export function BrandForm({ brand, initialBanners = [] }: BrandFormProps) {
 
         // 새 브랜드 생성 후 배너도 저장
         if (newBrand && banners.length > 0) {
-          const bannerPromises = banners.map(async (banner, index) => {
-            // 임시 URL인 경우 실제 파일 업로드
-            let imageUrl = banner.image_url
+          try {
+            const bannerImages = []
+            const bannerTitles = []
+            const bannerDescriptions = []
             
-            if (banner.image_url.startsWith('blob:')) {
-              try {
-                // Blob URL을 File 객체로 변환
-                const response = await fetch(banner.image_url)
-                const blob = await response.blob()
-                const file = new File([blob], `banner-${index}.jpg`, { type: blob.type })
-                
-                // 실제 파일 업로드
-                const formData = new FormData()
-                formData.append('file', file)
-                formData.append('category', `brand-${newBrand.id}`)
-                
-                const uploadResponse = await fetch('/api/category-banners/upload', {
-                  method: 'POST',
-                  body: formData,
-                })
-                
-                if (uploadResponse.ok) {
-                  const uploadData = await uploadResponse.json()
-                  imageUrl = uploadData.url
-                } else {
-                  throw new Error('File upload failed')
+            for (let index = 0; index < banners.length; index++) {
+              const banner = banners[index]
+              let imageUrl = banner.image_url
+              
+              // 임시 URL인 경우 실제 파일 업로드
+              if (banner.image_url.startsWith('blob:')) {
+                try {
+                  // Blob URL을 File 객체로 변환
+                  const response = await fetch(banner.image_url)
+                  const blob = await response.blob()
+                  const file = new File([blob], `banner-${index}.jpg`, { type: blob.type })
+                  
+                  // 실제 파일 업로드
+                  const formData = new FormData()
+                  formData.append('file', file)
+                  formData.append('category', `brand-${newBrand.id}`)
+                  
+                  const uploadResponse = await fetch('/api/category-banners/upload', {
+                    method: 'POST',
+                    body: formData,
+                  })
+                  
+                  if (uploadResponse.ok) {
+                    const uploadData = await uploadResponse.json()
+                    imageUrl = uploadData.url
+                  } else {
+                    throw new Error('File upload failed')
+                  }
+                } catch (uploadError) {
+                  console.error('Banner upload error:', uploadError)
+                  throw uploadError
                 }
-              } catch (uploadError) {
-                console.error('Banner upload error:', uploadError)
-                throw uploadError
               }
+              
+              bannerImages.push(imageUrl)
+              bannerTitles.push(banner.title || '')
+              bannerDescriptions.push(banner.description || '')
             }
             
-            return supabase
-              .from("category_banners")
-              .insert({
-                category: `brand-${newBrand.id}`,
-                image_url: imageUrl,
-                title: banner.title || '',
-                description: banner.description || '',
-                order_index: index,
-                is_active: true
+            // 브랜드에 배너 정보 업데이트
+            const { error: bannerUpdateError } = await supabase
+              .from('brands')
+              .update({
+                banner_images: bannerImages,
+                banner_titles: bannerTitles,
+                banner_descriptions: bannerDescriptions,
+                updated_at: new Date().toISOString()
               })
-          })
-
-          const bannerResults = await Promise.all(bannerPromises)
-          const bannerErrors = bannerResults.filter(result => result.error)
-          
-          if (bannerErrors.length > 0) {
-            console.error('Some banners failed to save:', bannerErrors)
-            // 브랜드는 생성되었으므로 경고만 표시
-            setError("브랜드는 생성되었지만 일부 배너 저장에 실패했습니다.")
+              .eq('id', newBrand.id)
+            
+            if (bannerUpdateError) {
+              console.error('Banner update error:', bannerUpdateError)
+              setError("브랜드는 생성되었지만 배너 저장에 실패했습니다.")
+            }
+          } catch (bannerError) {
+            console.error('Banner processing error:', bannerError)
+            setError("브랜드는 생성되었지만 배너 처리에 실패했습니다.")
           }
         }
       }

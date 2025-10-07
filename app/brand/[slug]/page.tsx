@@ -87,21 +87,29 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
       notFound()
     }
 
-    // 브랜드 ID를 알았으니 관련 데이터를 병렬로 가져오기
-    const [
-      { data: products, error: productsError },
-      { data: banners, error: bannersError }
-    ] = await Promise.all([
-      supabase.from("products").select("id, name, slug, price, category, image_url, in_stock, featured").eq("brand_id", brand.id).order("created_at", { ascending: false }),
-      supabase.from("category_banners").select("*").eq("category", `brand-${brand.id}`).order("order_index")
-    ])
+    // 브랜드 ID를 알았으니 제품 정보를 가져오기
+    const { data: products, error: productsError } = await supabase
+      .from("products")
+      .select("id, name, slug, price, category, image_url, in_stock, featured")
+      .eq("brand_id", brand.id)
+      .order("created_at", { ascending: false })
 
     if (productsError) {
       console.error('Products fetch error:', productsError)
     }
 
-    if (bannersError) {
-      console.error('Banners fetch error:', bannersError)
+    // 브랜드 정보에서 배너 데이터 추출
+    const banners = []
+    if (brand.banner_images && Array.isArray(brand.banner_images)) {
+      for (let i = 0; i < brand.banner_images.length; i++) {
+        banners.push({
+          id: `${brand.id}-${i}`,
+          image_url: brand.banner_images[i],
+          title: brand.banner_titles?.[i] || '',
+          description: brand.banner_descriptions?.[i] || '',
+          order_index: i
+        })
+      }
     }
 
     const displayProducts = products || []
