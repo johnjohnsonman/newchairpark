@@ -71,8 +71,17 @@ export default function StoreClientPage({
   const categoryParam = searchParams.get("category")
   const supabase = createBrowserClient()
 
-  // 카테고리별 설명 문구
+  // 카테고리별 설명 문구 (배너 데이터에서 가져오거나 기본값)
   const getCategoryDescription = (categoryId: string | null) => {
+    if (!categoryId) return "최고의 품질과 디자인을 경험하세요"
+    
+    // 현재 카테고리에 맞는 배너에서 설명 가져오기
+    const currentBanner = categoryBanners.find(banner => banner.category_id === categoryId)
+    if (currentBanner && currentBanner.description) {
+      return currentBanner.description
+    }
+    
+    // 배너가 없으면 기본 설명
     switch (categoryId) {
       case "all":
         return "체어파크의 모든 프리미엄 제품을 만나보세요"
@@ -368,21 +377,6 @@ export default function StoreClientPage({
                             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${imageUrl})`
                           }}
                         >
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-center text-white">
-                              <h2 className="text-2xl font-bold mb-2">
-                                {banner.title}
-                              </h2>
-                              <p className="text-lg opacity-90">
-                                {banner.description}
-                              </p>
-                              {bannerImages.length > 1 && (
-                                <p className="text-sm opacity-75 mt-2">
-                                  {imageIndex + 1} / {bannerImages.length}
-                                </p>
-                              )}
-                            </div>
-                          </div>
                         </div>
                       </CarouselItem>
                     ))
@@ -416,9 +410,18 @@ export default function StoreClientPage({
           <div className="max-w-5xl mx-auto">
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-neutral-900">
-                {selectedCategory
-                  ? categories.find((c) => c.id === selectedCategory)?.displayName || "제품"
-                  : "전체 제품"}
+                {(() => {
+                  if (!selectedCategory) return "전체 제품"
+                  
+                  // 배너에서 제목 가져오기
+                  const currentBanner = categoryBanners.find(banner => banner.category_id === selectedCategory)
+                  if (currentBanner && currentBanner.title) {
+                    return currentBanner.title
+                  }
+                  
+                  // 배너가 없으면 기본 제목
+                  return categories.find((c) => c.id === selectedCategory)?.displayName || "제품"
+                })()}
               </h1>
               <p className="mt-2 text-base text-muted-foreground">
                 {getCategoryDescription(selectedCategory)}
