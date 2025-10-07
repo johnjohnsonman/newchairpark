@@ -9,24 +9,27 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 interface GalleryDetailPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function GalleryDetailPage({ params }: GalleryDetailPageProps) {
-  const supabase = createClient()
-  
-  // 갤러리 아이템 조회
-  const { data: galleryItem, error: galleryError } = await supabase
-    .from("gallery")
-    .select("*")
-    .eq("id", params.id)
-    .single()
+  try {
+    const { id } = await params
+    const supabase = createClient()
+    
+    // 갤러리 아이템 조회
+    const { data: galleryItem, error: galleryError } = await supabase
+      .from("gallery")
+      .select("*")
+      .eq("id", id)
+      .single()
 
-  if (galleryError || !galleryItem) {
-    notFound()
-  }
+    if (galleryError || !galleryItem) {
+      console.error('Gallery item not found:', galleryError)
+      notFound()
+    }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -259,4 +262,8 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
       </section>
     </div>
   )
+  } catch (error) {
+    console.error('Gallery detail page error:', error)
+    notFound()
+  }
 }
