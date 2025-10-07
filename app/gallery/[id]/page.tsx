@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Share2, Heart, ShoppingCart, Star, Calendar, MapPin, Users } from "lucide-react"
+import { ArrowLeft, Share2, Heart, ShoppingCart, Calendar, MapPin, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -27,38 +27,6 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
   if (galleryError || !galleryItem) {
     notFound()
   }
-
-  // 관련 제품 조회 (브랜드와 제품명으로)
-  let relatedProducts = null
-  if (galleryItem.brand && galleryItem.product_name) {
-    const { data: products } = await supabase
-      .from("products")
-      .select("id, name, price, image_url, brand_id, brands(name)")
-      .or(`name.ilike.%${galleryItem.product_name}%,brands.name.ilike.%${galleryItem.brand}%`)
-      .limit(3)
-    
-    relatedProducts = products
-  }
-
-  // 관련 리뷰 조회
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select(`
-      id,
-      rating,
-      comment,
-      created_at,
-      users:user_id (
-        name,
-        avatar_url
-      ),
-      products:product_id (
-        name
-      )
-    `)
-    .or(`products.name.ilike.%${galleryItem.product_name || galleryItem.title}%`)
-    .order("created_at", { ascending: false })
-    .limit(5)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -212,43 +180,6 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
 
             {/* 사이드바 */}
             <div className="space-y-10">
-              {/* 관련 제품 */}
-              {relatedProducts && relatedProducts.length > 0 && (
-                <Card className="p-8 bg-white/90 backdrop-blur-sm border-slate-200/50 shadow-xl">
-                  <h3 className="text-2xl font-thin mb-6 text-slate-800 tracking-wide">관련 제품</h3>
-                  <div className="space-y-5">
-                    {relatedProducts.map((product: any) => (
-                      <div key={product.id} className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50/80 transition-all duration-300 group border border-transparent hover:border-slate-200">
-                        {product.image_url && (
-                          <div className="relative overflow-hidden rounded-lg">
-                            <Image
-                              src={product.image_url}
-                              alt={product.name}
-                              width={70}
-                              height={70}
-                              className="rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-light text-slate-800 truncate text-lg group-hover:text-slate-900 transition-colors">
-                            {product.name}
-                          </p>
-                          <p className="text-sm text-slate-600 font-light">
-                            {product.price ? `₩${product.price.toLocaleString()}` : '가격 문의'}
-                          </p>
-                        </div>
-                        <Button size="sm" variant="outline" asChild className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <Link href={`/store/${product.id}`}>
-                            <ShoppingCart className="w-4 h-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              )}
-
               {/* 구매 문의 */}
               <Card className="p-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border-0 shadow-2xl relative overflow-hidden">
                 {/* 배경 장식 */}
@@ -276,65 +207,33 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
                   </div>
                 </div>
               </Card>
+
+              {/* 갤러리 정보 */}
+              <Card className="p-8 bg-white/90 backdrop-blur-sm border-slate-200/50 shadow-xl">
+                <h3 className="text-2xl font-thin mb-6 text-slate-800 tracking-wide">갤러리 정보</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-slate-600" />
+                    <span className="text-slate-600 font-light">Chairpark Gallery</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-slate-600" />
+                    <span className="text-slate-600 font-light">
+                      {new Date(galleryItem.created_at).toLocaleDateString('ko-KR')}
+                    </span>
+                  </div>
+                  <div className="pt-4">
+                    <p className="text-sm text-slate-500 font-light leading-relaxed">
+                      이 작품은 Chairpark Gallery에서 전시되고 있습니다. 
+                      더 많은 작품을 보시려면 갤러리 페이지를 방문해주세요.
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
       </section>
-
-      {/* 리뷰 섹션 */}
-      {reviews && reviews.length > 0 && (
-        <section className="py-24 px-6 bg-gradient-to-br from-slate-50 via-white to-slate-50 relative">
-          {/* 배경 장식 */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-slate-100/40 rounded-full blur-3xl" />
-          
-          <div className="max-w-5xl mx-auto relative z-10">
-            <h2 className="text-4xl font-thin mb-16 text-center text-slate-800 tracking-wide">관람객 후기</h2>
-            <div className="space-y-8">
-              {reviews.map((review: any, index: number) => (
-                <Card key={review.id} className="p-8 bg-white/90 backdrop-blur-sm border-slate-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 group">
-                  <div className="flex items-start gap-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <span className="text-slate-700 font-light text-xl">
-                        {review.users?.name?.[0] || 'A'}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-4">
-                        <h4 className="font-light text-slate-800 text-xl">
-                          {review.users?.name || '익명'}
-                        </h4>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-5 h-5 transition-colors duration-300 ${
-                                i < review.rating ? 'text-yellow-400 fill-current' : 'text-slate-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-slate-500 font-light">
-                          {new Date(review.created_at).toLocaleDateString('ko-KR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                      {review.comment && (
-                        <p className="text-slate-600 leading-relaxed text-lg font-light group-hover:text-slate-700 transition-colors">
-                          {review.comment}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* 관련 작품 섹션 */}
       <section className="py-24 px-6 relative">
@@ -350,6 +249,9 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
               <div className="inline-block p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200/50">
                 <p className="text-slate-600 text-lg font-light">더 많은 작품을 준비 중입니다.</p>
                 <p className="text-slate-500 text-sm mt-2">곧 새로운 작품들을 만나보실 수 있습니다.</p>
+                <Button className="mt-4" variant="outline" asChild>
+                  <Link href="/gallery">갤러리 둘러보기</Link>
+                </Button>
               </div>
             </div>
           </div>
