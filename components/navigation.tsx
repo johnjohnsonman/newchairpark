@@ -27,7 +27,7 @@ export default function Navigation() {
     { name: "블로그", href: "https://blog.naver.com/chairforyou", external: true },
     { name: "수리", href: "/repair" },
     { name: "리싸이클", href: "/recycle" },
-    { name: "렌탈", href: "/rental" },
+    { name: "렌탈/데모", href: "/rental" },
     { name: "소식", href: "/news" },
   ]
 
