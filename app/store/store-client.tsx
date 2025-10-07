@@ -356,50 +356,48 @@ export default function StoreClientPage({
     <div className="min-h-screen bg-neutral-50">
       {/* 카테고리 배너 캐러셀 */}
       {currentBanners.length > 0 && (
-        <div className="border-b bg-white">
-          <div className="container mx-auto px-4 py-8">
-            <div className="max-w-5xl mx-auto">
-              <Carousel className="mb-6">
-                <CarouselContent>
-                  {currentBanners.map((banner) => {
-                    // 다중 이미지가 있으면 각 이미지를 별도 캐러셀 아이템으로 표시
-                    const bannerImages = banner.images && banner.images.length > 0 
-                      ? banner.images 
-                      : banner.background_image 
-                      ? [banner.background_image] 
-                      : []
+        <div className="bg-white">
+          <div className="w-full">
+            <Carousel>
+              <CarouselContent>
+                {currentBanners.map((banner) => {
+                  // 다중 이미지가 있으면 각 이미지를 별도 캐러셀 아이템으로 표시
+                  const bannerImages = banner.images && banner.images.length > 0 
+                    ? banner.images 
+                    : banner.background_image 
+                    ? [banner.background_image] 
+                    : []
 
-                    return bannerImages.map((imageUrl, imageIndex) => (
-                      <CarouselItem key={`${banner.id}-${imageIndex}`}>
-                        <div 
-                          className="relative h-48 rounded-lg overflow-hidden bg-cover bg-center"
-                          style={{
-                            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${imageUrl})`
-                          }}
-                        >
-                        </div>
-                      </CarouselItem>
-                    ))
-                  })}
-                </CarouselContent>
-                {(() => {
-                  const totalImages = currentBanners.reduce((total, banner) => {
-                    const bannerImages = banner.images && banner.images.length > 0 
-                      ? banner.images 
-                      : banner.background_image 
-                      ? [banner.background_image] 
-                      : []
-                    return total + bannerImages.length
-                  }, 0)
-                  return totalImages > 1 ? (
-                    <>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </>
-                  ) : null
-                })()}
-              </Carousel>
-            </div>
+                  return bannerImages.map((imageUrl, imageIndex) => (
+                    <CarouselItem key={`${banner.id}-${imageIndex}`}>
+                      <div 
+                        className="relative h-80 w-full overflow-hidden bg-cover bg-center"
+                        style={{
+                          backgroundImage: `url(${imageUrl})`
+                        }}
+                      >
+                      </div>
+                    </CarouselItem>
+                  ))
+                })}
+              </CarouselContent>
+              {(() => {
+                const totalImages = currentBanners.reduce((total, banner) => {
+                  const bannerImages = banner.images && banner.images.length > 0 
+                    ? banner.images 
+                    : banner.background_image 
+                    ? [banner.background_image] 
+                    : []
+                  return total + bannerImages.length
+                }, 0)
+                return totalImages > 1 ? (
+                  <>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </>
+                ) : null
+              })()}
+            </Carousel>
           </div>
         </div>
       )}
