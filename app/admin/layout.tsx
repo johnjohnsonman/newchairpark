@@ -18,6 +18,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     let mounted = true
 
     const checkAuth = async () => {
+      console.log('Admin layout auth check starting:', { isLoginPage, pathname })
+      
       if (isLoginPage) {
         setIsLoading(false)
         return
@@ -29,10 +31,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         // 먼저 세션 확인 (더 빠름)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
+        console.log('Session check result:', { session: !!session, error: sessionError })
+        
         if (!mounted) return
 
         if (sessionError || !session?.user) {
-          console.warn('No valid session found')
+          console.warn('No valid session found, redirecting to login')
           router.push("/admin/login")
           return
         }
@@ -45,22 +49,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         const { data: roleData, error: roleError } = await Promise.race([rolePromise, roleTimeoutPromise]) as any
 
+        console.log('Role check result:', { roleData, roleError })
+
         if (!mounted) return
 
         if (roleError || !roleData || roleData.role !== "admin") {
-          console.warn('Admin role check failed:', roleError?.message || 'No admin role')
+          console.warn('Admin role check failed, redirecting to login:', roleError?.message || 'No admin role')
           router.push("/admin/login")
           return
         }
 
+        console.log('Admin authentication successful')
         setIsAuthenticated(true)
       } catch (error) {
         if (mounted) {
-          console.warn('Admin auth error:', error)
+          console.warn('Admin auth error, redirecting to login:', error)
           router.push("/admin/login")
         }
       } finally {
         if (mounted) {
+          console.log('Admin layout auth check completed')
           setIsLoading(false)
         }
       }

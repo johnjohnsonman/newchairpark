@@ -38,6 +38,10 @@ const menuItems = [
 export function AdminSidebar() {
   const pathname = usePathname()
 
+  const handleMenuClick = (href: string, title: string) => {
+    console.log('Menu clicked:', { href, title, pathname })
+  }
+
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-slate-900 text-white">
       {/* Header */}
@@ -51,10 +55,10 @@ export function AdminSidebar() {
           <div key={idx}>
             {section.href ? (
               // Single menu item
-              <Link href={section.href}>
+              <Link href={section.href} onClick={() => handleMenuClick(section.href, section.title)}>
                 <div
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
                     pathname === section.href
                       ? "bg-slate-800 text-white"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white",
@@ -74,10 +78,10 @@ export function AdminSidebar() {
                   {section.items?.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
                     return (
-                      <Link key={item.href} href={item.href}>
+                      <Link key={item.href} href={item.href} onClick={() => handleMenuClick(item.href, item.title)}>
                         <div
                           className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer",
                             isActive
                               ? "bg-slate-800 text-white font-medium"
                               : "text-slate-300 hover:bg-slate-800 hover:text-white",
