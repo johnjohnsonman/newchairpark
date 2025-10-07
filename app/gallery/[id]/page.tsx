@@ -226,8 +226,11 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
           <p className="text-slate-600 mb-8 text-lg">
             전문 상담을 통해 더 자세한 정보를 받아보실 수 있습니다.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
+              <Link href="/store-visit">매장에서 직접 체험하기</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
               <Link href="/bulk-inquiry">구매 문의하기</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>

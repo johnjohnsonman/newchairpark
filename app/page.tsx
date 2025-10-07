@@ -312,24 +312,65 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-slate-900 px-4 py-10 text-white sm:py-14">
-        <div className="container mx-auto text-center">
-          <h2 className="mb-3 text-2xl font-bold sm:text-3xl">지금 바로 시작하세요</h2>
-          <p className="mb-6 text-sm opacity-90 sm:mb-8 sm:text-lg">체어파크에서 당신의 공간을 완성하세요</p>
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="default" className="bg-white text-slate-900 shadow-lg hover:bg-white/90 w-full sm:w-auto" asChild>
-              <Link href="/store">
-                제품 보기 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              size="default"
-              variant="outline"
-              className="border-2 border-white bg-transparent text-white hover:bg-white/10 w-full sm:w-auto"
-              asChild
-            >
-              <Link href="/gallery">갤러리 둘러보기</Link>
-            </Button>
+      {/* 매장 방문 유도 섹션 */}
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-16 text-white">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">직접 앉아보고 선택하세요</h2>
+            <p className="mb-6 text-lg opacity-90 sm:text-xl">체어파크만의 특별한 경험을 만나보세요</p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-white/10 p-4">
+                  <Store className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="mb-2 text-xl font-semibold">실제 체험</h3>
+              <p className="text-sm opacity-80">허먼밀러, 스틸케이스 등 모든 제품을 직접 앉아보고 선택하세요</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-white/10 p-4">
+                  <Award className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="mb-2 text-xl font-semibold">전문 상담</h3>
+              <p className="text-sm opacity-80">인체공학 전문가가 맞춤형 솔루션을 제안해드립니다</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="rounded-full bg-white/10 p-4">
+                  <Package className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="mb-2 text-xl font-semibold">즉시 구매</h3>
+              <p className="text-sm opacity-80">마음에 드는 제품을 바로 구매하고 당일 배송도 가능합니다</p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="mb-6">
+              <p className="text-lg opacity-90">온라인으로는 느낄 수 없는 진짜 편안함을 경험해보세요</p>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button size="lg" className="bg-white text-slate-900 shadow-lg hover:bg-white/90 w-full sm:w-auto" asChild>
+                <Link href="/store-visit">
+                  매장 방문 예약하기 <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white bg-transparent text-white hover:bg-white/10 w-full sm:w-auto"
+                asChild
+              >
+                <Link href="/store">온라인 스토어 보기</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

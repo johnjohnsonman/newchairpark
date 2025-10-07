@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SlidersHorizontal, Star, ShoppingCart } from "lucide-react"
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SlidersHorizontal, Star, ShoppingCart, ArrowRight, Store, Award, Package } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/client"
 
@@ -589,6 +589,64 @@ export default function StoreClientPage({
           )}
         </main>
       </div>
+
+      {/* 매장 방문 유도 섹션 */}
+      <section className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">온라인으로는 부족하다면?</h2>
+          <p className="text-lg opacity-90 mb-8">직접 앉아보고 느껴보는 것이 가장 확실합니다</p>
+          
+          <div className="grid gap-6 md:grid-cols-3 mb-8">
+            <div className="text-center">
+              <div className="mb-3 flex justify-center">
+                <div className="rounded-full bg-white/10 p-3">
+                  <Store className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <h3 className="font-semibold mb-2">실제 체험</h3>
+              <p className="text-sm opacity-80">모든 제품을 직접 앉아보고 비교해보세요</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="mb-3 flex justify-center">
+                <div className="rounded-full bg-white/10 p-3">
+                  <Award className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <h3 className="font-semibold mb-2">전문 상담</h3>
+              <p className="text-sm opacity-80">인체공학 전문가의 맞춤형 솔루션</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="mb-3 flex justify-center">
+                <div className="rounded-full bg-white/10 p-3">
+                  <Package className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <h3 className="font-semibold mb-2">특별 혜택</h3>
+              <p className="text-sm opacity-80">매장 방문 고객 전용 특가 및 당일 배송</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button size="lg" className="bg-white text-slate-900 shadow-lg hover:bg-white/90" asChild>
+              <Link href="/store-visit">
+                매장 방문 예약하기 <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-2 border-white bg-transparent text-white hover:bg-white/10"
+              asChild
+            >
+              <Link href="tel:02-1234-5678">
+                전화 상담: 02-1234-5678
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
