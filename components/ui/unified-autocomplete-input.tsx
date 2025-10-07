@@ -45,8 +45,10 @@ export function UnifiedAutocompleteInput({
 
   // 입력값이 변경될 때마다 상위 컴포넌트에 전달
   useEffect(() => {
-    onChange(inputValue)
-  }, [inputValue, onChange])
+    if (inputValue !== value) {
+      onChange(inputValue)
+    }
+  }, [inputValue, value, onChange])
 
   // 외부에서 value가 변경될 때 inputValue 동기화
   useEffect(() => {

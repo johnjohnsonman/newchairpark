@@ -29,11 +29,13 @@ export function useUnifiedBrandProduct() {
         // 모든 테이블에서 브랜드와 제품명을 통합 수집
         const [
           { data: products },
+          { data: brands },
           { data: gallery },
           { data: resources },
           { data: recycleItems }
         ] = await Promise.all([
-          supabase.from("products").select("brand, name"),
+          supabase.from("products").select("id, name, brand_id"),
+          supabase.from("brands").select("id, name"),
           supabase.from("gallery").select("brand, product_name"),
           supabase.from("resources").select("brand, product_name"),
           supabase.from("recycle_items").select("brand, product_name")
@@ -44,16 +46,17 @@ export function useUnifiedBrandProduct() {
         const productSet = new Set<string>()
         const brandProductMap: Record<string, Set<string>> = {}
 
-        // Products 테이블
+        // Products 테이블 - brands 테이블과 조인하여 브랜드명 가져오기
         products?.forEach(item => {
-          if (item.brand) {
-            brandSet.add(item.brand)
+          const brand = brands?.find(b => b.id === item.brand_id)
+          if (brand) {
+            brandSet.add(brand.name)
             if (item.name) {
               productSet.add(item.name)
-              if (!brandProductMap[item.brand]) {
-                brandProductMap[item.brand] = new Set()
+              if (!brandProductMap[brand.name]) {
+                brandProductMap[brand.name] = new Set()
               }
-              brandProductMap[item.brand].add(item.name)
+              brandProductMap[brand.name].add(item.name)
             }
           }
         })
@@ -155,8 +158,8 @@ export function useUnifiedBrandProduct() {
     searchBrands,
     searchProducts,
     refetch: () => {
-      setData({ brands: [], products: [], brandProducts: {} })
-      setIsLoading(true)
+      // 데이터를 다시 가져오는 로직은 useEffect에서 처리됨
+      // 여기서는 단순히 상태만 초기화
       setError(null)
     }
   }
