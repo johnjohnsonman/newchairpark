@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+import type { CategoryBanner } from "@/types/database"
+
 interface BrandBanner {
   id: string
   image_url: string

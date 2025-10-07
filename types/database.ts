@@ -9,6 +9,19 @@ export interface Brand {
   updated_at: string
 }
 
+export interface CategoryBanner {
+  id: string
+  category: string
+  image_url: string
+  title: string | null
+  description: string | null
+  order_index: number
+  link_url: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface Product {
   id: string
   name: string

@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { X, Upload, Image as ImageIcon, GripVertical } from "lucide-react"
 import Image from "next/image"
 
+import type { CategoryBanner } from "@/types/database"
+
 interface BrandBanner {
   id?: string
   image_url: string
