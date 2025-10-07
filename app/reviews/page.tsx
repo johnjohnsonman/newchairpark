@@ -3,7 +3,9 @@ import FeaturedReviewsCarousel from "@/components/featured-reviews-carousel"
 import ReviewFilters from "@/components/review-filters"
 import Link from "next/link"
 import Image from "next/image"
-import { Star, Eye, ThumbsUp } from "lucide-react"
+import { Star, Eye, ThumbsUp, Plus, Filter } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { TouchOptimizedButton } from "@/components/ui/touch-optimized-button"
 import type { Review } from "@/types/database"
 
 export default async function ReviewsPage({
@@ -107,10 +109,20 @@ export default async function ReviewsPage({
     <div className="min-h-screen bg-background">
       <FeaturedReviewsCarousel reviews={(featuredReviews as Review[]) || []} />
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-bold">고객 리뷰</h1>
-          <p className="text-muted-foreground">실제 사용자들의 솔직한 의자 사용 후기를 확인하세요</p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="mb-2 text-3xl font-bold sm:text-4xl">고객 리뷰</h1>
+              <p className="text-muted-foreground">실제 사용자들의 솔직한 의자 사용 후기를 확인하세요</p>
+            </div>
+            <TouchOptimizedButton asChild className="w-full sm:w-auto">
+              <Link href="/reviews/new">
+                <Plus className="mr-2 h-4 w-4" />
+                리뷰 작성하기
+              </Link>
+            </TouchOptimizedButton>
+          </div>
         </div>
 
         <div className="flex gap-8">
@@ -123,6 +135,12 @@ export default async function ReviewsPage({
           <div className="flex-1">
             <div className="mb-6 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">{allReviews?.length || 0}개의 리뷰</p>
+              <Button variant="outline" size="sm" className="lg:hidden" asChild>
+                <Link href="/reviews/filters">
+                  <Filter className="mr-2 h-4 w-4" />
+                  필터
+                </Link>
+              </Button>
             </div>
 
             <div className="space-y-4">

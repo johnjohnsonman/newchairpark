@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { X } from "lucide-react"
+import { TouchOptimizedButton } from "@/components/ui/touch-optimized-button"
+import { X, ArrowLeft } from "lucide-react"
 
 interface ReviewFiltersProps {
   productInfo?: {
@@ -80,6 +81,19 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
 
   return (
     <div className="space-y-6">
+      {/* 모바일에서 뒤로가기 버튼 */}
+      <div className="flex items-center gap-4 lg:hidden">
+        <TouchOptimizedButton
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="h-10 w-10"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </TouchOptimizedButton>
+        <h2 className="text-lg font-semibold">필터</h2>
+      </div>
+
       {(productInfo || brandInfo) && (
         <div className="rounded-lg border bg-muted/50 p-4">
           <div className="mb-2 flex items-start justify-between gap-2">
@@ -99,7 +113,7 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
                 </>
               )}
             </div>
-            <Button
+            <TouchOptimizedButton
               variant="ghost"
               size="icon"
               className="h-6 w-6 shrink-0"
@@ -107,7 +121,7 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
               title="필터 제거"
             >
               <X className="h-4 w-4" />
-            </Button>
+            </TouchOptimizedButton>
           </div>
           <p className="text-xs text-muted-foreground">이 제품의 리뷰만 표시 중</p>
         </div>
@@ -203,9 +217,9 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
       </div>
 
       <div className="border-t pt-6">
-        <Button variant="outline" className="w-full bg-transparent" onClick={resetFilters}>
+        <TouchOptimizedButton variant="outline" className="w-full bg-transparent" onClick={resetFilters}>
           필터 초기화
-        </Button>
+        </TouchOptimizedButton>
       </div>
     </div>
   )
