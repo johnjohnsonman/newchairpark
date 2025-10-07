@@ -1,112 +1,138 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent } from "@/components/ui/card"
-import { createBrowserClient } from "@/lib/supabase/client"
-import { SingleImageUpload } from "@/components/admin/single-image-upload"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createClient } from "@/lib/supabase/client"
+import { SingleImageUpload } from "./single-image-upload"
 
-interface CategoryBannerFormProps {
-  banner: any
-}
+const categories = [
+  { id: "office-chair", name: "오피스 체어" },
+  { id: "executive-chair", name: "임원용 체어" },
+  { id: "lounge-chair", name: "라운지 체어" },
+  { id: "conference-chair", name: "회의용 체어" },
+  { id: "dining-chair", name: "다이닝 체어" },
+  { id: "design-chair", name: "디자인 체어" },
+]
 
-export default function CategoryBannerForm({ banner }: CategoryBannerFormProps) {
+export function CategoryBannerForm() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    title: banner.title || "",
-    description: banner.description || "",
-    background_image: banner.background_image || "",
-    featured_image: banner.featured_image || "",
+    category_id: "",
+    title: "",
+    description: "",
+    background_image: "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setIsLoading(true)
+    setError(null)
 
-    const supabase = createBrowserClient()
-    const { error } = await supabase
-      .from("category_banners")
-      .update({
-        ...formData,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", banner.id)
+    const supabase = createClient()
 
-    if (error) {
-      alert("오류가 발생했습니다: " + error.message)
-    } else {
-      alert("배너가 수정되었습니다!")
+    try {
+      const { data, error } = await supabase
+        .from("category_banners")
+        .insert([formData])
+        .select()
+        .single()
+
+      if (error) throw error
+
       router.push("/admin/category-banners")
       router.refresh()
+    } catch (err) {
+      console.error("Banner save error:", err)
+      setError(err instanceof Error ? err.message : "배너 저장에 실패했습니다")
+    } finally {
+      setIsLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card>
-        <CardContent className="space-y-6 pt-6">
-          <div>
-            <Label htmlFor="category">카테고리</Label>
-            <Input id="category" value={banner.category_name} disabled className="bg-neutral-100" />
+    <Card>
+      <CardHeader>
+        <CardTitle>카테고리 배너 정보</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="category_id">카테고리 *</Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="카테고리를 선택하세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="title">배너 제목 *</Label>
+              <Input
+                id="title"
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="예: Herman Miller Aeron"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">배너 설명 *</Label>
+              <Textarea
+                id="description"
+                required
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="예: 장시간 업무에 최적화된 인체공학적 오피스 체어"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>배경 이미지 *</Label>
+              <SingleImageUpload
+                image={formData.background_image}
+                onChange={(url) => setFormData({ ...formData, background_image: url })}
+              />
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="title">제목</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-            />
-          </div>
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+              <p className="font-semibold">Error:</p>
+              <p>{error}</p>
+            </div>
+          )}
 
-          <div>
-            <Label htmlFor="description">설명</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label>배경 이미지</Label>
-            <SingleImageUpload
-              value={formData.background_image}
-              onChange={(url) => setFormData({ ...formData, background_image: url })}
-              aspectRatio="video"
-            />
-          </div>
-
-          <div>
-            <Label>제품 이미지</Label>
-            <SingleImageUpload
-              value={formData.featured_image}
-              onChange={(url) => setFormData({ ...formData, featured_image: url })}
-              aspectRatio="square"
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
-              {loading ? "저장 중..." : "배너 수정"}
+          <div className="flex gap-3">
+            <Button type="submit" disabled={isLoading} className="flex-1">
+              {isLoading ? "저장 중..." : "배너 추가"}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>
               취소
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </form>
+        </form>
+      </CardContent>
+    </Card>
   )
 }

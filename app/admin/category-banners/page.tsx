@@ -17,9 +17,14 @@ export default async function CategoryBannersPage() {
             <h1 className="text-3xl font-bold">카테고리 배너 관리</h1>
             <p className="mt-2 text-muted-foreground">스토어 카테고리별 배너 이미지와 설명을 관리합니다</p>
           </div>
-          <Link href="/admin">
-            <Button variant="outline">대시보드로 돌아가기</Button>
-          </Link>
+          <div className="flex gap-3">
+            <Link href="/admin/category-banners/new">
+              <Button>새 배너 추가</Button>
+            </Link>
+            <Link href="/admin">
+              <Button variant="outline">대시보드로 돌아가기</Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

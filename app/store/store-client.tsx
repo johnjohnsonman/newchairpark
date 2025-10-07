@@ -65,6 +65,28 @@ export default function StoreClientPage({
   const categoryParam = searchParams.get("category")
   const supabase = createBrowserClient()
 
+  // 카테고리별 설명 문구
+  const getCategoryDescription = (categoryId: string | null) => {
+    switch (categoryId) {
+      case "all":
+        return "체어파크의 모든 프리미엄 제품을 만나보세요"
+      case "office-chair":
+        return "장시간 업무에 최적화된 인체공학적 오피스 체어 컬렉션"
+      case "executive-chair":
+        return "임원실과 고급 사무공간을 위한 프리미엄 임원용 체어"
+      case "lounge-chair":
+        return "편안한 휴식과 대화를 위한 세련된 라운지 체어"
+      case "conference-chair":
+        return "회의실과 프레젠테이션 공간에 최적화된 회의용 체어"
+      case "dining-chair":
+        return "다이닝룸과 식사 공간을 아름답게 만드는 다이닝 체어"
+      case "design-chair":
+        return "독특한 디자인과 예술적 가치를 지닌 디자인 체어"
+      default:
+        return "최고의 품질과 디자인을 경험하세요"
+    }
+  }
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState([0, 5000000])
@@ -120,7 +142,8 @@ export default function StoreClientPage({
     if (categoryParam) {
       setSelectedCategory(categoryParam)
     } else {
-      setSelectedCategory(null)
+      // 기본값을 전체 체어로 설정
+      setSelectedCategory("all")
     }
   }, [categoryParam])
 
@@ -320,6 +343,29 @@ export default function StoreClientPage({
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-5xl mx-auto">
+            {/* 배너 이미지가 있는 경우 */}
+            {categoryBanners.length > 0 && categoryBanners.find(b => b.category_id === selectedCategory) && (
+              <div className="mb-6">
+                <div 
+                  className="relative h-48 rounded-lg overflow-hidden bg-cover bg-center"
+                  style={{
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${categoryBanners.find(b => b.category_id === selectedCategory)?.background_image})`
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <h2 className="text-2xl font-bold mb-2">
+                        {categoryBanners.find(b => b.category_id === selectedCategory)?.title}
+                      </h2>
+                      <p className="text-lg opacity-90">
+                        {categoryBanners.find(b => b.category_id === selectedCategory)?.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-neutral-900">
                 {selectedCategory
@@ -327,9 +373,7 @@ export default function StoreClientPage({
                   : "전체 제품"}
               </h1>
               <p className="mt-2 text-base text-muted-foreground">
-                {selectedCategory
-                  ? "최고의 품질과 디자인을 경험하세요"
-                  : "체어파크의 모든 프리미엄 제품을 만나보세요"}
+                {getCategoryDescription(selectedCategory)}
               </p>
             </div>
           </div>
