@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { GalleryViewer } from "@/components/gallery-viewer"
 import type { Metadata } from "next"
 import { StructuredData } from "@/components/structured-data"
+import { GalleryRelatedContent } from "@/components/gallery-related-content"
 
 interface GalleryDetailPageProps {
   params: Promise<{
@@ -235,6 +236,9 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
           </div>
         </div>
       </section>
+
+      {/* 관련 갤러리 컨텐츠 */}
+      <GalleryRelatedContent currentGalleryId={galleryItem.id} />
       </div>
     </>
   )

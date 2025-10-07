@@ -28,6 +28,7 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedBrand, setSelectedBrand] = useState("all")
   const [featuredIndex, setFeaturedIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
@@ -43,9 +44,12 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
   }, [isAutoPlaying, displayFeaturedItems.length])
 
   const filteredItems = galleryItems.filter((item) => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory
-    return matchesSearch && matchesCategory
+    const matchesBrand = selectedBrand === "all" || item.brand === selectedBrand
+    return matchesSearch && matchesCategory && matchesBrand
   })
 
   const categories = Array.from(new Set(galleryItems.map((item) => item.category).filter(Boolean)))
@@ -160,16 +164,29 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
 
       <div className="sticky top-16 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="제품명 검색..."
+                placeholder="제품명, 브랜드 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
               />
             </div>
+            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+              <SelectTrigger>
+                <SelectValue placeholder="브랜드" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">모든 브랜드</SelectItem>
+                {brands.map((brand) => (
+                  <SelectItem key={brand.name} value={brand.name}>
+                    {brand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="카테고리" />
