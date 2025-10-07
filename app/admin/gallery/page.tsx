@@ -12,7 +12,7 @@ export default async function GalleryManagementPage() {
   // 필요한 필드만 선택하고 제한된 수만 가져오기 (타임아웃 설정)
   const galleryPromise = supabase
     .from("gallery")
-    .select("id, title, description, image_url, created_at, updated_at")
+    .select("id, title, description, brand, product_name, image_url, created_at, updated_at")
     .order("created_at", { ascending: false })
     .limit(30) // 최대 30개로 줄임
 
@@ -86,6 +86,22 @@ export default async function GalleryManagementPage() {
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-1 line-clamp-1">{item.title}</h3>
+                  
+                  {(item.brand || item.product_name) && (
+                    <div className="mb-2">
+                      {item.brand && (
+                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">
+                          {item.brand}
+                        </span>
+                      )}
+                      {item.product_name && (
+                        <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                          {item.product_name}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
                   {item.description && <p className="text-sm text-gray-500 line-clamp-2 mb-4">{item.description}</p>}
                   <div className="flex gap-2">
                     <Link href={`/admin/gallery/${item.id}/edit`} className="flex-1">

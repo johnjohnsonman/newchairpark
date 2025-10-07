@@ -10,8 +10,12 @@ type GalleryItem = {
   id: string
   title: string
   description: string | null
+  brand: string | null
+  product_name: string | null
   category: string | null
   image_url: string
+  images?: string[]
+  featured_image_index?: number
   featured: boolean
   created_at: string
 }
@@ -106,6 +110,22 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
             <h1 className="mb-4 font-serif text-5xl font-light text-white md:text-6xl lg:text-7xl">
               {displayFeaturedItems[featuredIndex].title}
             </h1>
+            
+            {(displayFeaturedItems[featuredIndex].brand || displayFeaturedItems[featuredIndex].product_name) && (
+              <div className="mb-4 flex justify-center gap-3">
+                {displayFeaturedItems[featuredIndex].brand && (
+                  <span className="rounded-full bg-white/20 px-4 py-1 text-sm text-white backdrop-blur-sm">
+                    {displayFeaturedItems[featuredIndex].brand}
+                  </span>
+                )}
+                {displayFeaturedItems[featuredIndex].product_name && (
+                  <span className="rounded-full bg-white/20 px-4 py-1 text-sm text-white backdrop-blur-sm">
+                    {displayFeaturedItems[featuredIndex].product_name}
+                  </span>
+                )}
+              </div>
+            )}
+            
             {displayFeaturedItems[featuredIndex].category && (
               <p className="mb-2 text-lg text-white/90">{displayFeaturedItems[featuredIndex].category}</p>
             )}
@@ -185,6 +205,22 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
               </div>
               <div className="p-4">
                 <h3 className="mb-1 font-semibold">{item.title}</h3>
+                
+                {(item.brand || item.product_name) && (
+                  <div className="mb-2 flex flex-wrap gap-1">
+                    {item.brand && (
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                        {item.brand}
+                      </span>
+                    )}
+                    {item.product_name && (
+                      <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                        {item.product_name}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
                 {item.category && <p className="mb-2 text-sm text-muted-foreground">{item.category}</p>}
                 {item.description && <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>}
               </div>
@@ -214,6 +250,22 @@ export function GalleryClient({ galleryItems, brands }: { galleryItems: GalleryI
 
               <div className="space-y-2 border-t pt-4">
                 <h2 className="text-2xl font-bold">{selectedItem.title}</h2>
+                
+                {(selectedItem.brand || selectedItem.product_name) && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedItem.brand && (
+                      <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+                        {selectedItem.brand}
+                      </span>
+                    )}
+                    {selectedItem.product_name && (
+                      <span className="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+                        {selectedItem.product_name}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
                 {selectedItem.category && <p className="text-lg text-muted-foreground">{selectedItem.category}</p>}
                 {selectedItem.description && <p className="text-sm">{selectedItem.description}</p>}
               </div>

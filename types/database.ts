@@ -31,6 +31,8 @@ export interface Gallery {
   id: string
   title: string
   description: string | null
+  brand: string | null
+  product_name: string | null
   image_url: string
   images: string[]
   featured_image_index: number

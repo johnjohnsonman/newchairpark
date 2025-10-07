@@ -35,6 +35,8 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
   const [formData, setFormData] = useState({
     title: galleryItem?.title || "",
     description: galleryItem?.description || "",
+    brand: galleryItem?.brand || "",
+    product_name: galleryItem?.product_name || "",
     images: initialImages,
     featuredIndex: initialFeaturedIndex,
   })
@@ -61,6 +63,8 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
       const dataToSubmit: any = {
         title: formData.title.trim(),
         description: formData.description.trim(),
+        brand: formData.brand.trim(),
+        product_name: formData.product_name.trim(),
         image_url: formData.images[formData.featuredIndex], // 대표 이미지를 image_url에 저장
       }
 
@@ -131,8 +135,30 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Beautiful workspace setup"
+                placeholder="갤러리 제목을 입력하세요"
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="brand">브랜드</Label>
+                <Input
+                  id="brand"
+                  value={formData.brand}
+                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  placeholder="예: Herman Miller, Steelcase"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="product_name">제품명</Label>
+                <Input
+                  id="product_name"
+                  value={formData.product_name}
+                  onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
+                  placeholder="예: Aeron Chair, Gesture Chair"
+                />
+              </div>
             </div>
 
             <div className="grid gap-2">
