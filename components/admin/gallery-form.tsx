@@ -24,6 +24,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   
   // 브랜드 및 제품 데이터 로드
   const { brands, getProductsByBrand, loadingBrands } = useBrandProductData()
@@ -72,6 +73,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
     setIsLoading(true)
     setError(null)
+    setSuccess(null)
 
     const supabase = createClient()
 
@@ -121,14 +123,15 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
         throw new Error('데이터 저장에 실패했습니다.')
       }
 
-      // 성공 메시지 표시 후 리다이렉트
+      // 성공 메시지 표시
       console.log('Gallery saved successfully:', data)
+      setSuccess(galleryItem ? "갤러리가 성공적으로 수정되었습니다!" : "갤러리가 성공적으로 등록되었습니다!")
       
       // 잠시 대기 후 리다이렉트
       setTimeout(() => {
         router.push("/admin/gallery")
         router.refresh()
-      }, 1000)
+      }, 2000)
 
     } catch (err) {
       console.error('Gallery form error:', err)
@@ -231,6 +234,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
           </div>
 
           {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
+          {success && <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">{success}</div>}
 
           <div className="flex gap-3">
             <Button 
@@ -244,7 +248,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
                   저장 중...
                 </div>
               ) : (
-                galleryItem ? "이미지 수정" : "이미지 추가"
+                galleryItem ? "갤러리 수정" : "갤러리 등록"
               )}
             </Button>
             <Link href="/admin/gallery">
