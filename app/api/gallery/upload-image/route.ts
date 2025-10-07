@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
         upsert: false
       })
 
-    // 10분 타임아웃 설정 (대용량 파일 고려)
+    // 1분 30초 타임아웃 설정 (대용량 파일 고려)
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Upload timeout - 파일이 너무 큽니다. 파일 크기를 줄이거나 다시 시도해주세요.')), 600000)
+      setTimeout(() => reject(new Error('Upload timeout - 파일이 너무 큽니다. 파일 크기를 줄이거나 다시 시도해주세요.')), 90000)
     )
 
     const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any

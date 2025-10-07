@@ -72,7 +72,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
 
       console.log('Submitting gallery data:', dataToSubmit)
 
-      // 타임아웃 설정 (5분으로 증가)
+      // 타임아웃 설정 (1분 30초)
       const submitPromise = galleryItem 
         ? supabase
             .from("gallery")
@@ -85,7 +85,7 @@ export function GalleryForm({ galleryItem }: GalleryFormProps) {
         : supabase.from("gallery").insert([dataToSubmit]).select()
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('제출 시간이 초과되었습니다. 파일 크기가 클 수 있습니다. 다시 시도해주세요.')), 300000) // 5분
+        setTimeout(() => reject(new Error('제출 시간이 초과되었습니다. 파일 크기가 클 수 있습니다. 다시 시도해주세요.')), 90000) // 1분 30초
       )
 
       const { data, error } = await Promise.race([submitPromise, timeoutPromise]) as any

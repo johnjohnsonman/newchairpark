@@ -65,8 +65,8 @@ export function GalleryImageUpload({
         const response = await fetch("/api/gallery/upload-image", {
           method: "POST",
           body: formData,
-          // 타임아웃 설정 (10분)
-          signal: AbortSignal.timeout(600000)
+          // 타임아웃 설정 (1분 30초)
+          signal: AbortSignal.timeout(90000)
         })
 
         clearInterval(progressInterval)
