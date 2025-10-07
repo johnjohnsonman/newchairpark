@@ -1,13 +1,64 @@
-"use client"
-
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Store, Award, Wrench, Recycle, Newspaper, Sparkles, TrendingUp, Package } from "lucide-react"
 import Image from "next/image"
 import { StructuredData } from "@/components/structured-data"
+import { NaverBookingButtonWhite } from "@/components/naver-booking-button"
+import type { Metadata } from "next"
 
-// Note: metadata는 클라이언트 컴포넌트에서 사용할 수 없으므로 제거됨
+export const metadata: Metadata = {
+  title: "체어파크 | 프리미엄 오피스 가구 전문점 - 허먼밀러, 스틸케이스 정품",
+  description: "허먼밀러 에어론, 스틸케이스 제스처 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에 만나보세요. 정품 보증, 전국 매장, 렌탈 서비스, 중고 거래까지 원스톱 가구 솔루션을 제공합니다.",
+  keywords: [
+    "허먼밀러",
+    "스틸케이스", 
+    "에어론 체어",
+    "제스처 체어",
+    "프리미엄 오피스 체어",
+    "인체공학 의자",
+    "오피스 가구",
+    "스탠딩 데스크",
+    "가구 렌탈",
+    "중고 가구",
+    "체어파크"
+  ],
+  openGraph: {
+    title: "체어파크 | 프리미엄 오피스 가구 전문점",
+    description: "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에",
+    type: "website",
+    locale: "ko_KR",
+    siteName: "체어파크",
+    images: [
+      {
+        url: "/herman-miller-aeron.png",
+        width: 1200,
+        height: 630,
+        alt: "체어파크 프리미엄 오피스 체어",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "체어파크 | 프리미엄 오피스 가구 전문점",
+    description: "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에",
+    images: ["/herman-miller-aeron.png"],
+  },
+  alternates: {
+    canonical: "https://chairpark.co.kr",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+}
 
 export default function Home() {
   return (
@@ -307,13 +358,9 @@ export default function Home() {
               <p className="text-lg opacity-90">온라인으로는 느낄 수 없는 진짜 편안함을 경험해보세요</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button 
-                size="lg" 
-                className="bg-white text-slate-900 shadow-lg hover:bg-white/90 w-full sm:w-auto"
-                onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
-              >
+              <NaverBookingButtonWhite className="w-full sm:w-auto">
                 네이버 예약으로 바로 예약하기 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              </NaverBookingButtonWhite>
               <Button
                 size="lg"
                 variant="outline"

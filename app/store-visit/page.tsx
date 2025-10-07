@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,8 +6,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Clock, MapPin, Phone, Mail, Store, Users, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { NaverBookingButtonGreen } from "@/components/naver-booking-button"
+import type { Metadata } from "next"
 
-// Note: metadata는 클라이언트 컴포넌트에서 사용할 수 없으므로 제거됨
+export const metadata: Metadata = {
+  title: "매장 방문 예약 | 체어파크 - 직접 앉아보고 선택하세요",
+  description: "체어파크 매장에서 허먼밀러, 스틸케이스 등 프리미엄 오피스 체어를 직접 체험해보세요. 전문 상담과 맞춤형 솔루션을 제공합니다.",
+}
 
 export default function StoreVisitPage() {
   return (
@@ -55,14 +58,9 @@ export default function StoreVisitPage() {
                 </div>
 
                 <div className="text-center">
-                  <Button 
-                    className="w-full bg-green-600 hover:bg-green-700 text-white" 
-                    size="lg"
-                    onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
-                  >
-                    <Calendar className="h-5 w-5 mr-2" />
+                  <NaverBookingButtonGreen className="w-full">
                     네이버 예약으로 바로 예약하기
-                  </Button>
+                  </NaverBookingButtonGreen>
                 </div>
 
                 <div className="relative">
@@ -193,13 +191,9 @@ export default function StoreVisitPage() {
                   <div>
                     <p className="font-medium">네이버 예약</p>
                     <p className="text-sm text-slate-600">온라인 예약 시스템 운영</p>
-                    <Button 
-                      size="sm" 
-                      className="mt-2 bg-green-600 hover:bg-green-700"
-                      onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196?searchType=place&lng=127.0071253&lat=37.5336229&placePath=/booking?bookingRedirectUrl=https://m.booking.naver.com/booking/10/bizes/1400496?theme=place&entry=pll&lang=ko&entry=pll&area=pll', '_blank')}
-                    >
+                    <NaverBookingButtonGreen size="sm" className="mt-2">
                       네이버 예약하기
-                    </Button>
+                    </NaverBookingButtonGreen>
                   </div>
                 </div>
               </CardContent>
