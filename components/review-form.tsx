@@ -7,28 +7,24 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Star, Upload, X } from "lucide-react"
 import { TouchOptimizedButton } from "@/components/ui/touch-optimized-button"
+import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
 import Image from "next/image"
 
 interface ReviewFormProps {
-  products: Array<{
-    id: string
-    name: string
-    brands?: { name: string } | null
-  }>
   user?: any
 }
 
-export function ReviewForm({ products, user }: ReviewFormProps) {
+export function ReviewForm({ user }: ReviewFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [images, setImages] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
-    product_id: "",
+    brand: "",
+    product_name: "",
     title: "",
     comment: "",
     rating: 5,
@@ -141,21 +137,27 @@ export function ReviewForm({ products, user }: ReviewFormProps) {
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">{error}</div>
           )}
 
-          {/* 제품 선택 */}
+          {/* 브랜드 입력 */}
           <div className="space-y-2">
-            <Label htmlFor="product">리뷰할 제품 *</Label>
-            <Select value={formData.product_id} onValueChange={(value) => setFormData({ ...formData, product_id: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="제품을 선택해주세요" />
-              </SelectTrigger>
-              <SelectContent>
-                {products.map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.brands?.name} {product.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <UnifiedAutocompleteInput
+              label="브랜드 *"
+              placeholder="브랜드명을 입력하세요 (예: Herman Miller)"
+              value={formData.brand}
+              onChange={(value) => setFormData({ ...formData, brand: value })}
+              type="brand"
+            />
+          </div>
+
+          {/* 제품명 입력 */}
+          <div className="space-y-2">
+            <UnifiedAutocompleteInput
+              label="제품명 *"
+              placeholder="제품명을 입력하세요 (예: Aeron Chair)"
+              value={formData.product_name}
+              onChange={(value) => setFormData({ ...formData, product_name: value })}
+              type="product"
+              selectedBrand={formData.brand}
+            />
           </div>
 
           {/* 리뷰 제목 */}

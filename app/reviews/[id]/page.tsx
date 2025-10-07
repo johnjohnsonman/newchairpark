@@ -20,17 +20,7 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
     // 리뷰 정보 가져오기
     const { data: review, error: reviewError } = await supabase
       .from("reviews")
-      .select(`
-        *,
-        products (
-          id,
-          name,
-          brands (
-            name,
-            slug
-          )
-        )
-      `)
+      .select("*")
       .eq("id", id)
       .single()
 
@@ -107,18 +97,15 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
             </div>
 
             {/* 제품 정보 */}
-            {review.products && (
+            {(review.brand || review.product_name) && (
               <div className="mb-8 rounded-lg border bg-muted/50 p-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Package className="h-4 w-4" />
                   리뷰한 제품
                 </div>
-                <Link 
-                  href={`/store/${review.products.id}`}
-                  className="mt-1 text-lg font-semibold hover:text-primary"
-                >
-                  {review.products.brands?.name} {review.products.name}
-                </Link>
+                <div className="mt-1 text-lg font-semibold">
+                  {review.brand} {review.product_name}
+                </div>
               </div>
             )}
 
@@ -198,8 +185,8 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
                 </Link>
               </TouchOptimizedButton>
               <TouchOptimizedButton variant="outline" asChild>
-                <Link href={`/store/${review.products?.id}`}>
-                  제품 자세히 보기
+                <Link href="/store">
+                  제품 둘러보기
                 </Link>
               </TouchOptimizedButton>
             </div>

@@ -194,6 +194,16 @@ export default async function ReviewsPage({
                           <div>
                             <span className="font-medium">작성자:</span> {review.user_name}
                           </div>
+                          {review.brand && (
+                            <div>
+                              <span className="font-medium">브랜드:</span> {review.brand}
+                            </div>
+                          )}
+                          {review.product_name && (
+                            <div>
+                              <span className="font-medium">제품:</span> {review.product_name}
+                            </div>
+                          )}
                           {review.age && (
                             <div>
                               <span className="font-medium">나이:</span> {review.age}세

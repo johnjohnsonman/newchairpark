@@ -10,12 +10,6 @@ export default async function NewReviewPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // 제품 목록 가져오기 (리뷰 작성 시 선택용)
-  const { data: products } = await supabase
-    .from("products")
-    .select("id, name, brands(name)")
-    .order("name")
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 sm:py-12">
@@ -27,7 +21,7 @@ export default async function NewReviewPage() {
             </p>
           </div>
 
-          <ReviewForm products={products || []} user={user} />
+          <ReviewForm user={user} />
         </div>
       </div>
     </div>
