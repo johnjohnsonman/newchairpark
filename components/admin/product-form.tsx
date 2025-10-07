@@ -34,9 +34,24 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [images, setImages] = useState<Array<{ url: string; order: number }>>(
-    (product?.images as Array<{ url: string; order: number }>) || [],
-  )
+  // images를 JSON 파싱하여 초기화
+  const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
+    if (product?.images) {
+      // images가 string이면 파싱, 아니면 그대로 사용
+      if (typeof product.images === 'string') {
+        try {
+          return JSON.parse(product.images)
+        } catch (e) {
+          console.error('Failed to parse product images:', e)
+          return []
+        }
+      }
+      if (Array.isArray(product.images)) {
+        return product.images as Array<{ url: string; order: number }>
+      }
+    }
+    return []
+  })
 
   const [formData, setFormData] = useState({
     name: product?.name || "",
@@ -58,29 +73,50 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     const supabase = createClient()
 
     try {
+      // images를 JSONB 형식으로 변환
       const dataToSave = {
         ...formData,
         brand_id: formData.brand_id === "no-brand" ? null : formData.brand_id,
-        images: images,
+        images: JSON.stringify(images), // JSONB로 저장
         image_url: images.length > 0 ? images[0].url : "",
         updated_at: new Date().toISOString(),
       }
 
       console.log('💾 Saving product data:', dataToSave)
 
+      let savedProduct;
+      
       if (product) {
         console.log('🔄 Updating existing product:', product.id)
-        const { data, error } = await supabase.from("products").update(dataToSave).eq("id", product.id).select()
+        const { data, error } = await supabase
+          .from("products")
+          .update(dataToSave)
+          .eq("id", product.id)
+          .select()
+          .single()
+        
         console.log('✅ Update result:', { data, error })
         if (error) throw error
+        savedProduct = data
       } else {
         console.log('✨ Creating new product')
-        const { data, error } = await supabase.from("products").insert([dataToSave]).select()
+        const { data, error } = await supabase
+          .from("products")
+          .insert([dataToSave])
+          .select()
+          .single()
+        
         console.log('✅ Insert result:', { data, error })
         if (error) throw error
+        savedProduct = data
       }
 
-      console.log('🎉 Product saved successfully! Redirecting...')
+      console.log('🎉 Product saved successfully!', savedProduct)
+      
+      // 성공 메시지 표시
+      alert('제품이 성공적으로 저장되었습니다!')
+      
+      // 리다이렉트
       router.push("/admin/products")
       router.refresh()
     } catch (err) {
