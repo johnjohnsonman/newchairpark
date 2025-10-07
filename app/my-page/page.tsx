@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Plus, Package, ImageIcon } from "lucide-react"
 
 export default async function MyPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const {
     data: { user },
@@ -77,10 +77,10 @@ export default async function MyPage() {
         <Tabs defaultValue="gallery" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="gallery">
-              <ImageIcon className="mr-2 h-4 w-4" />내 갤러리 ({galleryItems?.length || 0})
+              <ImageIcon className="mr-2 h-4 w-4" />내 갤러리 ({galleryItems.length})
             </TabsTrigger>
             <TabsTrigger value="recycle">
-              <Package className="mr-2 h-4 w-4" />내 중고마켓 ({recycleItems?.length || 0})
+              <Package className="mr-2 h-4 w-4" />내 중고마켓 ({recycleItems.length})
             </TabsTrigger>
           </TabsList>
 
