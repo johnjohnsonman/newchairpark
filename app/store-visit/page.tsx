@@ -161,9 +161,15 @@ export default function StoreVisitPage() {
                       size="sm" 
                       variant="outline" 
                       className="mt-2"
-                      onClick={() => window.open('http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196', '_blank')}
+                      asChild
                     >
-                      네이버 지도에서 보기
+                      <a 
+                        href="http://map.naver.com/p/search/%EC%B2%B4%EC%96%B4%ED%8C%8C%ED%81%AC/place/2029627196" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        네이버 지도에서 보기
+                      </a>
                     </Button>
                   </div>
                 </div>
