@@ -45,8 +45,6 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
   
-  const supabase = createClient()
-  
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
     if (formData.name && !product) {
@@ -70,10 +68,10 @@ export function ProductForm({ product, brands }: ProductFormProps) {
             return
           }
           
-          
           setSlugStatus('checking')
           
           try {
+            const supabase = createClient()
             const { data: existingProduct } = await supabase
               .from('products')
               .select('id')
@@ -89,7 +87,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         
         const timeoutId = setTimeout(checkSlugAvailability, 500)
         return () => clearTimeout(timeoutId)
-      }, [formData.slug, product, supabase])
+      }, [formData.slug, product])
 
   // images를 JSON 파싱하여 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
@@ -148,6 +146,8 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         setError(null)
 
     try {
+      const supabase = createClient()
+      
       // images를 JSONB 형식으로 변환
       const dataToSave = {
         ...formData,
@@ -217,6 +217,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   }
 
       const generateSlug = async () => {
+        const supabase = createClient()
         
         const baseSlug = formData.name
           .toLowerCase()
