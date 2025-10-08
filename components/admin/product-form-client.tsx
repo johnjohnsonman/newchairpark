@@ -274,15 +274,16 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
             <div className="space-y-2">
               <Label htmlFor="brand">브랜드</Label>
               <UnifiedAutocompleteInput
+                label="브랜드"
                 value={selectedBrandName}
-                onValueChange={(value) => {
+                onChange={(value) => {
                   setSelectedBrandName(value)
                   const brand = brands.find(b => b.name === value)
                   if (brand) {
                     setFormData(prev => ({ ...prev, brand_id: brand.id }))
                   }
                 }}
-                options={brands.map(brand => ({ value: brand.name, label: brand.name }))}
+                type="brand"
                 placeholder="브랜드 선택"
               />
             </div>
