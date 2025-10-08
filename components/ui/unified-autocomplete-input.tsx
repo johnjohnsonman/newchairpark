@@ -1,12 +1,22 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, Suspense } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useUnifiedBrandProduct } from "@/hooks/use-unified-brand-product"
+
+// 로딩 컴포넌트
+function AutocompleteLoading() {
+  return (
+    <div className="space-y-2">
+      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+      <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+    </div>
+  )
+}
 
 interface UnifiedAutocompleteInputProps {
   label: string
@@ -19,7 +29,8 @@ interface UnifiedAutocompleteInputProps {
   disabled?: boolean
 }
 
-export function UnifiedAutocompleteInput({
+// 내부 컴포넌트
+function UnifiedAutocompleteInputInner({
   label,
   placeholder,
   value,
@@ -33,6 +44,23 @@ export function UnifiedAutocompleteInput({
   const [inputValue, setInputValue] = useState(value)
   const inputRef = useRef<HTMLInputElement>(null)
   
+  // useUnifiedBrandProduct 훅을 안전하게 사용
+  let hookData
+  try {
+    hookData = useUnifiedBrandProduct()
+  } catch (error) {
+    console.error("Failed to initialize useUnifiedBrandProduct:", error)
+    hookData = {
+      brands: [],
+      products: [],
+      isLoading: false,
+      error: "데이터 로딩에 실패했습니다.",
+      getProductsByBrand: () => [],
+      searchBrands: () => [],
+      searchProducts: () => []
+    }
+  }
+  
   const { 
     brands, 
     products, 
@@ -41,7 +69,7 @@ export function UnifiedAutocompleteInput({
     getProductsByBrand, 
     searchBrands, 
     searchProducts 
-  } = useUnifiedBrandProduct()
+  } = hookData
 
   // 입력값이 변경될 때마다 상위 컴포넌트에 전달
   useEffect(() => {
@@ -199,5 +227,14 @@ export function UnifiedAutocompleteInput({
         {hasSuggestions && ` (${suggestions.length}개 제안)`}
       </p>
     </div>
+  )
+}
+
+// 메인 export 함수 - Suspense로 감싸서 안전하게 렌더링
+export function UnifiedAutocompleteInput(props: UnifiedAutocompleteInputProps) {
+  return (
+    <Suspense fallback={<AutocompleteLoading />}>
+      <UnifiedAutocompleteInputInner {...props} />
+    </Suspense>
   )
 }

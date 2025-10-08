@@ -17,8 +17,14 @@ export function useUnifiedBrandProduct() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
+    // 이미 초기화되었거나 로딩 중이면 중복 실행 방지
+    if (isInitialized || isLoading) {
+      return
+    }
+
     const fetchData = async () => {
       try {
         setIsLoading(true)
@@ -31,6 +37,7 @@ export function useUnifiedBrandProduct() {
           console.error("Failed to create Supabase client:", clientError)
           setError("데이터베이스 연결에 실패했습니다.")
           setIsLoading(false)
+          setIsInitialized(true)
           return
         }
 
@@ -125,16 +132,18 @@ export function useUnifiedBrandProduct() {
           products: sortedProducts,
           brandProducts: sortedBrandProducts
         })
+        setIsInitialized(true)
       } catch (err) {
         console.error('Failed to fetch unified brand/product data:', err)
         setError('데이터를 불러오는데 실패했습니다.')
+        setIsInitialized(true)
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchData()
-  }, [])
+  }, [isInitialized, isLoading])
 
   const getProductsByBrand = (brand: string): string[] => {
     return data.brandProducts[brand] || []

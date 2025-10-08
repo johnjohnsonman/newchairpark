@@ -423,13 +423,13 @@ export function ProductForm({ product, brands }: ProductFormProps) {
             </div>
           </div>
 
-          {/* 제품 옵션 관리 */}
-          {product && (
-            <ProductOptionsManager
-              productId={product.id}
-              onOptionsChange={setProductOptions}
-            />
-          )}
+              {/* 제품 옵션 관리 - Supabase 클라이언트가 있을 때만 렌더링 */}
+              {product && supabase && (
+                <ProductOptionsManager
+                  productId={product.id}
+                  onOptionsChange={setProductOptions}
+                />
+              )}
 
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
