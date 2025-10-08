@@ -9,81 +9,90 @@ interface ProductPageProps {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const supabase = await createClient()
-  const { data: product } = await supabase
-    .from("products")
-    .select(`
-      name,
-      description,
-      images,
-      brand_id,
-      brands(name)
-    `)
-    .eq("slug", params.slug)
-    .single()
+  try {
+    const supabase = await createClient()
+    const { data: product } = await supabase
+      .from("products")
+      .select(`
+        name,
+        description,
+        images,
+        brand_id,
+        brands(name)
+      `)
+      .eq("slug", params.slug)
+      .single()
 
-  if (!product) {
-    return {
-      title: "제품을 찾을 수 없습니다",
-      description: "요청하신 제품을 찾을 수 없습니다.",
+    if (!product) {
+      return {
+        title: "제품을 찾을 수 없습니다",
+        description: "요청하신 제품을 찾을 수 없습니다.",
+      }
     }
-  }
 
-  const title = `${product.name} | ${product.brands?.name || ''} - 체어파크`
-  const description = product.description?.substring(0, 150) + "..."
-  const imageUrl = product.images?.[0] || "/placeholder.jpg"
+    const title = `${product.name} | ${product.brands?.name || ''} - 체어파크`
+    const description = product.description?.substring(0, 150) + "..."
+    const imageUrl = Array.isArray(product.images) && product.images[0] 
+      ? product.images[0] 
+      : "/placeholder.jpg"
 
-  return {
-    title,
-    description,
-    openGraph: {
+    return {
       title,
       description,
-      images: [{ url: imageUrl }],
-      type: "product",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [imageUrl],
-    },
+      openGraph: {
+        title,
+        description,
+        images: [{ url: imageUrl }],
+        type: "product",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [imageUrl],
+      },
+    }
+  } catch (error) {
+    console.error("Error generating metadata:", error)
+    return {
+      title: "제품 정보",
+      description: "제품 정보를 불러오는 중 오류가 발생했습니다.",
+    }
   }
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const supabase = await createClient()
-
-  const { data: product, error } = await supabase
-    .from("products")
-    .select(`
-      *,
-      brands(name, description, logo_url),
-      product_options(*),
-      product_variants(*)
-    `)
-    .eq("slug", params.slug)
-    .single()
-
-  if (error || !product) {
-    console.error("Error fetching product:", error?.message || "Product not found")
-    notFound()
-  }
-
-  // 데이터 안전성 검증 및 정규화
-  const normalizedProduct = {
-    ...product,
-    images: Array.isArray(product.images) ? product.images : [],
-    product_options: Array.isArray(product.product_options) ? product.product_options : [],
-    product_variants: Array.isArray(product.product_variants) ? product.product_variants : [],
-  }
-
-  // 조회수 증가 (에러 무시)
   try {
-    await supabase.rpc("increment_product_view_count", { product_slug: params.slug })
-  } catch (viewError) {
-    console.warn("Failed to increment view count:", viewError)
-  }
+    const supabase = await createClient()
+
+    const { data: product, error } = await supabase
+      .from("products")
+      .select(`
+        *,
+        brands(name, description, logo_url),
+        product_options(*),
+        product_variants(*)
+      `)
+      .eq("slug", params.slug)
+      .single()
+
+    if (error || !product) {
+      console.error("Error fetching product:", error?.message || "Product not found")
+      notFound()
+    }
+
+    // 데이터 안전성 검증 및 정규화
+    const normalizedProduct = {
+      ...product,
+      images: Array.isArray(product.images) ? product.images : [],
+      product_options: Array.isArray(product.product_options) ? product.product_options : [],
+      product_variants: Array.isArray(product.product_variants) ? product.product_variants : [],
+    }
+
+    // 조회수 증가 (에러 무시) - 비동기로 처리하여 페이지 렌더링을 차단하지 않음
+    supabase.rpc("increment_product_view_count", { product_slug: params.slug }).catch((viewError) => {
+      console.warn("Failed to increment view count:", viewError)
+    })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
@@ -134,4 +143,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
     </div>
   )
+  } catch (error) {
+    console.error("Error in ProductPage:", error)
+    notFound()
+  }
 }
