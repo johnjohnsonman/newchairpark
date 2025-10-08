@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -86,6 +86,11 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     meta_title: product?.meta_title || "",
     meta_description: product?.meta_description || "",
   })
+
+  // ProductOptionsManager의 콜백을 useCallback으로 메모이제이션
+  const handleOptionsChange = useCallback((options: any[]) => {
+    setFormData(prev => ({ ...prev, product_options: options }))
+  }, [])
 
   // 브랜드 이름 설정
   useEffect(() => {
@@ -325,7 +330,7 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
             <ProductOptionsManager
               productId={product?.id || 'new'}
               initialOptions={formData.product_options || []}
-              onOptionsChange={(options) => setFormData(prev => ({ ...prev, product_options: options }))}
+              onOptionsChange={handleOptionsChange}
             />
           </div>
 
