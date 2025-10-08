@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { BrandForm } from "@/components/admin/brand-form"
 
 export default async function EditBrandPage({ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     // 브랜드 정보를 먼저 가져오기
     const { data: brand, error: brandError } = await supabase

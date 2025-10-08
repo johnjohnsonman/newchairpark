@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -6,7 +6,7 @@ import { Plus, Edit } from "lucide-react"
 import { DeleteBrandButton } from "@/components/admin/delete-brand-button"
 
 export default async function BrandsManagementPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   // 브랜드 데이터 가져오기 (타임아웃 설정)
   const brandsPromise = supabase

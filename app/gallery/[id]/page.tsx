@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
@@ -21,7 +21,7 @@ interface GalleryDetailPageProps {
 export async function generateMetadata({ params }: GalleryDetailPageProps): Promise<Metadata> {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     
     const { data: galleryItem } = await supabase
       .from("gallery")
@@ -87,7 +87,7 @@ export default async function GalleryDetailPage({ params }: GalleryDetailPagePro
   try {
     const { id } = await params
     
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     
     // 갤러리 아이템 조회
     const { data: galleryItem, error: galleryError } = await supabase

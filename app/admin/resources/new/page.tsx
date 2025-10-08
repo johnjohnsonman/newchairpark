@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { ResourceForm } from "@/components/admin/resource-form"
 
 export default async function NewResourcePage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   // 브랜드 목록 가져오기
   const { data: brands } = await supabase

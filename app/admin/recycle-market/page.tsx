@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,7 +7,7 @@ import { Plus, Edit } from "lucide-react"
 import { DeleteRecycleItemButton } from "@/components/admin/delete-recycle-item-button"
 
 export default async function RecycleMarketManagementPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const { data: recycleItems } = await supabase
     .from("recycle_items")

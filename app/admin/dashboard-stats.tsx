@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { adminCache } from "@/lib/cache"
 
 export async function getDashboardStats() {
@@ -10,7 +10,7 @@ export async function getDashboardStats() {
     return cachedData
   }
 
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   try {
     // 모든 기본 카운트를 한 번에 가져오기 (타임아웃 설정)

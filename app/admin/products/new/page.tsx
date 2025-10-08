@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { ProductFormWrapper } from "@/components/admin/product-form-wrapper"
 
 export default async function NewProductPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const { data: brands } = await supabase.from("brands").select("*").order("name")
 

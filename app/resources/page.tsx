@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 export default async function ResourcesPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   // 자료와 브랜드 정보를 가져오기
   const [resourcesResult, brandsResult] = await Promise.all([

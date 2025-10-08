@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,7 +7,7 @@ import { Plus, Edit, Download, FileText, Calendar, Building2 } from "lucide-reac
 import { DeleteResourceButton } from "@/components/admin/delete-resource-button"
 
 export default async function ResourcesManagementPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   // 자료와 브랜드 정보를 가져오기 (타임아웃 설정)
   const dataPromise = Promise.allSettled([

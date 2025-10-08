@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { ReviewDetail } from "@/components/review-detail"
 import type { Metadata } from "next"
@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: ReviewPageProps): Promise<Met
   const { id } = await params
   
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     const { data: review } = await supabase
       .from("reviews")
       .select("title, brand, product_name, user_name, rating, comment")
@@ -46,7 +46,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const { id } = await params
   
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     
     // 리뷰 데이터 가져오기
     const { data: review, error: reviewError } = await supabase

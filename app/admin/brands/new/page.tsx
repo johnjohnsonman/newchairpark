@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { BrandForm } from "@/components/admin/brand-form"
 
 export default async function NewBrandPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   return (
     <div className="p-6">

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { ProductDetailView } from "@/components/product-detail-view"
 import type { Metadata } from "next"
@@ -10,7 +10,7 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     const { data: product } = await supabase
       .from("products")
       .select(`
@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     const { data: product, error } = await supabase
       .from("products")

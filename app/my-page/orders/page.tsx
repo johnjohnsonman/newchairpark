@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { OrdersList } from "@/components/orders-list"
 
 export default async function OrdersPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const {
     data: { user },

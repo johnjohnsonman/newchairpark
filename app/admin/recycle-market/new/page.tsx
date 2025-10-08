@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { RecycleMarketForm } from "@/components/admin/recycle-market-form"
 
 export default async function NewRecycleMarketPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const { data: brands } = await supabase.from("brands").select("id, name").order("name")
 

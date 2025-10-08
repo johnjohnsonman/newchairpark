@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { ProductFormWrapper } from "@/components/admin/product-form-wrapper"
 
@@ -7,7 +7,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     const { id } = await params
     console.log('Edit product page - ID:', id)
     
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     const { data: product, error: productError } = await supabase.from("products").select("*").eq("id", id).single()
 

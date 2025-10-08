@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { UserGalleryForm } from "@/components/user-gallery-form"
 
 export default async function EditGalleryPage({ params }: { params: { id: string } }) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const {
     data: { user },

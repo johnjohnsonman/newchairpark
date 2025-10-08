@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { RecycleMarketForm } from "@/components/admin/recycle-market-form"
 
 export default async function EditRecycleMarketPage({ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     const [{ data: recycleItem, error: itemError }, { data: brands }] = await Promise.all([
       supabase.from("recycle_items").select("*").eq("id", id).single(),

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -6,7 +6,7 @@ import { Plus, Edit } from "lucide-react"
 import { DeleteProductButton } from "@/components/admin/delete-product-button"
 
 export default async function ProductsManagementPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   let products: any[] = []
   
