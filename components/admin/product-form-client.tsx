@@ -323,8 +323,9 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
 
           <div className="mt-6">
             <ProductOptionsManager
-              options={formData.product_options}
-              onChange={(options) => setFormData(prev => ({ ...prev, product_options: options }))}
+              productId={product?.id || 'new'}
+              initialOptions={formData.product_options || []}
+              onOptionsChange={(options) => setFormData(prev => ({ ...prev, product_options: options }))}
             />
           </div>
 
