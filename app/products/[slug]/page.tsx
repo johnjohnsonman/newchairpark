@@ -70,8 +70,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
-  // 조회수 증가
-  await supabase.rpc("increment_product_view_count", { product_slug: params.slug })
+  // 데이터 안전성 검증 및 정규화
+  const normalizedProduct = {
+    ...product,
+    images: Array.isArray(product.images) ? product.images : [],
+    product_options: Array.isArray(product.product_options) ? product.product_options : [],
+    product_variants: Array.isArray(product.product_variants) ? product.product_variants : [],
+  }
+
+  // 조회수 증가 (에러 무시)
+  try {
+    await supabase.rpc("increment_product_view_count", { product_slug: params.slug })
+  } catch (viewError) {
+    console.warn("Failed to increment view count:", viewError)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
@@ -94,7 +106,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       {/* 메인 컨텐츠 */}
       <div className="container mx-auto px-4 py-8">
-        <ProductDetailView product={product} />
+        <ProductDetailView product={normalizedProduct} />
       </div>
 
       {/* JSON-LD 구조화 데이터 */}
@@ -104,18 +116,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
-            "name": product.name,
-            "description": product.description,
-            "image": product.images,
+            "name": normalizedProduct.name,
+            "description": normalizedProduct.description,
+            "image": normalizedProduct.images,
             "brand": {
               "@type": "Brand",
-              "name": product.brands?.name
+              "name": normalizedProduct.brands?.name
             },
             "offers": {
               "@type": "Offer",
-              "price": product.price,
+              "price": normalizedProduct.price,
               "priceCurrency": "KRW",
-              "availability": product.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+              "availability": normalizedProduct.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
             }
           })
         }}

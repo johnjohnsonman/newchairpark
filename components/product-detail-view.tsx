@@ -77,7 +77,11 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
 
   const currentPrice = selectedVariant?.price || product.price
   const currentOriginalPrice = selectedVariant?.original_price || product.original_price
-  const currentImages = selectedVariant?.images?.length ? selectedVariant.images : product.images
+  const currentImages = Array.isArray(selectedVariant?.images) && selectedVariant.images.length 
+    ? selectedVariant.images 
+    : Array.isArray(product.images) 
+      ? product.images 
+      : []
   const currentStock = selectedVariant?.stock_quantity ?? (product.in_stock ? 999 : 0)
 
   const handleOptionSelect = (optionName: string, value: string) => {
@@ -250,7 +254,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
-                  {option.values.map((value) => (
+                  {Array.isArray(option.values) && option.values.map((value) => (
                     <Button
                       key={value.value}
                       variant={selectedOptions[option.name] === value.value ? "default" : "outline"}

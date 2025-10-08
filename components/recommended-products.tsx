@@ -98,7 +98,7 @@ export function RecommendedProducts({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => {
+          {Array.isArray(products) && products.map((product) => {
             const discountPercentage = product.original_price && product.original_price > product.price
               ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
               : 0
@@ -109,7 +109,7 @@ export function RecommendedProducts({
                   <CardContent className="p-0">
                     {/* 제품 이미지 */}
                     <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                      {product.images[0] ? (
+                      {Array.isArray(product.images) && product.images[0] ? (
                         <Image
                           src={product.images[0]}
                           alt={product.name}
