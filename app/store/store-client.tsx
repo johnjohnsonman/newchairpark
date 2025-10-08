@@ -71,6 +71,21 @@ export default function StoreClientPage({
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const supabase = createBrowserClient()
+  
+  // 초기화 상태 관리
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // 컴포넌트 마운트 시 초기화
+  useEffect(() => {
+    // URL 파라미터에서 카테고리 설정
+    if (categoryParam) {
+      setSelectedCategory(categoryParam)
+    } else {
+      setSelectedCategory("all")
+    }
+    
+    setIsInitialized(true)
+  }, [categoryParam])
 
   // 카테고리별 설명 문구 (배너 데이터에서 가져오거나 기본값)
   const getCategoryDescription = (categoryId: string | null) => {
@@ -351,6 +366,18 @@ export default function StoreClientPage({
                 </Link>
               ))}
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 초기화되지 않았으면 로딩 화면 표시
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">스토어를 불러오는 중...</p>
         </div>
       </div>
     )

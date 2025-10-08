@@ -11,11 +11,26 @@ const categories = [
   { id: "design-chair", name: "Design Chair", displayName: "디자인 체어" },
 ]
 
-export const metadata = {
-  title: "스토어 | 프리미엄 오피스 가구",
-  description:
-    "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어와 가구를 만나보세요. 인체공학적 디자인과 최고의 품질을 경험하세요.",
+// 동적 메타데이터 생성
+export async function generateMetadata() {
+  return {
+    title: "스토어 | 프리미엄 오피스 가구",
+    description:
+      "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 체어와 가구를 만나보세요. 인체공학적 디자인과 최고의 품질을 경험하세요.",
+    robots: {
+      index: true,
+      follow: true,
+    },
+    // 캐시 방지
+    other: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  }
 }
+
+// 캐시 제어 설정
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export default async function StorePage() {
   const supabase = await createServerClient()
