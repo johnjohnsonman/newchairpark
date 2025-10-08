@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import type { Database } from "@/types/database"
 import Link from "next/link"
 import { Upload, FileText, AlertCircle } from "lucide-react"
@@ -115,7 +115,7 @@ export function ResourceForm({ resource, brands }: ResourceFormProps) {
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       let fileUrl = formData.file_url

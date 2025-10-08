@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import type { RecycleMarket } from "@/types/database"
 import Link from "next/link"
 import { SingleImageUpload } from "@/components/admin/single-image-upload"
@@ -43,7 +43,7 @@ export function RecycleMarketForm({ recycleItem, brands }: RecycleMarketFormProp
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       if (recycleItem) {
