@@ -34,8 +34,41 @@ export interface Product {
   image_url: string
   images: string[]
   specifications: Record<string, any>
+  options?: any[]
+  variants?: any[]
   in_stock: boolean
   featured: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ProductOption {
+  id: string
+  product_id: string
+  name: string
+  type: 'select' | 'color' | 'text' | 'number'
+  required: boolean
+  values: Array<{
+    value: string
+    color?: string
+    label?: string
+  }>
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ProductVariant {
+  id: string
+  product_id: string
+  sku?: string
+  name: string
+  price: number
+  original_price?: number
+  stock_quantity: number
+  options: Record<string, any>
+  images: string[]
+  is_default: boolean
   created_at: string
   updated_at: string
 }

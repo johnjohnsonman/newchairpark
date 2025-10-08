@@ -15,6 +15,7 @@ import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
 import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
+import { ProductOptionsManager } from "@/components/admin/product-options-manager"
 
 interface ProductFormProps {
   product?: Product
@@ -37,6 +38,9 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   
   // 브랜드 이름 표시용
   const [selectedBrandName, setSelectedBrandName] = useState("")
+  
+  // 제품 옵션 상태
+  const [productOptions, setProductOptions] = useState<any[]>([])
 
   // images를 JSON 파싱하여 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
@@ -282,6 +286,14 @@ export function ProductForm({ product, brands }: ProductFormProps) {
               </label>
             </div>
           </div>
+
+          {/* 제품 옵션 관리 */}
+          {product && (
+            <ProductOptionsManager
+              productId={product.id}
+              onOptionsChange={setProductOptions}
+            />
+          )}
 
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
