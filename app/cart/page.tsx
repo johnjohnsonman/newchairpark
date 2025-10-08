@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CartList } from "@/components/cart-list"
 
+export const dynamic = 'force-dynamic'
+
 export default async function CartPage() {
   const supabase = await createServerClient()
 

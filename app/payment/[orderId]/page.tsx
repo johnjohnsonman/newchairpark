@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { NaverPayButton } from "@/components/naver-pay-button"
 
+export const dynamic = 'force-dynamic'
+
 export default async function PaymentPage({ params }: { params: { orderId: string } }) {
   const supabase = await createServerClient()
 

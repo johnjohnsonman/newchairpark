@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { OrdersList } from "@/components/orders-list"
 
+export const dynamic = 'force-dynamic'
+
 export default async function OrdersPage() {
   const supabase = await createServerClient()
 

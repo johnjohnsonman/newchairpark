@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CheckoutForm } from "@/components/checkout-form"
 
+export const dynamic = 'force-dynamic'
+
 export default async function CheckoutPage() {
   const supabase = await createServerClient()
 

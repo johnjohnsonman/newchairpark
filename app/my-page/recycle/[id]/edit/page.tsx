@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { UserRecycleForm } from "@/components/user-recycle-form"
 
+export const dynamic = 'force-dynamic'
+
 export default async function EditRecyclePage({ params }: { params: { id: string } }) {
   const supabase = await createServerClient()
 

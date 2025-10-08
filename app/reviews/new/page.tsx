@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ReviewForm } from "@/components/review-form"
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewReviewPage() {
   const supabase = await createServerClient()
 
