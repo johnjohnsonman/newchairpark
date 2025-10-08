@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { createBrowserClient } from "@/lib/supabase/client"
 
 interface BrandProductData {
@@ -114,21 +114,29 @@ export function useUnifiedBrandProduct() {
     }
   }, [])
 
+  const getProductsByBrand = useCallback((brand: string) => {
+    return data.brandProducts[brand] || []
+  }, [data.brandProducts])
+
+  const searchBrands = useCallback((query: string) => {
+    if (!query || !query.trim()) return data.brands
+    return data.brands.filter(b => b.toLowerCase().includes(query.toLowerCase()))
+  }, [data.brands])
+
+  const searchProducts = useCallback((query: string, brand?: string) => {
+    const target = brand ? (data.brandProducts[brand] || []) : data.products
+    if (!query || !query.trim()) return target
+    return target.filter(p => p.toLowerCase().includes(query.toLowerCase()))
+  }, [data.brandProducts, data.products])
+
   return {
     brands: data.brands,
     products: data.products,
     brandProducts: data.brandProducts,
     isLoading,
     error,
-    getProductsByBrand: (brand: string) => data.brandProducts[brand] || [],
-    searchBrands: (query: string) => {
-      if (!query || !query.trim()) return data.brands
-      return data.brands.filter(b => b.toLowerCase().includes(query.toLowerCase()))
-    },
-    searchProducts: (query: string, brand?: string) => {
-      const target = brand ? (data.brandProducts[brand] || []) : data.products
-      if (!query || !query.trim()) return target
-      return target.filter(p => p.toLowerCase().includes(query.toLowerCase()))
-    }
+    getProductsByBrand,
+    searchBrands,
+    searchProducts
   }
 }

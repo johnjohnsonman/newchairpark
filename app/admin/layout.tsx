@@ -2,8 +2,17 @@ import type React from "react"
 import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { headers } from "next/headers"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers()
+  const pathname = headersList.get("x-pathname") || ""
+  
+  // 로그인 페이지는 인증 체크를 건너뜀
+  if (pathname.includes("/admin/login")) {
+    return <>{children}</>
+  }
+
   const supabase = await createServerClient()
 
   // 서버 사이드에서 인증 확인
