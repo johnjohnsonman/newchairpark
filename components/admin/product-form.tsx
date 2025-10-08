@@ -41,6 +41,52 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   
   // 제품 옵션 상태
   const [productOptions, setProductOptions] = useState<any[]>([])
+  
+  // 슬러그 중복 체크 상태
+  const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
+  
+  // 제품명 변경 시 슬러그 자동 업데이트
+  useEffect(() => {
+    if (formData.name && !product) {
+      // 새 제품 생성 시에만 자동 슬러그 생성
+      const autoSlug = formData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "")
+      
+      if (autoSlug !== formData.slug) {
+        setFormData(prev => ({ ...prev, slug: autoSlug }))
+      }
+    }
+  }, [formData.name, product])
+  
+  // 슬러그 중복 실시간 체크
+  useEffect(() => {
+    const checkSlugAvailability = async () => {
+      if (!formData.slug || (product && formData.slug === product.slug)) {
+        setSlugStatus(null)
+        return
+      }
+      
+      setSlugStatus('checking')
+      
+      try {
+        const { data: existingProduct } = await supabase
+          .from('products')
+          .select('id')
+          .eq('slug', formData.slug)
+          .maybeSingle()
+        
+        setSlugStatus(existingProduct ? 'taken' : 'available')
+      } catch (error) {
+        console.error('Error checking slug:', error)
+        setSlugStatus(null)
+      }
+    }
+    
+    const timeoutId = setTimeout(checkSlugAvailability, 500)
+    return () => clearTimeout(timeoutId)
+  }, [formData.slug, product])
 
   // images를 JSON 파싱하여 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
@@ -81,6 +127,19 @@ export function ProductForm({ product, brands }: ProductFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // 슬러그 중복 체크
+    if (slugStatus === 'taken') {
+      setError('이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해주세요.')
+      return
+    }
+    
+    // 슬러그 체크 중인 경우 대기
+    if (slugStatus === 'checking') {
+      setError('슬러그 중복 체크 중입니다. 잠시 후 다시 시도해주세요.')
+      return
+    }
+    
     setIsLoading(true)
     setError(null)
 
@@ -155,11 +214,31 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     }
   }
 
-  const generateSlug = () => {
-    const slug = formData.name
+  const generateSlug = async () => {
+    const baseSlug = formData.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
+    
+    let slug = baseSlug
+    let counter = 1
+    
+    // 중복 체크하여 고유한 슬러그 생성
+    while (true) {
+      const { data: existingProduct } = await supabase
+        .from('products')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle()
+      
+      if (!existingProduct || (product && existingProduct.id === product.id)) {
+        break // 사용 가능한 슬러그
+      }
+      
+      slug = `${baseSlug}-${counter}`
+      counter++
+    }
+    
     setFormData({ ...formData, slug })
   }
 
@@ -180,17 +259,52 @@ export function ProductForm({ product, brands }: ProductFormProps) {
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="slug">Slug *</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={generateSlug}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={generateSlug}
+                  disabled={!formData.name}
+                >
                   Generate from name
                 </Button>
               </div>
-              <Input
-                id="slug"
-                required
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="aeron-chair"
-              />
+              <div className="relative">
+                <Input
+                  id="slug"
+                  required
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  placeholder="aeron-chair"
+                  className={cn(
+                    slugStatus === 'taken' && 'border-red-500',
+                    slugStatus === 'available' && 'border-green-500'
+                  )}
+                />
+                {slugStatus && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    {slugStatus === 'checking' && (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                    )}
+                    {slugStatus === 'available' && (
+                      <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                        <span className="text-xs text-white">✓</span>
+                      </div>
+                    )}
+                    {slugStatus === 'taken' && (
+                      <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
+                        <span className="text-xs text-white">✗</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {slugStatus === 'taken' && (
+                <p className="text-sm text-red-600">이 슬러그는 이미 사용 중입니다.</p>
+              )}
+              {slugStatus === 'available' && (
+                <p className="text-sm text-green-600">사용 가능한 슬러그입니다.</p>
+              )}
             </div>
 
             <UnifiedAutocompleteInput
