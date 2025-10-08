@@ -20,10 +20,24 @@ export function UserNav() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
+  
+  // Supabase 클라이언트를 안전하게 초기화
+  let supabase
+  try {
+    supabase = createClient()
+  } catch (error) {
+    console.error("Failed to initialize Supabase client:", error)
+    supabase = null
+  }
 
   useEffect(() => {
     let mounted = true
+
+    // Supabase 클라이언트가 없으면 로딩 종료
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
 
     const initializeAuth = async () => {
       try {
@@ -65,9 +79,13 @@ export function UserNav() {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   const handleLogout = async () => {
+    if (!supabase) {
+      console.error("Cannot logout: Supabase client not available")
+      return
+    }
     await supabase.auth.signOut()
     router.refresh()
   }
