@@ -48,7 +48,7 @@ export function ImageUpload({ images, onChange }: ImageUploadProps) {
       const uploadedUrls = await Promise.all(uploadPromises)
       const newImages = uploadedUrls.map((url, index) => ({
         url,
-        order: images.length + index,
+        order: (images?.length || 0) + index,
       }))
 
       onChange([...images, ...newImages])

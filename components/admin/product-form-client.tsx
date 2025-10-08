@@ -50,20 +50,23 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     setIsClientReady(true)
   }, [])
 
-  // images를 JSON 파싱하여 초기화
+  // images를 안전하게 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
-    if (product?.images) {
-      if (typeof product.images === 'string') {
-        try {
-          return JSON.parse(product.images)
-        } catch (e) {
-          console.error('Failed to parse product images:', e)
-          return []
+    try {
+      if (product?.images) {
+        if (typeof product.images === 'string') {
+          const parsed = JSON.parse(product.images)
+          return Array.isArray(parsed) ? parsed : []
+        }
+        if (Array.isArray(product.images)) {
+          return product.images
         }
       }
-      return product.images
+      return []
+    } catch (e) {
+      console.error('Failed to parse product images:', e)
+      return []
     }
-    return []
   })
 
   // 폼 데이터 초기화
@@ -315,9 +318,8 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
           <div className="mt-6 space-y-2">
             <Label>제품 이미지</Label>
             <ImageUpload
-              value={images}
+              images={images || []}
               onChange={setImages}
-              maxImages={5}
             />
           </div>
 
