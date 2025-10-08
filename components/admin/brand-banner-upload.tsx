@@ -89,6 +89,7 @@ export function BrandBannerUpload({ brandId, initialBanners = [], onBannersChang
       formData.append('category', `brand-${brandId}`)
 
       console.log('Sending upload request to:', '/api/category-banners/upload')
+      console.log('Brand ID:', brandId, 'Category:', `brand-${brandId}`)
 
       const response = await fetch('/api/category-banners/upload', {
         method: 'POST',

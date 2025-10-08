@@ -42,8 +42,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    if (!category) {
-      return NextResponse.json({ error: "No category provided" }, { status: 400 })
+    if (!category || !category.startsWith('brand-')) {
+      return NextResponse.json({ error: "Invalid category provided" }, { status: 400 })
+    }
+
+    // 브랜드 ID 추출 (brand-{brandId} 형식에서)
+    const brandId = category.replace('brand-', '')
+    
+    console.log('Processing upload for brand ID:', brandId)
+    
+    // 임시 브랜드 ID인 경우 처리
+    if (brandId === 'temp') {
+      return NextResponse.json({ 
+        error: "새 브랜드 생성 중입니다. 브랜드 저장 후 배너를 업로드해주세요.",
+        code: "TEMP_BRAND_ID"
+      }, { status: 400 })
     }
 
     // 파일 크기 체크 (5MB)
@@ -107,9 +120,6 @@ export async function POST(request: NextRequest) {
       .from('images')
       .getPublicUrl(filePath)
 
-    // 브랜드 ID 추출 (brand-{brandId} 형식에서)
-    const brandId = category.replace('brand-', '')
-    
     // 기존 브랜드 정보 가져오기
     const { data: existingBrand, error: brandFetchError } = await supabase
       .from('brands')
