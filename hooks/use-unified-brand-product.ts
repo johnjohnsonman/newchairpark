@@ -127,18 +127,21 @@ export function useUnifiedBrandProduct() {
   }, [isMounted])
 
   const getProductsByBrand = (brand: string): string[] => {
+    if (!data || !data.brandProducts) return []
     return data.brandProducts[brand] || []
   }
 
   const searchBrands = (query: string): string[] => {
-    if (!query.trim()) return data.brands
+    if (!data || !data.brands) return []
+    if (!query || !query.trim()) return data.brands
     return data.brands.filter(brand => 
       brand.toLowerCase().includes(query.toLowerCase())
     )
   }
 
   const searchProducts = (query: string, brand?: string): string[] => {
-    if (!query.trim()) {
+    if (!data || !data.products) return []
+    if (!query || !query.trim()) {
       return brand ? getProductsByBrand(brand) : data.products
     }
     
@@ -149,16 +152,13 @@ export function useUnifiedBrandProduct() {
   }
 
   return {
-    ...data,
+    brands: data?.brands || [],
+    products: data?.products || [],
+    brandProducts: data?.brandProducts || {},
     isLoading,
     error,
     getProductsByBrand,
     searchBrands,
-    searchProducts,
-    refetch: () => {
-      // 데이터를 다시 가져오는 로직은 useEffect에서 처리됨
-      // 여기서는 단순히 상태만 초기화
-      setError(null)
-    }
+    searchProducts
   }
 }
