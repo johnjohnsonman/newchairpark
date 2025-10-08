@@ -35,6 +35,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isClientReady, setIsClientReady] = useState(false)
   
   // 브랜드 이름 표시용
   const [selectedBrandName, setSelectedBrandName] = useState("")
