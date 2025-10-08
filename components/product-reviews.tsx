@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Star, ThumbsUp, X } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
 interface Review {
@@ -45,7 +45,7 @@ export function ProductReviews({ productId, reviews, averageRating, totalReviews
     comment: "",
   })
   const [currentImageUrl, setCurrentImageUrl] = useState("")
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   useEffect(() => {
     const getUser = async () => {

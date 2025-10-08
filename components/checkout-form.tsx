@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import Image from "next/image"
 
 interface CartItem {
@@ -39,7 +39,7 @@ interface CheckoutFormProps {
 
 export function CheckoutForm({ cartItems, profile, userId }: CheckoutFormProps) {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

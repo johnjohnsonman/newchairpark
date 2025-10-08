@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import Image from "next/image"
 import { Loader2 } from "lucide-react"
 
@@ -32,7 +32,7 @@ interface NaverPayButtonProps {
 
 export function NaverPayButton({ order }: NaverPayButtonProps) {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

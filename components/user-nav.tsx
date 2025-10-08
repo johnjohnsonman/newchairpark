@@ -1,6 +1,6 @@
 "use client"
 
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -21,7 +21,7 @@ export function UserNav() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   useEffect(() => {
     let mounted = true

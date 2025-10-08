@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { MultipleImageUpload } from "@/components/admin/multiple-image-upload"
 import { Trash2 } from "lucide-react"
 import {
@@ -66,7 +66,7 @@ export function UserGalleryForm({ userId, galleryItem }: UserGalleryFormProps) {
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       const dataToSubmit: any = {
@@ -120,7 +120,7 @@ export function UserGalleryForm({ userId, galleryItem }: UserGalleryFormProps) {
     if (!galleryItem) return
 
     setIsDeleting(true)
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       const { error } = await supabase.from("gallery").delete().eq("id", galleryItem.id).eq("user_id", userId)

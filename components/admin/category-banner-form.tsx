@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { MultipleImageUpload } from "./multiple-image-upload"
 
 const categories = [
@@ -38,7 +38,7 @@ export function CategoryBannerForm() {
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       // 데이터베이스 스키마에 따라 다른 방식으로 삽입

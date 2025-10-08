@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { SingleImageUpload } from "@/components/admin/single-image-upload"
 import { Trash2 } from "lucide-react"
 import {
@@ -78,7 +78,7 @@ export function UserRecycleForm({ userId, profile, recycleItem }: UserRecycleFor
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       if (recycleItem) {
@@ -118,7 +118,7 @@ export function UserRecycleForm({ userId, profile, recycleItem }: UserRecycleFor
     if (!recycleItem) return
 
     setIsDeleting(true)
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       const { error } = await supabase.from("recycle_items").delete().eq("id", recycleItem.id).eq("user_id", userId)

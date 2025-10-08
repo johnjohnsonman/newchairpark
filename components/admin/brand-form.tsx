@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import type { Brand } from "@/types/database"
 import Link from "next/link"
 import { SingleImageUpload } from "@/components/admin/single-image-upload"
@@ -39,7 +39,7 @@ export function BrandForm({ brand, initialBanners = [] }: BrandFormProps) {
     setIsLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       if (brand) {
