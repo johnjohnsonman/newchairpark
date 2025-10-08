@@ -12,25 +12,32 @@ export function createBrowserClient() {
     return supabaseClient
   }
 
-  // 환경 변수에서 값을 가져오되, 없으면 기본값 사용
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
-
-  console.log("Creating Supabase client with:", {
-    url: supabaseUrl ? "✓" : "✗",
-    key: supabaseAnonKey ? "✓" : "✗",
-    fromEnv: !!process.env.NEXT_PUBLIC_SUPABASE_URL
-  })
-
   try {
+    // 환경 변수에서 값을 가져오되, 없으면 기본값 사용
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
+
+    console.log("Creating Supabase client with:", {
+      url: supabaseUrl ? "✓" : "✗",
+      key: supabaseAnonKey ? "✓" : "✗",
+      fromEnv: !!process.env.NEXT_PUBLIC_SUPABASE_URL
+    })
+
     supabaseClient = createSupabaseBrowserClient(supabaseUrl, supabaseAnonKey)
     return supabaseClient
   } catch (error) {
     console.error("Failed to create Supabase client:", error)
     // 폴백으로 기본값으로 클라이언트 생성
-    supabaseClient = createSupabaseBrowserClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY)
-    return supabaseClient
+    try {
+      supabaseClient = createSupabaseBrowserClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY)
+      return supabaseClient
+    } catch (fallbackError) {
+      console.error("Failed to create fallback Supabase client:", fallbackError)
+      throw fallbackError
+    }
   }
 }
 
-export const createClient = createBrowserClient
+export function createClient() {
+  return createBrowserClient()
+}

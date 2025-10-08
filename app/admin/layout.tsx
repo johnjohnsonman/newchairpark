@@ -3,8 +3,8 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { createBrowserClient } from "@/lib/supabase/client"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { createBrowserClient } from "@/lib/supabase/client"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -26,7 +26,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
 
       try {
-        const supabase = createBrowserClient()
+        // Supabase 클라이언트를 lazy하게 초기화
+        let supabase
+        try {
+          supabase = createBrowserClient()
+        } catch (clientError) {
+          console.error('Failed to create Supabase client:', clientError)
+          throw new Error('Supabase client initialization failed')
+        }
         
         // 먼저 세션 확인 (더 빠름)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
