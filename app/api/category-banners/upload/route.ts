@@ -4,21 +4,34 @@ import { logEnvironmentStatus } from "@/lib/env-check"
 
 export async function POST(request: NextRequest) {
   try {
-    // 환경 변수 상태 로깅
-    const envStatus = logEnvironmentStatus()
+    // 환경 변수 직접 확인 및 상세 로깅
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    console.log("=== Environment Variables Check ===")
+    console.log("NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "✅ Set" : "❌ Missing")
+    console.log("SUPABASE_SERVICE_ROLE_KEY:", supabaseServiceKey ? "✅ Set" : "❌ Missing")
+    console.log("NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseAnonKey ? "✅ Set" : "❌ Missing")
     
-    if (!envStatus.isValid) {
+    if (!supabaseUrl || !supabaseServiceKey) {
+      const missing = []
+      if (!supabaseUrl) missing.push("NEXT_PUBLIC_SUPABASE_URL")
+      if (!supabaseServiceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY")
+      
       return NextResponse.json(
         { 
           error: "서버 설정 오류가 발생했습니다. 환경 변수를 확인해주세요.",
-          details: envStatus.issues
+          details: `Missing variables: ${missing.join(", ")}`,
+          debug: {
+            hasUrl: !!supabaseUrl,
+            hasServiceKey: !!supabaseServiceKey,
+            hasAnonKey: !!supabaseAnonKey
+          }
         },
         { status: 500 }
       )
     }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const formData = await request.formData()
