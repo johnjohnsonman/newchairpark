@@ -24,7 +24,15 @@ export function useUnifiedBrandProduct() {
         setIsLoading(true)
         setError(null)
 
-        const supabase = createBrowserClient()
+        let supabase
+        try {
+          supabase = createBrowserClient()
+        } catch (clientError) {
+          console.error("Failed to create Supabase client:", clientError)
+          setError("데이터베이스 연결에 실패했습니다.")
+          setIsLoading(false)
+          return
+        }
 
         // 모든 테이블에서 브랜드와 제품명을 통합 수집
         const [

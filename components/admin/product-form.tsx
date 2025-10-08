@@ -45,6 +45,15 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
   
+  // Supabase 클라이언트를 안전하게 초기화
+  let supabase
+  try {
+    supabase = createClient()
+  } catch (error) {
+    console.error("Failed to initialize Supabase client:", error)
+    supabase = null
+  }
+  
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
     if (formData.name && !product) {
@@ -60,33 +69,38 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     }
   }, [formData.name, product])
   
-  // 슬러그 중복 실시간 체크
-  useEffect(() => {
-    const checkSlugAvailability = async () => {
-      if (!formData.slug || (product && formData.slug === product.slug)) {
-        setSlugStatus(null)
-        return
-      }
-      
-      setSlugStatus('checking')
-      
-      try {
-        const { data: existingProduct } = await supabase
-          .from('products')
-          .select('id')
-          .eq('slug', formData.slug)
-          .maybeSingle()
+      // 슬러그 중복 실시간 체크
+      useEffect(() => {
+        const checkSlugAvailability = async () => {
+          if (!formData.slug || (product && formData.slug === product.slug)) {
+            setSlugStatus(null)
+            return
+          }
+          
+          if (!supabase) {
+            setSlugStatus(null)
+            return
+          }
+          
+          setSlugStatus('checking')
+          
+          try {
+            const { data: existingProduct } = await supabase
+              .from('products')
+              .select('id')
+              .eq('slug', formData.slug)
+              .maybeSingle()
+            
+            setSlugStatus(existingProduct ? 'taken' : 'available')
+          } catch (error) {
+            console.error('Error checking slug:', error)
+            setSlugStatus(null)
+          }
+        }
         
-        setSlugStatus(existingProduct ? 'taken' : 'available')
-      } catch (error) {
-        console.error('Error checking slug:', error)
-        setSlugStatus(null)
-      }
-    }
-    
-    const timeoutId = setTimeout(checkSlugAvailability, 500)
-    return () => clearTimeout(timeoutId)
-  }, [formData.slug, product])
+        const timeoutId = setTimeout(checkSlugAvailability, 500)
+        return () => clearTimeout(timeoutId)
+      }, [formData.slug, product, supabase])
 
   // images를 JSON 파싱하여 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
@@ -125,25 +139,28 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     setSelectedBrandName(brand ? brand.name : "")
   }, [formData.brand_id, brands])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // 슬러그 중복 체크
-    if (slugStatus === 'taken') {
-      setError('이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해주세요.')
-      return
-    }
-    
-    // 슬러그 체크 중인 경우 대기
-    if (slugStatus === 'checking') {
-      setError('슬러그 중복 체크 중입니다. 잠시 후 다시 시도해주세요.')
-      return
-    }
-    
-    setIsLoading(true)
-    setError(null)
-
-    const supabase = createClient()
+      const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        if (!supabase) {
+          setError('데이터베이스 연결에 실패했습니다. 페이지를 새로고침해주세요.')
+          return
+        }
+        
+        // 슬러그 중복 체크
+        if (slugStatus === 'taken') {
+          setError('이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해주세요.')
+          return
+        }
+        
+        // 슬러그 체크 중인 경우 대기
+        if (slugStatus === 'checking') {
+          setError('슬러그 중복 체크 중입니다. 잠시 후 다시 시도해주세요.')
+          return
+        }
+        
+        setIsLoading(true)
+        setError(null)
 
     try {
       // images를 JSONB 형식으로 변환
@@ -214,33 +231,38 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     }
   }
 
-  const generateSlug = async () => {
-    const baseSlug = formData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-    
-    let slug = baseSlug
-    let counter = 1
-    
-    // 중복 체크하여 고유한 슬러그 생성
-    while (true) {
-      const { data: existingProduct } = await supabase
-        .from('products')
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle()
-      
-      if (!existingProduct || (product && existingProduct.id === product.id)) {
-        break // 사용 가능한 슬러그
+      const generateSlug = async () => {
+        if (!supabase) {
+          setError('데이터베이스 연결에 실패했습니다.')
+          return
+        }
+        
+        const baseSlug = formData.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")
+        
+        let slug = baseSlug
+        let counter = 1
+        
+        // 중복 체크하여 고유한 슬러그 생성
+        while (true) {
+          const { data: existingProduct } = await supabase
+            .from('products')
+            .select('id')
+            .eq('slug', slug)
+            .maybeSingle()
+          
+          if (!existingProduct || (product && existingProduct.id === product.id)) {
+            break // 사용 가능한 슬러그
+          }
+          
+          slug = `${baseSlug}-${counter}`
+          counter++
+        }
+        
+        setFormData({ ...formData, slug })
       }
-      
-      slug = `${baseSlug}-${counter}`
-      counter++
-    }
-    
-    setFormData({ ...formData, slug })
-  }
 
   return (
     <Card>
