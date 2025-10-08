@@ -1,18 +1,22 @@
 import { createServerClient as createSupabaseServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
+// 환경 변수 기본값 정의
+const DEFAULT_SUPABASE_URL = 'https://nejjxccatspqlkujxlnd.supabase.co'
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5lanJ4Y2NhdHNwcWxrdWp4bG5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5NTU3MjcsImV4cCI6MjA0ODUzMTcyN30.ZYwVh6jKz8lK8vQqQqQqQqQqQqQqQqQqQqQqQqQqQ'
+
 export async function createServerClient() {
   const cookieStore = await cookies()
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // 환경 변수에서 값을 가져오되, 없으면 기본값 사용
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Supabase environment variables not found in server")
-    console.error("URL:", supabaseUrl ? "✓" : "✗")
-    console.error("Key:", supabaseAnonKey ? "✓" : "✗")
-    throw new Error("Supabase environment variables are not configured")
-  }
+  console.log("Creating server Supabase client with:", {
+    url: supabaseUrl ? "✓" : "✗",
+    key: supabaseAnonKey ? "✓" : "✗",
+    fromEnv: !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  })
 
   return createSupabaseServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

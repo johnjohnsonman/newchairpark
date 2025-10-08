@@ -45,14 +45,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
   
-  // Supabase 클라이언트를 안전하게 초기화
-  let supabase
-  try {
-    supabase = createClient()
-  } catch (error) {
-    console.error("Failed to initialize Supabase client:", error)
-    supabase = null
-  }
+  const supabase = createClient()
   
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
@@ -77,10 +70,6 @@ export function ProductForm({ product, brands }: ProductFormProps) {
             return
           }
           
-          if (!supabase) {
-            setSlugStatus(null)
-            return
-          }
           
           setSlugStatus('checking')
           
@@ -142,10 +131,6 @@ export function ProductForm({ product, brands }: ProductFormProps) {
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
-        if (!supabase) {
-          setError('데이터베이스 연결에 실패했습니다. 페이지를 새로고침해주세요.')
-          return
-        }
         
         // 슬러그 중복 체크
         if (slugStatus === 'taken') {
@@ -232,10 +217,6 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   }
 
       const generateSlug = async () => {
-        if (!supabase) {
-          setError('데이터베이스 연결에 실패했습니다.')
-          return
-        }
         
         const baseSlug = formData.name
           .toLowerCase()
@@ -423,8 +404,8 @@ export function ProductForm({ product, brands }: ProductFormProps) {
             </div>
           </div>
 
-              {/* 제품 옵션 관리 - Supabase 클라이언트가 있을 때만 렌더링 */}
-              {product && supabase && (
+              {/* 제품 옵션 관리 */}
+              {product && (
                 <ProductOptionsManager
                   productId={product.id}
                   onOptionsChange={setProductOptions}

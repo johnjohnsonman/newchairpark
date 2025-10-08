@@ -44,23 +44,6 @@ function UnifiedAutocompleteInputInner({
   const [inputValue, setInputValue] = useState(value)
   const inputRef = useRef<HTMLInputElement>(null)
   
-  // useUnifiedBrandProduct 훅을 안전하게 사용
-  let hookData
-  try {
-    hookData = useUnifiedBrandProduct()
-  } catch (error) {
-    console.error("Failed to initialize useUnifiedBrandProduct:", error)
-    hookData = {
-      brands: [],
-      products: [],
-      isLoading: false,
-      error: "데이터 로딩에 실패했습니다.",
-      getProductsByBrand: () => [],
-      searchBrands: () => [],
-      searchProducts: () => []
-    }
-  }
-  
   const { 
     brands, 
     products, 
@@ -69,7 +52,7 @@ function UnifiedAutocompleteInputInner({
     getProductsByBrand, 
     searchBrands, 
     searchProducts 
-  } = hookData
+  } = useUnifiedBrandProduct()
 
   // 입력값이 변경될 때마다 상위 컴포넌트에 전달
   useEffect(() => {
@@ -230,11 +213,7 @@ function UnifiedAutocompleteInputInner({
   )
 }
 
-// 메인 export 함수 - Suspense로 감싸서 안전하게 렌더링
+// 메인 export 함수
 export function UnifiedAutocompleteInput(props: UnifiedAutocompleteInputProps) {
-  return (
-    <Suspense fallback={<AutocompleteLoading />}>
-      <UnifiedAutocompleteInputInner {...props} />
-    </Suspense>
-  )
+  return <UnifiedAutocompleteInputInner {...props} />
 }
