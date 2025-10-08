@@ -175,15 +175,15 @@ export function BrandBannerCarousel({ banners, brandName, className }: BrandBann
 
       {/* 인디케이터 도트 */}
       {banners.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 sm:bottom-4 sm:gap-1.5">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-0.5 sm:bottom-4 sm:gap-1">
           {banners.map((_, index) => (
             <TouchOptimizedButton
               key={index}
               onClick={() => goToSlide(index)}
               className={cn(
-                "w-1.5 h-1.5 rounded-full transition-all duration-300 p-0 sm:w-2 sm:h-2",
+                "w-1 h-1 rounded-full transition-all duration-300 p-0 sm:w-1.5 sm:h-1.5",
                 index === currentIndex 
-                  ? "bg-white scale-110" 
+                  ? "bg-white scale-125" 
                   : "bg-white/50 hover:bg-white/75"
               )}
             />
