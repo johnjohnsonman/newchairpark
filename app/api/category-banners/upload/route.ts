@@ -1,18 +1,24 @@
 import { createClient } from "@supabase/supabase-js"
 import { type NextRequest, NextResponse } from "next/server"
+import { logEnvironmentStatus } from "@/lib/env-check"
 
 export async function POST(request: NextRequest) {
   try {
-    // 환경 변수를 런타임에 가져오기
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !supabaseServiceKey) {
+    // 환경 변수 상태 로깅
+    const envStatus = logEnvironmentStatus()
+    
+    if (!envStatus.isValid) {
       return NextResponse.json(
-        { error: "서버 설정 오류가 발생했습니다" },
+        { 
+          error: "서버 설정 오류가 발생했습니다. 환경 변수를 확인해주세요.",
+          details: envStatus.issues
+        },
         { status: 500 }
       )
     }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const formData = await request.formData()
@@ -45,6 +51,30 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)
 
+    // Storage 버킷 확인 및 생성
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets()
+    
+    if (bucketsError) {
+      console.error("Bucket list error:", bucketsError)
+      return NextResponse.json({ error: `스토리지 접근 오류: ${bucketsError.message}` }, { status: 500 })
+    }
+
+    const imagesBucket = buckets?.find(bucket => bucket.name === 'images')
+    
+    if (!imagesBucket) {
+      console.log("Creating images bucket...")
+      const { data: newBucket, error: createError } = await supabase.storage.createBucket('images', {
+        public: true,
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+        fileSizeLimit: 5242880 // 5MB
+      })
+      
+      if (createError) {
+        console.error("Bucket creation error:", createError)
+        return NextResponse.json({ error: `스토리지 버킷 생성 실패: ${createError.message}` }, { status: 500 })
+      }
+    }
+
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
       .from('images')
@@ -56,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Supabase upload error:", error)
-      return NextResponse.json({ error: `Upload failed: ${error.message}` }, { status: 500 })
+      return NextResponse.json({ error: `업로드 실패: ${error.message}` }, { status: 500 })
     }
 
     // Get public URL
