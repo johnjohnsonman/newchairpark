@@ -34,7 +34,7 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isClientReady, setIsClientReady] = useState(false)
+  const [isClientReady, setIsClientReady] = useState(true)
   
   // 브랜드 이름 표시용
   const [selectedBrandName, setSelectedBrandName] = useState("")
@@ -44,16 +44,6 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
   
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
-
-  // 클라이언트 준비 상태 설정
-  useEffect(() => {
-    setIsClientReady(true)
-  }, [])
-
-  // hydration mismatch 방지
-  if (!isClientReady) {
-    return <div>Loading...</div>
-  }
 
   // images를 안전하게 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
@@ -73,6 +63,8 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
       return []
     }
   })
+
+  // 클라이언트 준비 상태 설정 (제거)
 
   // 폼 데이터 초기화
   const [formData, setFormData] = useState({
