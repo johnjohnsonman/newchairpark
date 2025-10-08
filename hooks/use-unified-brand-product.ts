@@ -17,148 +17,118 @@ export function useUnifiedBrandProduct() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isMounted, setIsMounted] = useState(false)
-
-  // 컴포넌트 마운트 상태 관리
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   useEffect(() => {
-    // 컴포넌트가 마운트되지 않았으면 실행하지 않음
-    if (!isMounted) return
+    let isMounted = true
 
     const fetchData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        // 안전하게 Supabase 클라이언트 생성
-        let supabase
-        try {
-          supabase = createBrowserClient()
-        } catch (clientError) {
-          console.error("Failed to create Supabase client:", clientError)
-          setError("데이터베이스 연결에 실패했습니다.")
-          setIsLoading(false)
-          return
-        }
+        const supabase = createBrowserClient()
 
-        // 존재하는 테이블에서만 브랜드와 제품명을 수집
-        const [
-          productsResult,
-          brandsResult,
-          galleryResult
-        ] = await Promise.allSettled([
+        // 존재하는 테이블에서만 데이터 수집
+        const [productsResult, brandsResult, galleryResult] = await Promise.allSettled([
           supabase.from("products").select("id, name, brand_id"),
           supabase.from("brands").select("id, name"),
           supabase.from("gallery").select("brand, product_name")
         ])
 
-        const products = productsResult.status === 'fulfilled' ? productsResult.value.data : null
-        const brands = brandsResult.status === 'fulfilled' ? brandsResult.value.data : null
-        const gallery = galleryResult.status === 'fulfilled' ? galleryResult.value.data : null
-        const resources = null // 테이블이 존재하지 않음
-        const recycleItems = null // 테이블이 존재하지 않음
+        if (!isMounted) return
+
+        const products = productsResult.status === 'fulfilled' && productsResult.value.data ? productsResult.value.data : []
+        const brands = brandsResult.status === 'fulfilled' && brandsResult.value.data ? brandsResult.value.data : []
+        const gallery = galleryResult.status === 'fulfilled' && galleryResult.value.data ? galleryResult.value.data : []
 
         // 브랜드 수집
         const brandSet = new Set<string>()
         const productSet = new Set<string>()
         const brandProductMap: Record<string, Set<string>> = {}
 
-        // Products 테이블 - brands 테이블과 조인하여 브랜드명 가져오기
-        products?.forEach(item => {
-          const brand = brands?.find(b => b.id === item.brand_id)
-          if (brand) {
-            brandSet.add(brand.name)
-            if (item.name) {
-              productSet.add(item.name)
-              if (!brandProductMap[brand.name]) {
-                brandProductMap[brand.name] = new Set()
+        // Products 테이블 - brands 테이블과 조인
+        if (Array.isArray(products) && Array.isArray(brands)) {
+          products.forEach(item => {
+            const brand = brands.find(b => b.id === item.brand_id)
+            if (brand && brand.name) {
+              brandSet.add(brand.name)
+              if (item.name) {
+                productSet.add(item.name)
+                if (!brandProductMap[brand.name]) {
+                  brandProductMap[brand.name] = new Set()
+                }
+                brandProductMap[brand.name].add(item.name)
               }
-              brandProductMap[brand.name].add(item.name)
             }
-          }
-        })
+          })
+        }
 
         // Gallery 테이블
-        gallery?.forEach(item => {
-          if (item.brand) {
-            brandSet.add(item.brand)
-            if (item.product_name) {
-              productSet.add(item.product_name)
-              if (!brandProductMap[item.brand]) {
-                brandProductMap[item.brand] = new Set()
+        if (Array.isArray(gallery)) {
+          gallery.forEach(item => {
+            if (item && item.brand) {
+              brandSet.add(item.brand)
+              if (item.product_name) {
+                productSet.add(item.product_name)
+                if (!brandProductMap[item.brand]) {
+                  brandProductMap[item.brand] = new Set()
+                }
+                brandProductMap[item.brand].add(item.product_name)
               }
-              brandProductMap[item.brand].add(item.product_name)
             }
-          }
-        })
-
-        // Resources 테이블은 현재 존재하지 않으므로 건너뜀
-        // resources?.forEach(item => { ... })
-
-        // Recycle Items 테이블은 현재 존재하지 않으므로 건너뜀
-        // recycleItems?.forEach(item => { ... })
+          })
+        }
 
         // Set을 Array로 변환하고 정렬
         const sortedBrands = Array.from(brandSet).sort()
         const sortedProducts = Array.from(productSet).sort()
         
         const sortedBrandProducts: Record<string, string[]> = {}
-        Object.keys(brandProductMap).sort().forEach(brand => {
+        Object.keys(brandProductMap).forEach(brand => {
           sortedBrandProducts[brand] = Array.from(brandProductMap[brand]).sort()
         })
 
-        setData({
-          brands: sortedBrands,
-          products: sortedProducts,
-          brandProducts: sortedBrandProducts
-        })
+        if (isMounted) {
+          setData({
+            brands: sortedBrands,
+            products: sortedProducts,
+            brandProducts: sortedBrandProducts
+          })
+        }
       } catch (err) {
         console.error('Failed to fetch unified brand/product data:', err)
-        setError('데이터를 불러오는데 실패했습니다.')
+        if (isMounted) {
+          setError('데이터를 불러오는데 실패했습니다.')
+        }
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     fetchData()
-  }, [isMounted])
 
-  const getProductsByBrand = (brand: string): string[] => {
-    if (!data || !data.brandProducts) return []
-    return data.brandProducts[brand] || []
-  }
-
-  const searchBrands = (query: string): string[] => {
-    if (!data || !data.brands) return []
-    if (!query || !query.trim()) return data.brands
-    return data.brands.filter(brand => 
-      brand.toLowerCase().includes(query.toLowerCase())
-    )
-  }
-
-  const searchProducts = (query: string, brand?: string): string[] => {
-    if (!data || !data.products) return []
-    if (!query || !query.trim()) {
-      return brand ? getProductsByBrand(brand) : data.products
+    return () => {
+      isMounted = false
     }
-    
-    const searchTarget = brand ? getProductsByBrand(brand) : data.products
-    return searchTarget.filter(product => 
-      product.toLowerCase().includes(query.toLowerCase())
-    )
-  }
+  }, [])
 
   return {
-    brands: data?.brands || [],
-    products: data?.products || [],
-    brandProducts: data?.brandProducts || {},
+    brands: data.brands,
+    products: data.products,
+    brandProducts: data.brandProducts,
     isLoading,
     error,
-    getProductsByBrand,
-    searchBrands,
-    searchProducts
+    getProductsByBrand: (brand: string) => data.brandProducts[brand] || [],
+    searchBrands: (query: string) => {
+      if (!query || !query.trim()) return data.brands
+      return data.brands.filter(b => b.toLowerCase().includes(query.toLowerCase()))
+    },
+    searchProducts: (query: string, brand?: string) => {
+      const target = brand ? (data.brandProducts[brand] || []) : data.products
+      if (!query || !query.trim()) return target
+      return target.filter(p => p.toLowerCase().includes(query.toLowerCase()))
+    }
   }
 }
