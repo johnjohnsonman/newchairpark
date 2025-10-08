@@ -1,4 +1,2 @@
-# Force Vercel to rebuild
-.next/
-node_modules/
-
+# Force rebuild
+# Updated: 2025-01-09 05:00:00
