@@ -65,7 +65,7 @@ function UnifiedAutocompleteInputInner({
     if (inputValue !== value) {
       onChange(inputValue)
     }
-  }, [inputValue, value, onChange])
+  }, [inputValue, value]) // onChange 의존성 제거
 
   // 외부에서 value가 변경될 때 inputValue 동기화
   useEffect(() => {
