@@ -42,7 +42,13 @@ function UnifiedAutocompleteInputInner({
 }: UnifiedAutocompleteInputProps) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState(value)
+  const [isClient, setIsClient] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  
+  // 클라이언트 사이드 렌더링 확인
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const { 
     brands, 
@@ -97,6 +103,27 @@ function UnifiedAutocompleteInputInner({
   const suggestions = getSuggestions()
   const hasSuggestions = suggestions.length > 0
   const showSuggestions = open && (inputValue.length > 0 || hasSuggestions)
+
+  // 서버 사이드 렌더링 중에는 기본 input만 표시
+  if (!isClient) {
+    return (
+      <div className={cn("space-y-2", className)}>
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          disabled={disabled}
+          className={cn(
+            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
+        />
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
