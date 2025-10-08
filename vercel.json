@@ -1,3 +1,11 @@
 {
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "functions": {
+    "app/**/*.{js,ts,tsx}": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "crons": []
 }
