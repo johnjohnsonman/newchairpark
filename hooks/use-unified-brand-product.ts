@@ -44,20 +44,26 @@ export function useUnifiedBrandProduct() {
           return
         }
 
-        // 모든 테이블에서 브랜드와 제품명을 통합 수집
+        // 모든 테이블에서 브랜드와 제품명을 통합 수집 (안전하게)
         const [
-          { data: products },
-          { data: brands },
-          { data: gallery },
-          { data: resources },
-          { data: recycleItems }
-        ] = await Promise.all([
+          productsResult,
+          brandsResult,
+          galleryResult,
+          resourcesResult,
+          recycleItemsResult
+        ] = await Promise.allSettled([
           supabase.from("products").select("id, name, brand_id"),
           supabase.from("brands").select("id, name"),
           supabase.from("gallery").select("brand, product_name"),
-          supabase.from("resources").select("brand, product_name"),
-          supabase.from("recycle_items").select("brand, product_name")
+          supabase.from("resources").select("brand, product_name").catch(() => ({ data: null, error: null })),
+          supabase.from("recycle_items").select("brand, product_name").catch(() => ({ data: null, error: null }))
         ])
+
+        const products = productsResult.status === 'fulfilled' ? productsResult.value.data : null
+        const brands = brandsResult.status === 'fulfilled' ? brandsResult.value.data : null
+        const gallery = galleryResult.status === 'fulfilled' ? galleryResult.value.data : null
+        const resources = resourcesResult.status === 'fulfilled' ? resourcesResult.value.data : null
+        const recycleItems = recycleItemsResult.status === 'fulfilled' ? recycleItemsResult.value.data : null
 
         // 브랜드 수집
         const brandSet = new Set<string>()

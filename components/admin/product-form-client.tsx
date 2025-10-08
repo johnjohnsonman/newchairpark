@@ -50,6 +50,11 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     setIsClientReady(true)
   }, [])
 
+  // hydration mismatch 방지
+  if (!isClientReady) {
+    return <div>Loading...</div>
+  }
+
   // images를 안전하게 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
     try {
