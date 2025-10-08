@@ -17,14 +17,32 @@ export function useUnifiedBrandProduct() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // 컴포넌트 마운트 상태 관리
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
+    // 컴포넌트가 마운트되지 않았으면 실행하지 않음
+    if (!isMounted) return
+
     const fetchData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        const supabase = createBrowserClient()
+        // 안전하게 Supabase 클라이언트 생성
+        let supabase
+        try {
+          supabase = createBrowserClient()
+        } catch (clientError) {
+          console.error("Failed to create Supabase client:", clientError)
+          setError("데이터베이스 연결에 실패했습니다.")
+          setIsLoading(false)
+          return
+        }
 
         // 모든 테이블에서 브랜드와 제품명을 통합 수집
         const [
@@ -126,7 +144,7 @@ export function useUnifiedBrandProduct() {
     }
 
     fetchData()
-  }, [])
+  }, [isMounted])
 
   const getProductsByBrand = (brand: string): string[] => {
     return data.brandProducts[brand] || []

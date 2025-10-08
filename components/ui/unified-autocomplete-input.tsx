@@ -42,8 +42,14 @@ function UnifiedAutocompleteInputInner({
 }: UnifiedAutocompleteInputProps) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState(value)
+  const [isMounted, setIsMounted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   
+  // 컴포넌트 마운트 상태 관리
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const { 
     brands, 
     products, 
