@@ -95,33 +95,11 @@ export function useUnifiedBrandProduct() {
           }
         })
 
-        // Resources 테이블
-        resources?.forEach(item => {
-          if (item.brand) {
-            brandSet.add(item.brand)
-            if (item.product_name) {
-              productSet.add(item.product_name)
-              if (!brandProductMap[item.brand]) {
-                brandProductMap[item.brand] = new Set()
-              }
-              brandProductMap[item.brand].add(item.product_name)
-            }
-          }
-        })
+        // Resources 테이블은 현재 존재하지 않으므로 건너뜀
+        // resources?.forEach(item => { ... })
 
-        // Recycle Items 테이블
-        recycleItems?.forEach(item => {
-          if (item.brand) {
-            brandSet.add(item.brand)
-            if (item.product_name) {
-              productSet.add(item.product_name)
-              if (!brandProductMap[item.brand]) {
-                brandProductMap[item.brand] = new Set()
-              }
-              brandProductMap[item.brand].add(item.product_name)
-            }
-          }
-        })
+        // Recycle Items 테이블은 현재 존재하지 않으므로 건너뜀
+        // recycleItems?.forEach(item => { ... })
 
         // Set을 Array로 변환하고 정렬
         const sortedBrands = Array.from(brandSet).sort()
