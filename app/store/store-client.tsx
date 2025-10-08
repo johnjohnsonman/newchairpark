@@ -25,6 +25,7 @@ interface Category {
 interface Product {
   id: string
   name: string
+  slug: string
   price: number
   category: string
   featured: boolean
@@ -583,7 +584,7 @@ export default function StoreClientPage({
                     key={product.id}
                     className="group h-full overflow-hidden border-neutral-200 transition-shadow hover:shadow-lg"
                   >
-                    <Link href={`/store/product/${product.id}`}>
+                    <Link href={`/products/${product.slug}`}>
                       <div className="relative aspect-square overflow-hidden bg-neutral-50">
                         <Image
                           src={mainImage || "/placeholder.svg"}
@@ -599,7 +600,7 @@ export default function StoreClientPage({
                           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
                             {product.brands?.name || "브랜드 없음"}
                           </p>
-                          <Link href={`/store/product/${product.id}`}>
+                          <Link href={`/products/${product.slug}`}>
                             <h3 className="mb-1 text-base font-bold text-neutral-900 hover:underline line-clamp-2">
                               {product.name}
                             </h3>

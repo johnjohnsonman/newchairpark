@@ -38,6 +38,7 @@ export interface Product {
   variants?: any[]
   in_stock: boolean
   featured: boolean
+  view_count?: number
   created_at: string
   updated_at: string
 }

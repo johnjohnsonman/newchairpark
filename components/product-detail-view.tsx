@@ -20,6 +20,7 @@ import {
   Minus
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { RecommendedProducts } from "@/components/recommended-products"
 
 interface ProductDetailViewProps {
   product: {
@@ -374,6 +375,15 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* 추천 제품 섹션 */}
+      <div className="mt-16">
+        <RecommendedProducts
+          currentProductId={product.id}
+          currentBrandId={product.brands?.name ? product.brand_id : undefined}
+          currentCategory={product.category}
+        />
       </div>
     </div>
   )
