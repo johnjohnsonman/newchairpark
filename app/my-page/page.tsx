@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus, Package, ImageIcon } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function MyPage() {
   const supabase = await createServerClient()
 

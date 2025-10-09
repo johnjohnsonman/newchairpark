@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import ReviewFilters from "@/components/review-filters"
 
@@ -7,7 +7,7 @@ export default async function ReviewFiltersPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const productId = searchParams.product ? Number(searchParams.product) : null
   const brandSlug = searchParams.brand ? String(searchParams.brand) : null

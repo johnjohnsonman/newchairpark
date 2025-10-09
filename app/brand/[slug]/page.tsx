@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Heart } from "lucide-react"
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { BrandBannerCarousel } from "@/components/brand-banner-carousel"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -17,7 +17,7 @@ interface BrandDetailPageProps {
 export async function generateMetadata({ params }: BrandDetailPageProps): Promise<Metadata> {
   try {
     const { slug } = await params
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     
     const { data: brand } = await supabase
       .from("brands")
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: BrandDetailPageProps): Promis
 export default async function BrandDetailPage({ params }: BrandDetailPageProps) {
   try {
     const { slug } = await params
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     // 브랜드 정보를 먼저 가져오기
     const { data: brand, error: brandError } = await supabase
@@ -155,7 +155,7 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
 
           {displayProducts.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {displayProducts.map((product) => (
+              {Array.isArray(displayProducts) && displayProducts.map((product) => (
                 <Card key={product.id} className="group overflow-hidden border-border">
                   <div className="relative aspect-square overflow-hidden bg-slate-50">
                     <Image

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -36,6 +36,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isClientReady, setIsClientReady] = useState(false)
   
   // 브랜드 이름 표시용
   const [selectedBrandName, setSelectedBrandName] = useState("")
@@ -75,7 +76,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
           setSlugStatus('checking')
           
           try {
-            const supabase = createClient()
+            const supabase = createBrowserClient()
             const { data: existingProduct } = await supabase
               .from('products')
               .select('id')
@@ -150,7 +151,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         setError(null)
 
     try {
-      const supabase = createClient()
+      const supabase = createBrowserClient()
       
       // images를 JSONB 형식으로 변환
       const dataToSave = {
@@ -221,7 +222,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   }
 
       const generateSlug = async () => {
-        const supabase = createClient()
+        const supabase = createBrowserClient()
         
         const baseSlug = formData.name
           .toLowerCase()

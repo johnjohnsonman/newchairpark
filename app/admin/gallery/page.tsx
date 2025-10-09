@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -7,7 +7,7 @@ import { Plus, Edit } from "lucide-react"
 import { DeleteGalleryButton } from "@/components/admin/delete-gallery-button"
 
 export default async function GalleryManagementPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   // 필요한 필드만 선택하고 제한된 수만 가져오기 (타임아웃 설정)
   const galleryPromise = supabase

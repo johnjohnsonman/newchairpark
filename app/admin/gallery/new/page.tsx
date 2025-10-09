@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { GalleryForm } from "@/components/admin/gallery-form"
 
 export default async function NewGalleryPage() {

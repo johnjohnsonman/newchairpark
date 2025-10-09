@@ -38,5 +38,3 @@ export async function createServerClient() {
   })
 }
 
-// 기존 코드와의 호환성을 위해 createClient export 추가
-export const createClient = createServerClient

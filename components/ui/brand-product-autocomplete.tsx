@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, Suspense } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -9,28 +9,27 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useUnifiedBrandProduct } from "@/hooks/use-unified-brand-product"
 
 // 로딩 컴포넌트
-function AutocompleteLoading() {
+function AutocompleteLoading({ className }: { className?: string }) {
   return (
-    <div className="space-y-2">
-      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-      <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+    <div className={cn("space-y-2", className)}>
+      <div className="h-10 bg-gray-100 rounded-md animate-pulse"></div>
+      <p className="text-xs text-gray-500">데이터 로딩 중...</p>
     </div>
   )
 }
 
-interface UnifiedAutocompleteInputProps {
+interface BrandProductAutocompleteProps {
   label: string
   placeholder?: string
   value: string
   onChange: (value: string) => void
   type: "brand" | "product"
-  selectedBrand?: string // product 타입일 때 필요한 브랜드 정보
+  selectedBrand?: string
   className?: string
   disabled?: boolean
 }
 
-// 내부 컴포넌트
-function UnifiedAutocompleteInputInner({
+function BrandProductAutocompleteInner({
   label,
   placeholder,
   value,
@@ -39,70 +38,57 @@ function UnifiedAutocompleteInputInner({
   selectedBrand,
   className,
   disabled = false
-}: UnifiedAutocompleteInputProps) {
+}: BrandProductAutocompleteProps) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState(value)
   const [isClient, setIsClient] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  
-  // 클라이언트 사이드 렌더링 확인
+
+  // 클라이언트 마운트 확인
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  const { 
-    brands, 
-    products, 
-    isLoading, 
-    error, 
-    getProductsByBrand, 
-    searchBrands, 
-    searchProducts 
+  const {
+    brands,
+    products,
+    isLoading,
+    error,
+    getProductsByBrand,
+    searchBrands,
+    searchProducts,
+    refreshData
   } = useUnifiedBrandProduct()
 
-  // 입력값이 변경될 때마다 상위 컴포넌트에 전달
+  // 입력값 변경 처리 (무한 루프 방지)
   useEffect(() => {
-    if (inputValue !== value) {
+    if (inputValue !== value && isClient) {
       onChange(inputValue)
     }
-  }, [inputValue, value]) // onChange를 의존성에서 제거하여 무한 루프 방지
+  }, [inputValue, value, isClient, onChange])
 
-  // 외부에서 value가 변경될 때 inputValue 동기화
+  // 외부 value 변경 동기화
   useEffect(() => {
     setInputValue(value)
   }, [value])
 
-  const handleSelect = useCallback((selectedValue: string) => {
-    setInputValue(selectedValue)
-    setOpen(false)
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [])
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
+  // 입력값 변경 핸들러
+  const handleInputChange = (newValue: string) => {
     setInputValue(newValue)
-    setOpen(true)
-  }, [])
+  }
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
+  // 키보드 이벤트 핸들러
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
       setOpen(false)
     }
-  }, [])
+  }
 
-  const getSuggestions = useCallback(() => {
-    if (type === "brand") {
-      return searchBrands(inputValue)
-    } else {
-      return searchProducts(inputValue, selectedBrand)
-    }
-  }, [type, inputValue, selectedBrand, searchBrands, searchProducts])
-
-  const suggestions = getSuggestions()
-  const hasSuggestions = suggestions.length > 0
-  const showSuggestions = open && (inputValue.length > 0 || hasSuggestions)
+  // 선택 핸들러
+  const handleSelect = (selectedValue: string) => {
+    setInputValue(selectedValue)
+    setOpen(false)
+  }
 
   // 서버 사이드 렌더링 중에는 기본 input만 표시
   if (!isClient) {
@@ -149,7 +135,7 @@ function UnifiedAutocompleteInputInner({
             type="text"
             placeholder={placeholder}
             value={inputValue}
-            onChange={handleInputChange}
+            onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={disabled}
             className="flex-1 bg-transparent outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -160,13 +146,23 @@ function UnifiedAutocompleteInputInner({
     )
   }
 
+  // 제안 목록 생성
+  let suggestions: string[] = []
+  if (type === "brand") {
+    suggestions = searchBrands(inputValue)
+  } else if (type === "product") {
+    suggestions = selectedBrand 
+      ? searchProducts(inputValue, selectedBrand)
+      : searchProducts(inputValue)
+  }
+
   return (
     <div className={cn("space-y-2", className)}>
       <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
         {label}
       </label>
       
-      <Popover open={showSuggestions} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
             <input
@@ -174,7 +170,7 @@ function UnifiedAutocompleteInputInner({
               type="text"
               placeholder={placeholder}
               value={inputValue}
-              onChange={handleInputChange}
+              onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={disabled}
               className={cn(
@@ -204,10 +200,10 @@ function UnifiedAutocompleteInputInner({
                 </CommandEmpty>
               ) : (
                 <CommandGroup>
-                  {Array.isArray(suggestions) && suggestions.length > 0 ? (
+                  {suggestions.length > 0 ? (
                     suggestions.map((suggestion, index) => (
                       <CommandItem
-                        key={`${suggestion}-${index}`}
+                        key={`${suggestion}-${index}-${type}`}
                         value={suggestion}
                         onSelect={() => handleSelect(suggestion)}
                         className="cursor-pointer"
@@ -233,20 +229,19 @@ function UnifiedAutocompleteInputInner({
         </PopoverContent>
       </Popover>
       
-      <p className="text-xs text-muted-foreground">
-        {type === "brand" 
-          ? "기존 브랜드 선택 또는 새 브랜드 입력 가능" 
-          : selectedBrand 
-            ? `"${selectedBrand}" 브랜드의 기존 제품 선택 또는 새 제품 입력`
-            : "기존 제품명 선택 또는 새 제품명 입력 가능"
-        }
-        {hasSuggestions && ` (${suggestions.length}개 제안)`}
-      </p>
+      {type === "product" && selectedBrand && (
+        <p className="text-xs text-muted-foreground">
+          {selectedBrand} 브랜드의 제품만 표시됩니다
+        </p>
+      )}
     </div>
   )
 }
 
-// 메인 export 함수
-export function UnifiedAutocompleteInput(props: UnifiedAutocompleteInputProps) {
-  return <UnifiedAutocompleteInputInner {...props} />
+export function BrandProductAutocomplete(props: BrandProductAutocompleteProps) {
+  return (
+    <Suspense fallback={<AutocompleteLoading className={props.className} />}>
+      <BrandProductAutocompleteInner {...props} />
+    </Suspense>
+  )
 }

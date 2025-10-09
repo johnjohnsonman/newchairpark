@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 
 interface UseBrandProductDataReturn {
   brands: string[]
@@ -17,7 +17,7 @@ export function useBrandProductData(): UseBrandProductDataReturn {
   const [loadingBrands, setLoadingBrands] = useState(true)
   const [loadingProducts, setLoadingProducts] = useState(true)
 
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   // 브랜드 목록 로드
   useEffect(() => {

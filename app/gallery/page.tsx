@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { GalleryClient } from "@/components/gallery-client"
 import type { Metadata } from "next"
 
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 }
 
 export default async function GalleryPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   const { data: galleryItems } = await supabase.from("gallery").select("id, title, description, brand, product_name, image_url, images, featured_image_index, created_at").order("created_at", { ascending: false })
 

@@ -36,12 +36,18 @@ export function ProductOptionsManager({
 }: ProductOptionsManagerProps) {
   const [options, setOptions] = useState<ProductOption[]>(initialOptions)
   const [isLoading, setIsLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // 클라이언트에서만 실행
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
-    if (onOptionsChange) {
+    if (isClient && onOptionsChange) {
       onOptionsChange(options)
     }
-  }, [options, onOptionsChange])
+  }, [options, isClient]) // onOptionsChange 제거
 
   const addOption = () => {
     const newOption: ProductOption = {
@@ -66,23 +72,30 @@ export function ProductOptionsManager({
 
   const addOptionValue = (optionIndex: number) => {
     const updatedOptions = [...options]
+    if (!Array.isArray(updatedOptions[optionIndex].values)) {
+      updatedOptions[optionIndex].values = []
+    }
     updatedOptions[optionIndex].values.push({ value: '', label: '' })
     setOptions(updatedOptions)
   }
 
   const updateOptionValue = (optionIndex: number, valueIndex: number, field: string, value: string) => {
     const updatedOptions = [...options]
-    updatedOptions[optionIndex].values[valueIndex] = {
-      ...updatedOptions[optionIndex].values[valueIndex],
-      [field]: value
+    if (Array.isArray(updatedOptions[optionIndex].values) && updatedOptions[optionIndex].values[valueIndex]) {
+      updatedOptions[optionIndex].values[valueIndex] = {
+        ...updatedOptions[optionIndex].values[valueIndex],
+        [field]: value
+      }
+      setOptions(updatedOptions)
     }
-    setOptions(updatedOptions)
   }
 
   const removeOptionValue = (optionIndex: number, valueIndex: number) => {
     const updatedOptions = [...options]
-    updatedOptions[optionIndex].values.splice(valueIndex, 1)
-    setOptions(updatedOptions)
+    if (Array.isArray(updatedOptions[optionIndex].values)) {
+      updatedOptions[optionIndex].values.splice(valueIndex, 1)
+      setOptions(updatedOptions)
+    }
   }
 
   const getOptionIcon = (type: string) => {
@@ -125,8 +138,9 @@ export function ProductOptionsManager({
             <p className="text-sm">색상, 사이즈 등을 추가해보세요.</p>
           </div>
         ) : (
-          options.map((option, optionIndex) => (
-            <Card key={optionIndex} className="border-l-4 border-l-primary">
+          Array.isArray(options) && options.length > 0 ? (
+            options.map((option, optionIndex) => (
+              <Card key={optionIndex} className="border-l-4 border-l-primary">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -197,40 +211,42 @@ export function ProductOptionsManager({
                     </Button>
                   </div>
 
-                  {option.values.map((value, valueIndex) => (
-                    <div key={valueIndex} className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                      {option.type === 'color' && (
-                        <input
-                          type="color"
-                          value={value.color || '#000000'}
-                          onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'color', e.target.value)}
-                          className="w-8 h-8 rounded border"
+                  {Array.isArray(option.values) && option.values.length > 0 ? (
+                    option.values.map((value, valueIndex) => (
+                      <div key={valueIndex} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                        {option.type === 'color' && (
+                          <input
+                            type="color"
+                            value={value.color || '#000000'}
+                            onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'color', e.target.value)}
+                            className="w-8 h-8 rounded border"
+                          />
+                        )}
+                        <Input
+                          value={value.value}
+                          onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'value', e.target.value)}
+                          placeholder="옵션 값"
+                          className="flex-1"
                         />
-                      )}
-                      <Input
-                        value={value.value}
-                        onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'value', e.target.value)}
-                        placeholder="옵션 값"
-                        className="flex-1"
-                      />
-                      <Input
-                        value={value.label || ''}
-                        onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'label', e.target.value)}
-                        placeholder="표시명 (선택)"
-                        className="flex-1"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeOptionValue(optionIndex, valueIndex)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                        <Input
+                          value={value.label || ''}
+                          onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'label', e.target.value)}
+                          placeholder="표시명 (선택)"
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOptionValue(optionIndex, valueIndex)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  ) : null}
 
-                  {option.values.length === 0 && (
+                  {Array.isArray(option.values) && option.values.length === 0 && (
                     <div className="text-center py-4 text-muted-foreground text-sm">
                       옵션 값이 없습니다. "값 추가" 버튼을 클릭하세요.
                     </div>
@@ -238,7 +254,13 @@ export function ProductOptionsManager({
                 </div>
               </CardContent>
             </Card>
-          ))
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>옵션 데이터를 불러오는 중...</p>
+            </div>
+          )
         )}
       </CardContent>
     </Card>

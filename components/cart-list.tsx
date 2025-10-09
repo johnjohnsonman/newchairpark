@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import Image from "next/image"
 import { Trash2, ShoppingBag } from "lucide-react"
 import Link from "next/link"
@@ -28,7 +28,7 @@ interface CartListProps {
 
 export function CartList({ cartItems: initialCartItems }: CartListProps) {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   const [cartItems, setCartItems] = useState(initialCartItems)
   const [isLoading, setIsLoading] = useState<string | null>(null)
 

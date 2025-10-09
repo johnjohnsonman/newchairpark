@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Upload, Loader2 } from "lucide-react"
 
@@ -29,7 +29,7 @@ interface ProfileEditFormProps {
 
 export function ProfileEditForm({ profile, userId }: ProfileEditFormProps) {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   const [isLoading, setIsLoading] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)

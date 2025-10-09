@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -54,7 +54,7 @@ export function GalleryRelatedContent({ currentGalleryId }: GalleryRelatedConten
 
   const fetchGalleryItems = async () => {
     try {
-      const supabase = createClient()
+      const supabase = createBrowserClient()
       const { data, error } = await supabase
         .from("gallery")
         .select("*")

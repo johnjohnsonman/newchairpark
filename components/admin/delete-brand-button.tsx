@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 
 interface DeleteBrandButtonProps {
   brandId: string
@@ -23,7 +23,7 @@ export function DeleteBrandButton({ brandId, brandName }: DeleteBrandButtonProps
     }
 
     setIsDeleting(true)
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       const { error } = await supabase.from("brands").delete().eq("id", brandId)

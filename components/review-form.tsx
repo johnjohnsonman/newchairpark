@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Star, Upload, X } from "lucide-react"
 import { TouchOptimizedButton } from "@/components/ui/touch-optimized-button"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 import Image from "next/image"
 
 interface ReviewFormProps {
@@ -50,7 +50,7 @@ export function ReviewForm({ user }: ReviewFormProps) {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const supabase = createClient()
+        const supabase = createBrowserClient()
         const { data, error } = await supabase
           .from("brands")
           .select("id, name")

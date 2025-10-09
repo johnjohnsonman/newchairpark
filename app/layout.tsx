@@ -13,6 +13,7 @@ const notoSans = Noto_Sans({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://newchairpark.vercel.app'),
   title: {
     default: "체어파크 | World Premium Chair Store",
     template: "%s | 체어파크",
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://chairpark.com",
+    url: "https://newchairpark.vercel.app",
     title: "체어파크 | World Premium Chair Store",
     description: "허먼밀러, 스틸케이스 등 세계적인 프리미엄 오피스 가구 브랜드",
     siteName: "체어파크",

@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     images: ["/herman-miller-aeron.png"],
   },
   alternates: {
-    canonical: "https://chairpark.co.kr",
+    canonical: "https://newchairpark.vercel.app",
   },
   robots: {
     index: true,

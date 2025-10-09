@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 }
 
 export default async function BrandPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClient()
 
   try {
     const { data: brands, error } = await supabase.from("brands").select("*").order("name")

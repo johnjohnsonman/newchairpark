@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@/lib/supabase/client"
 
 interface DeleteRecycleItemButtonProps {
   itemId: string
@@ -21,7 +21,7 @@ export function DeleteRecycleItemButton({ itemId, itemTitle }: DeleteRecycleItem
     }
 
     setIsDeleting(true)
-    const supabase = createClient()
+    const supabase = createBrowserClient()
 
     try {
       const { error } = await supabase.from("recycle_market").delete().eq("id", itemId)

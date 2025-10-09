@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { GalleryForm } from "@/components/admin/gallery-form"
 
 export default async function EditGalleryPage({ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     const { data: galleryItem, error: galleryError } = await supabase.from("gallery").select("*").eq("id", id).single()
 

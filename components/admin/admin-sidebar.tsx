@@ -39,7 +39,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   const handleMenuClick = (href: string, title: string) => {
-    console.log('Menu clicked:', { href, title, pathname })
+    // 메뉴 클릭 로직 (필요시 추가)
   }
 
   return (
