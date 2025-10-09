@@ -90,12 +90,8 @@ export function RecommendedProducts({
   }
 
   return (
-    <section className="py-12 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-8">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">추천 제품</h2>
-          <p className="text-gray-600">고객님께 추천하는 다른 제품들</p>
-        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.isArray(products) && products.map((product) => {
@@ -109,18 +105,39 @@ export function RecommendedProducts({
                   <CardContent className="p-0">
                     {/* 제품 이미지 */}
                     <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                      {Array.isArray(product.images) && product.images[0] ? (
-                        <Image
-                          src={product.images[0]}
-                          alt={product.name}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-muted-foreground">
-                          <span>이미지 없음</span>
-                        </div>
-                      )}
+                      {(() => {
+                        // 이미지 처리 로직
+                        let imageUrl = null
+                        
+                        if (Array.isArray(product.images) && product.images[0]) {
+                          imageUrl = product.images[0]
+                        } else if (typeof product.images === 'string') {
+                          try {
+                            const parsed = JSON.parse(product.images)
+                            if (Array.isArray(parsed) && parsed[0]) {
+                              imageUrl = parsed[0]
+                            }
+                          } catch (e) {
+                            console.warn('Failed to parse recommended product images:', e)
+                          }
+                        }
+                        
+                        return imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={product.name}
+                            fill
+                            className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                            <div className="w-12 h-12 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">
+                              <span className="text-xl">📷</span>
+                            </div>
+                            <span className="text-xs font-medium">이미지 준비 중</span>
+                          </div>
+                        )
+                      })()}
 
                       {/* 배지들 */}
                       <div className="absolute top-2 left-2 flex flex-col gap-1">
