@@ -17,6 +17,7 @@ export function useUnifiedBrandProduct() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -112,7 +113,7 @@ export function useUnifiedBrandProduct() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [refreshTrigger])
 
   const getProductsByBrand = useCallback((brand: string) => {
     return data.brandProducts[brand] || []
@@ -129,6 +130,10 @@ export function useUnifiedBrandProduct() {
     return target.filter(p => p.toLowerCase().includes(query.toLowerCase()))
   }, [data.brandProducts, data.products])
 
+  const refreshData = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1)
+  }, [])
+
   return {
     brands: data.brands,
     products: data.products,
@@ -137,6 +142,7 @@ export function useUnifiedBrandProduct() {
     error,
     getProductsByBrand,
     searchBrands,
-    searchProducts
+    searchProducts,
+    refreshData
   }
 }

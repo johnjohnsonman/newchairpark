@@ -56,15 +56,16 @@ function BrandProductAutocompleteInner({
     error,
     getProductsByBrand,
     searchBrands,
-    searchProducts
+    searchProducts,
+    refreshData
   } = useUnifiedBrandProduct()
 
-  // 입력값 변경 처리
+  // 입력값 변경 처리 (무한 루프 방지)
   useEffect(() => {
-    if (inputValue !== value) {
+    if (inputValue !== value && isClient) {
       onChange(inputValue)
     }
-  }, [inputValue, value])
+  }, [inputValue, value, isClient, onChange])
 
   // 외부 value 변경 동기화
   useEffect(() => {

@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useUnifiedBrandProduct } from "@/hooks/use-unified-brand-product"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -38,6 +39,9 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
   
   // 브랜드 이름 표시용
   const [selectedBrandName, setSelectedBrandName] = useState("")
+  
+  // 브랜드 데이터 새로고침을 위한 훅
+  const { refreshData } = useUnifiedBrandProduct()
   
   // 제품 옵션 상태
   const [productOptions, setProductOptions] = useState<any[]>([])
@@ -286,6 +290,9 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
                   const brand = brands.find(b => b.name === value)
                   if (brand) {
                     setFormData(prev => ({ ...prev, brand_id: brand.id }))
+                  } else {
+                    // 새 브랜드인 경우 데이터 새로고침
+                    setTimeout(() => refreshData(), 1000)
                   }
                 }}
                 type="brand"
