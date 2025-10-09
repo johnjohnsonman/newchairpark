@@ -36,12 +36,18 @@ export function ProductOptionsManager({
 }: ProductOptionsManagerProps) {
   const [options, setOptions] = useState<ProductOption[]>(initialOptions)
   const [isLoading, setIsLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // 클라이언트에서만 실행
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
-    if (onOptionsChange) {
+    if (isClient && onOptionsChange) {
       onOptionsChange(options)
     }
-  }, [options, onOptionsChange])
+  }, [options, isClient]) // onOptionsChange 제거
 
   const addOption = () => {
     const newOption: ProductOption = {
