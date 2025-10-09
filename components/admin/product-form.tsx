@@ -14,9 +14,8 @@ import { createBrowserClient } from "@/lib/supabase/client"
 import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
-import { SafeAutocompleteInput } from "@/components/ui/safe-autocomplete-input"
-import { useUnifiedBrandProduct } from "@/hooks/use-unified-brand-product"
 import { ProductOptionsManager } from "@/components/admin/product-options-manager"
+import { cn } from "@/lib/utils"
 
 interface ProductFormProps {
   product?: Product
@@ -43,13 +42,13 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
   
-  // 브랜드 검색 함수 (간단한 로컬 검색)
-  const searchBrands = useCallback((query: string): string[] => {
-    if (!query.trim()) return brands.map(b => b.name)
-    return brands.filter(brand => 
-      brand.name.toLowerCase().includes(query.toLowerCase())
-    ).map(b => b.name)
-  }, [brands])
+  // 브랜드 검색 함수 (간단한 로컬 검색) - 현재 사용하지 않음
+  // const searchBrands = useCallback((query: string): string[] => {
+  //   if (!query.trim()) return brands.map(b => b.name)
+  //   return brands.filter(brand => 
+  //     brand.name.toLowerCase().includes(query.toLowerCase())
+  //   ).map(b => b.name)
+  // }, [brands])
 
   // 제품 옵션 변경 핸들러 (무한 루프 방지)
   const handleOptionsChange = useCallback((options: any[]) => {
@@ -275,14 +274,16 @@ export function ProductForm({ product, brands }: ProductFormProps) {
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4">
-            <SafeAutocompleteInput
-              label="Product Name *"
-              placeholder="예: Aeron Chair, Gesture Chair"
-              value={formData.name}
-              onChange={useCallback((value) => setFormData(prev => ({ ...prev, name: value })), [])}
-              suggestions={searchProducts(formData.name, selectedBrandName)}
-              isLoading={false}
-            />
+            <div className="grid gap-2">
+              <Label htmlFor="name">Product Name *</Label>
+              <Input
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="예: Aeron Chair, Gesture Chair"
+              />
+            </div>
 
             <div className="grid gap-2">
               <div className="flex items-center justify-between">

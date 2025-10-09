@@ -5,11 +5,12 @@ import type { Metadata } from "next"
 import { Badge } from "@/components/ui/badge"
 
 interface ProductPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   try {
+    const { slug } = await params
     const supabase = await createServerClient()
     const { data: product } = await supabase
       .from("products")
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         brand_id,
         brands(name)
       `)
-      .eq("slug", params.slug)
+      .eq("slug", slug)
       .single()
 
     if (!product) {
@@ -63,6 +64,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   try {
+    const { slug } = await params
     const supabase = await createServerClient()
 
     const { data: product, error } = await supabase
@@ -73,7 +75,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         product_options(*),
         product_variants(*)
       `)
-      .eq("slug", params.slug)
+      .eq("slug", slug)
       .single()
 
     if (error || !product) {
@@ -90,9 +92,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }
 
     // 조회수 증가 (에러 무시) - 비동기로 처리하여 페이지 렌더링을 차단하지 않음
-    supabase.rpc("increment_product_view_count", { product_slug: params.slug }).catch((viewError) => {
+    try {
+      await supabase.rpc("increment_product_view_count", { product_slug: slug })
+    } catch (viewError) {
       console.warn("Failed to increment view count:", viewError)
-    })
+    }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
