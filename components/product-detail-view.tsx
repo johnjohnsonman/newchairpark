@@ -446,7 +446,6 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           )}
         </div>
       </div>
-      </div>
 
       {/* 추천 제품 섹션 */}
       <div className="mt-20">
