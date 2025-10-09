@@ -115,7 +115,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.order_items?.map((item: any) => (
+                {Array.isArray(order.order_items) && order.order_items.map((item: any) => (
                   <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 relative overflow-hidden">
                       {item.product_image_url ? (

@@ -192,7 +192,7 @@ export default async function ProductDetailPage({
             <div className="mb-8">
               <h3 className="mb-4 text-lg font-semibold">주요 특징</h3>
               <div className="grid gap-3 sm:grid-cols-2">
-                {product.features.map((feature, idx) => (
+                {Array.isArray(product.features) && product.features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                     <span className="text-sm">{feature}</span>

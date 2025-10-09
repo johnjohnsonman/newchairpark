@@ -155,7 +155,7 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
 
           {displayProducts.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {displayProducts.map((product) => (
+              {Array.isArray(displayProducts) && displayProducts.map((product) => (
                 <Card key={product.id} className="group overflow-hidden border-border">
                   <div className="relative aspect-square overflow-hidden bg-slate-50">
                     <Image

@@ -33,7 +33,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     : { count: 0, average: 0 }
 
   const mainImage = product.images?.[0]?.url || product.image_url || "/placeholder.svg"
-  const thumbnailImages = product.images || []
+  const thumbnailImages = Array.isArray(product.images) ? product.images : []
 
   return (
     <div className="min-h-screen bg-white">
@@ -44,7 +44,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-50">
               <Image src={mainImage || "/placeholder.svg"} alt={product.name} fill className="object-contain p-8" />
             </div>
-            {thumbnailImages.length > 0 && (
+            {Array.isArray(thumbnailImages) && thumbnailImages.length > 0 && (
               <div className="grid grid-cols-4 gap-2">
                 {thumbnailImages.slice(0, 4).map((img: any, idx: number) => (
                   <div
