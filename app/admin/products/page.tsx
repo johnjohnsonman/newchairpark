@@ -5,6 +5,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Plus, Edit } from "lucide-react"
 import { DeleteProductButton } from "@/components/admin/delete-product-button"
 
+// 캐시 무효화 설정
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function ProductsManagementPage() {
   const supabase = await createServerClient()
 

@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, TrendingUp, ArrowUpRight, Tag, ImageIcon, Recycle, Users, ShoppingCart, AlertTriangle } from "lucide-react"
 import { getDashboardStats } from "./dashboard-stats"
 
+// 캐시 무효화 설정 - 항상 최신 데이터 가져오기
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function AdminDashboard() {
   // 최적화된 데이터 로딩
   const {

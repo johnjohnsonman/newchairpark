@@ -69,7 +69,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         setFormData(prev => ({ ...prev, slug: autoSlug }))
       }
     }
-  }, [formData.name, product])
+  }, [formData.name, formData.slug, product])
   
       // 슬러그 중복 실시간 체크
       useEffect(() => {
@@ -454,13 +454,13 @@ export function ProductForm({ product, brands }: ProductFormProps) {
             </div>
           </div>
 
-              {/* 제품 옵션 관리 */}
-              {product && (
+              {/* 제품 옵션 관리 - 임시로 비활성화 (React Error #185 해결을 위해) */}
+              {/* {product && product.id && (
                 <ProductOptionsManager
                   productId={product.id}
                   onOptionsChange={handleOptionsChange}
                 />
-              )}
+              )} */}
 
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">

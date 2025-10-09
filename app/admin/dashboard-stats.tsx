@@ -2,7 +2,7 @@ import { createServerClient } from "@/lib/supabase/server"
 import { adminCache } from "@/lib/cache"
 
 export async function getDashboardStats() {
-  // 캐시에서 데이터 확인 (1분 캐시)
+  // 캐시에서 데이터 확인 (30초 캐시로 단축)
   const cacheKey = 'dashboard-stats'
   const cachedData = adminCache.get(cacheKey)
   if (cachedData) {
@@ -71,8 +71,8 @@ export async function getDashboardStats() {
       recentOrders,
     }
 
-    // 캐시에 저장 (1분)
-    adminCache.set(cacheKey, statsData, 60000)
+    // 캐시에 저장 (30초로 단축)
+    adminCache.set(cacheKey, statsData, 30000)
     
     return statsData
   } catch (error) {
