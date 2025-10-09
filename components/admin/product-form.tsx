@@ -128,7 +128,9 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   // 통합 자동완성 시스템으로 브랜드와 제품 제안이 자동으로 처리됨
   useEffect(() => {
     const brand = brands.find(b => b.id === formData.brand_id)
-    setSelectedBrandName(brand ? brand.name : "")
+    const brandName = brand ? brand.name : ""
+    setSelectedBrandName(brandName)
+    console.log('🏷️ Brand selected:', { brand_id: formData.brand_id, brand_name: brandName })
   }, [formData.brand_id, brands])
 
       const handleSubmit = async (e: React.FormEvent) => {
@@ -160,6 +162,11 @@ export function ProductForm({ product, brands }: ProductFormProps) {
         images: JSON.stringify(images), // JSONB로 저장
         image_url: images.length > 0 ? images[0].url : "",
         updated_at: new Date().toISOString(),
+      }
+
+      // 빈 문자열이나 null 값 처리
+      if (dataToSave.brand_id === "" || dataToSave.brand_id === "no-brand" || dataToSave.brand_id === "new-brand") {
+        dataToSave.brand_id = null
       }
 
       console.log('💾 Saving product data:', dataToSave)
@@ -321,9 +328,12 @@ export function ProductForm({ product, brands }: ProductFormProps) {
               placeholder="예: Herman Miller, Steelcase"
               value={selectedBrandName || ""}
               onChange={useCallback((value) => {
+                console.log('🏷️ Brand input changed:', value)
                 // 브랜드 이름으로 브랜드 ID 찾기
                 const brand = brands.find(b => b.name === value)
-                setFormData(prev => ({ ...prev, brand_id: brand ? brand.id : null }))
+                const brandId = brand ? brand.id : (value ? "new-brand" : null)
+                console.log('🏷️ Brand ID set:', brandId)
+                setFormData(prev => ({ ...prev, brand_id: brandId }))
               }, [brands])}
               suggestions={searchBrands(selectedBrandName)}
               isLoading={false}
