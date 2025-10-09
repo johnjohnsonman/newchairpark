@@ -211,7 +211,7 @@ export function ProductOptionsManager({
                     </Button>
                   </div>
 
-                  {Array.isArray(option.values) && option.values.map((value, valueIndex) => (
+                  {Array.isArray(option.values) && option.values.length > 0 && option.values.map((value, valueIndex) => (
                     <div key={valueIndex} className="flex items-center gap-2 p-2 bg-muted rounded-md">
                       {option.type === 'color' && (
                         <input
