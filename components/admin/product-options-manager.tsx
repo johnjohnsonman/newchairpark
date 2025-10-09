@@ -44,10 +44,10 @@ export function ProductOptionsManager({
   }, [])
 
   useEffect(() => {
-    if (isClient && onOptionsChange) {
+    if (isClient && onOptionsChange && options.length >= 0) {
       onOptionsChange(options)
     }
-  }, [options, isClient]) // onOptionsChange 제거
+  }, [options, isClient, onOptionsChange]) // onOptionsChange 다시 추가하되 useCallback으로 메모화 필요
 
   const addOption = () => {
     const newOption: ProductOption = {

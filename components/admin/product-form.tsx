@@ -50,6 +50,11 @@ export function ProductForm({ product, brands }: ProductFormProps) {
       brand.name.toLowerCase().includes(query.toLowerCase())
     ).map(b => b.name)
   }, [brands])
+
+  // 제품 옵션 변경 핸들러 (무한 루프 방지)
+  const handleOptionsChange = useCallback((options: any[]) => {
+    setProductOptions(options)
+  }, [])
   
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
@@ -126,12 +131,12 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     featured: product?.featured ?? false,
   })
 
-  // 브랜드 선택 상태 초기화
+  // 브랜드 선택 상태 초기화 (무한 루프 방지)
   useEffect(() => {
-    if (product?.brand_id && !formData.brand_id) {
+    if (product?.brand_id && formData.brand_id === "no-brand") {
       setFormData(prev => ({ ...prev, brand_id: product.brand_id }))
     }
-  }, [product?.brand_id, formData.brand_id])
+  }, [product?.brand_id]) // formData.brand_id 의존성 제거
 
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -344,15 +349,26 @@ export function ProductForm({ product, brands }: ProductFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no-brand">브랜드 없음</SelectItem>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
+                  {brands && brands.length > 0 ? (
+                    brands.map((brand) => (
+                      <SelectItem key={brand.id} value={brand.id}>
+                        {brand.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-brands" disabled>
+                      브랜드가 없습니다
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 기존 브랜드 중에서 선택하거나 "브랜드 없음"을 선택하세요.
+                {brands && (
+                  <span className="block text-green-600 mt-1">
+                    로드된 브랜드: {brands.length}개 ({brands.map(b => b.name).join(', ')})
+                  </span>
+                )}
               </p>
             </div>
 
@@ -442,7 +458,7 @@ export function ProductForm({ product, brands }: ProductFormProps) {
               {product && (
                 <ProductOptionsManager
                   productId={product.id}
-                  onOptionsChange={setProductOptions}
+                  onOptionsChange={handleOptionsChange}
                 />
               )}
 
