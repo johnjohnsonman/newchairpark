@@ -13,7 +13,7 @@ import { createBrowserClient } from "@/lib/supabase/client"
 import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
-import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
+import { BrandProductAutocomplete } from "@/components/ui/brand-product-autocomplete"
 import { ProductOptionsManager } from "@/components/admin/product-options-manager"
 
 interface ProductFormClientProps {
@@ -278,7 +278,7 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
 
             <div className="space-y-2">
               <Label htmlFor="brand">브랜드</Label>
-              <UnifiedAutocompleteInput
+              <BrandProductAutocomplete
                 label="브랜드"
                 value={selectedBrandName}
                 onChange={(value) => {
