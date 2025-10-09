@@ -131,7 +131,8 @@ export function ProductOptionsManager({
             <p className="text-sm">색상, 사이즈 등을 추가해보세요.</p>
           </div>
         ) : (
-          options.map((option, optionIndex) => (
+          Array.isArray(options) && options.length > 0 ? (
+            options.map((option, optionIndex) => (
             <Card key={optionIndex} className="border-l-4 border-l-primary">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-4">
@@ -244,7 +245,13 @@ export function ProductOptionsManager({
                 </div>
               </CardContent>
             </Card>
-          ))
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>옵션 데이터를 불러오는 중...</p>
+            </div>
+          )
         )}
       </CardContent>
     </Card>
