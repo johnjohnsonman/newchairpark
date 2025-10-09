@@ -72,23 +72,30 @@ export function ProductOptionsManager({
 
   const addOptionValue = (optionIndex: number) => {
     const updatedOptions = [...options]
+    if (!Array.isArray(updatedOptions[optionIndex].values)) {
+      updatedOptions[optionIndex].values = []
+    }
     updatedOptions[optionIndex].values.push({ value: '', label: '' })
     setOptions(updatedOptions)
   }
 
   const updateOptionValue = (optionIndex: number, valueIndex: number, field: string, value: string) => {
     const updatedOptions = [...options]
-    updatedOptions[optionIndex].values[valueIndex] = {
-      ...updatedOptions[optionIndex].values[valueIndex],
-      [field]: value
+    if (Array.isArray(updatedOptions[optionIndex].values) && updatedOptions[optionIndex].values[valueIndex]) {
+      updatedOptions[optionIndex].values[valueIndex] = {
+        ...updatedOptions[optionIndex].values[valueIndex],
+        [field]: value
+      }
+      setOptions(updatedOptions)
     }
-    setOptions(updatedOptions)
   }
 
   const removeOptionValue = (optionIndex: number, valueIndex: number) => {
     const updatedOptions = [...options]
-    updatedOptions[optionIndex].values.splice(valueIndex, 1)
-    setOptions(updatedOptions)
+    if (Array.isArray(updatedOptions[optionIndex].values)) {
+      updatedOptions[optionIndex].values.splice(valueIndex, 1)
+      setOptions(updatedOptions)
+    }
   }
 
   const getOptionIcon = (type: string) => {
@@ -204,7 +211,7 @@ export function ProductOptionsManager({
                     </Button>
                   </div>
 
-                  {option.values.map((value, valueIndex) => (
+                  {Array.isArray(option.values) && option.values.map((value, valueIndex) => (
                     <div key={valueIndex} className="flex items-center gap-2 p-2 bg-muted rounded-md">
                       {option.type === 'color' && (
                         <input
@@ -237,7 +244,7 @@ export function ProductOptionsManager({
                     </div>
                   ))}
 
-                  {option.values.length === 0 && (
+                  {Array.isArray(option.values) && option.values.length === 0 && (
                     <div className="text-center py-4 text-muted-foreground text-sm">
                       옵션 값이 없습니다. "값 추가" 버튼을 클릭하세요.
                     </div>
