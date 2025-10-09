@@ -41,22 +41,32 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       notFound()
     }
 
-    // 브랜드 데이터 가져오기 (실패해도 계속 진행)
+    // 브랜드 데이터 가져오기 (브랜드 관리 페이지와 동일한 방식)
+    const brandsPromise = supabase
+      .from("brands")
+      .select("id, name, slug")
+      .order("name")
+      .limit(30) // 최대 30개로 제한
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Brands fetch timeout')), 3000)
+    )
+
     let brands: any[] = []
+    let brandsError: any = null
+
     try {
-      const { data: brandsData, error: brandsError } = await supabase
-        .from("brands")
-        .select("id, name, slug")
-        .order("name")
-      
-      if (brandsError) {
-        console.error('⚠️ Brands fetch error:', brandsError)
-      } else {
-        brands = brandsData || []
-        console.log('🏷️ Brands fetched:', brands.length)
-      }
-    } catch (brandsErr) {
-      console.error('⚠️ Brands fetch exception:', brandsErr)
+      const brandsResult = await Promise.race([brandsPromise, timeoutPromise]) as any
+      brands = brandsResult.data || []
+      brandsError = brandsResult.error
+      console.log('🏷️ Brands fetched for edit:', brands.length, brands)
+    } catch (brandsTimeoutError) {
+      console.error('⚠️ Brands fetch timeout:', brandsTimeoutError)
+      brandsError = brandsTimeoutError
+    }
+
+    if (brandsError) {
+      console.error('❌ Brands fetch error:', brandsError)
     }
 
     console.log('✅ Product page data loaded successfully')
@@ -67,6 +77,11 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           <h1 className="text-2xl font-bold">Edit Product</h1>
           {product.name && (
             <p className="text-gray-600 mt-2">Editing: {product.name}</p>
+          )}
+          {brands.length > 0 && (
+            <p className="text-sm text-green-600 mt-1">
+              {brands.length}개의 브랜드를 불러왔습니다: {brands.map(b => b.name).join(', ')}
+            </p>
           )}
         </div>
         <ProductFormWrapper product={product} brands={brands} />

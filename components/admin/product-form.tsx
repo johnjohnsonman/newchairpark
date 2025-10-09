@@ -36,10 +36,6 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isClientReady, setIsClientReady] = useState(false)
-  
-  // 브랜드 이름 표시용
-  const [selectedBrandName, setSelectedBrandName] = useState("")
   
   // 제품 옵션 상태
   const [productOptions, setProductOptions] = useState<any[]>([])
@@ -47,8 +43,13 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
   
-  // 통합 브랜드/제품 데이터 훅
-  const { brands: allBrands, products: allProducts, searchBrands, searchProducts } = useUnifiedBrandProduct()
+  // 브랜드 검색 함수 (간단한 로컬 검색)
+  const searchBrands = useCallback((query: string): string[] => {
+    if (!query.trim()) return brands.map(b => b.name)
+    return brands.filter(brand => 
+      brand.name.toLowerCase().includes(query.toLowerCase())
+    ).map(b => b.name)
+  }, [brands])
   
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
@@ -125,13 +126,12 @@ export function ProductForm({ product, brands }: ProductFormProps) {
     featured: product?.featured ?? false,
   })
 
-  // 통합 자동완성 시스템으로 브랜드와 제품 제안이 자동으로 처리됨
+  // 브랜드 선택 상태 초기화
   useEffect(() => {
-    const brand = brands.find(b => b.id === formData.brand_id)
-    const brandName = brand ? brand.name : ""
-    setSelectedBrandName(brandName)
-    console.log('🏷️ Brand selected:', { brand_id: formData.brand_id, brand_name: brandName })
-  }, [formData.brand_id, brands])
+    if (product?.brand_id && !formData.brand_id) {
+      setFormData(prev => ({ ...prev, brand_id: product.brand_id }))
+    }
+  }, [product?.brand_id, formData.brand_id])
 
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -157,15 +157,22 @@ export function ProductForm({ product, brands }: ProductFormProps) {
       
       // images를 JSONB 형식으로 변환
       const dataToSave = {
-        ...formData,
+        name: formData.name,
+        slug: formData.slug,
         brand_id: formData.brand_id === "no-brand" ? null : formData.brand_id,
+        category: formData.category,
+        price: formData.price,
+        original_price: formData.original_price,
+        description: formData.description,
+        in_stock: formData.in_stock,
+        featured: formData.featured,
         images: JSON.stringify(images), // JSONB로 저장
         image_url: images.length > 0 ? images[0].url : "",
         updated_at: new Date().toISOString(),
       }
 
-      // 빈 문자열이나 null 값 처리
-      if (dataToSave.brand_id === "" || dataToSave.brand_id === "no-brand" || dataToSave.brand_id === "new-brand") {
+      // 브랜드 ID 정리
+      if (dataToSave.brand_id === "no-brand") {
         dataToSave.brand_id = null
       }
 
@@ -323,21 +330,31 @@ export function ProductForm({ product, brands }: ProductFormProps) {
               )}
             </div>
 
-            <SafeAutocompleteInput
-              label="Brand"
-              placeholder="예: Herman Miller, Steelcase"
-              value={selectedBrandName || ""}
-              onChange={useCallback((value) => {
-                console.log('🏷️ Brand input changed:', value)
-                // 브랜드 이름으로 브랜드 ID 찾기
-                const brand = brands.find(b => b.name === value)
-                const brandId = brand ? brand.id : (value ? "new-brand" : null)
-                console.log('🏷️ Brand ID set:', brandId)
-                setFormData(prev => ({ ...prev, brand_id: brandId }))
-              }, [brands])}
-              suggestions={searchBrands(selectedBrandName)}
-              isLoading={false}
-            />
+            <div className="grid gap-2">
+              <Label htmlFor="brand">Brand</Label>
+              <Select
+                value={formData.brand_id || "no-brand"}
+                onValueChange={(value) => {
+                  console.log('🏷️ Brand selected:', value)
+                  setFormData(prev => ({ ...prev, brand_id: value }))
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="브랜드를 선택하세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no-brand">브랜드 없음</SelectItem>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                기존 브랜드 중에서 선택하거나 "브랜드 없음"을 선택하세요.
+              </p>
+            </div>
 
             <div className="grid gap-2">
               <Label htmlFor="category">Category *</Label>
