@@ -140,7 +140,7 @@ export function ProductOptionsManager({
         ) : (
           Array.isArray(options) && options.length > 0 ? (
             options.map((option, optionIndex) => (
-            <Card key={optionIndex} className="border-l-4 border-l-primary">
+              <Card key={optionIndex} className="border-l-4 border-l-primary">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -211,38 +211,40 @@ export function ProductOptionsManager({
                     </Button>
                   </div>
 
-                  {Array.isArray(option.values) && option.values.length > 0 ? option.values.map((value, valueIndex) => (
-                    <div key={valueIndex} className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                      {option.type === 'color' && (
-                        <input
-                          type="color"
-                          value={value.color || '#000000'}
-                          onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'color', e.target.value)}
-                          className="w-8 h-8 rounded border"
+                  {Array.isArray(option.values) && option.values.length > 0 ? (
+                    option.values.map((value, valueIndex) => (
+                      <div key={valueIndex} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                        {option.type === 'color' && (
+                          <input
+                            type="color"
+                            value={value.color || '#000000'}
+                            onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'color', e.target.value)}
+                            className="w-8 h-8 rounded border"
+                          />
+                        )}
+                        <Input
+                          value={value.value}
+                          onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'value', e.target.value)}
+                          placeholder="옵션 값"
+                          className="flex-1"
                         />
-                      )}
-                      <Input
-                        value={value.value}
-                        onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'value', e.target.value)}
-                        placeholder="옵션 값"
-                        className="flex-1"
-                      />
-                      <Input
-                        value={value.label || ''}
-                        onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'label', e.target.value)}
-                        placeholder="표시명 (선택)"
-                        className="flex-1"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeOptionValue(optionIndex, valueIndex)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                        <Input
+                          value={value.label || ''}
+                          onChange={(e) => updateOptionValue(optionIndex, valueIndex, 'label', e.target.value)}
+                          placeholder="표시명 (선택)"
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOptionValue(optionIndex, valueIndex)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  ) : null}
 
                   {Array.isArray(option.values) && option.values.length === 0 && (
                     <div className="text-center py-4 text-muted-foreground text-sm">
