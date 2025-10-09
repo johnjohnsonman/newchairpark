@@ -79,14 +79,20 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   const currentOriginalPrice = selectedVariant?.original_price || product.original_price
   // 이미지 처리 로직 개선
   const getImages = () => {
+    console.log("🔍 Getting images for product:", product.name)
+    console.log("📸 Product images field:", product.images)
+    console.log("🖼️ Product image_url field:", (product as any).image_url)
+    
     // 변형 이미지가 있으면 사용
     if (selectedVariant?.images && Array.isArray(selectedVariant.images) && selectedVariant.images.length > 0) {
+      console.log("✅ Using variant images:", selectedVariant.images)
       return selectedVariant.images
     }
     
     // 제품 이미지 처리
     if (product.images) {
       if (Array.isArray(product.images)) {
+        console.log("✅ Using array images:", product.images)
         return product.images
       }
       
@@ -94,14 +100,24 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       if (typeof product.images === 'string') {
         try {
           const parsed = JSON.parse(product.images)
-          return Array.isArray(parsed) ? parsed : []
+          if (Array.isArray(parsed)) {
+            console.log("✅ Using parsed JSON images:", parsed)
+            return parsed
+          }
         } catch (e) {
           console.warn('Failed to parse product images:', e)
-          return []
         }
       }
     }
     
+    // image_url 필드가 있으면 사용 (단일 이미지)
+    const imageUrl = (product as any).image_url
+    if (imageUrl && typeof imageUrl === 'string') {
+      console.log("✅ Using image_url:", imageUrl)
+      return [imageUrl]
+    }
+    
+    console.log("❌ No images found")
     return []
   }
   
@@ -463,3 +479,4 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     </div>
   )
 }
+

@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
         price,
         original_price,
         images,
+        image_url,
         in_stock,
         featured,
         category,

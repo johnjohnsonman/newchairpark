@@ -78,6 +78,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       .eq("slug", slug)
       .single()
 
+    console.log("🔍 Product data:", product)
+    console.log("📸 Product images:", product?.images)
+    console.log("🖼️ Product image_url:", product?.image_url)
+
     if (error || !product) {
       console.error("Error fetching product:", error?.message || "Product not found")
       notFound()

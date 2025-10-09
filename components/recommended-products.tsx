@@ -109,16 +109,31 @@ export function RecommendedProducts({
                         // 이미지 처리 로직
                         let imageUrl = null
                         
+                        console.log("🔍 Recommended product:", product.name)
+                        console.log("📸 Product images:", product.images)
+                        console.log("🖼️ Product image_url:", (product as any).image_url)
+                        
                         if (Array.isArray(product.images) && product.images[0]) {
                           imageUrl = product.images[0]
+                          console.log("✅ Using array image:", imageUrl)
                         } else if (typeof product.images === 'string') {
                           try {
                             const parsed = JSON.parse(product.images)
                             if (Array.isArray(parsed) && parsed[0]) {
                               imageUrl = parsed[0]
+                              console.log("✅ Using parsed JSON image:", imageUrl)
                             }
                           } catch (e) {
                             console.warn('Failed to parse recommended product images:', e)
+                          }
+                        }
+                        
+                        // image_url 필드가 있으면 사용
+                        if (!imageUrl) {
+                          const singleImageUrl = (product as any).image_url
+                          if (singleImageUrl && typeof singleImageUrl === 'string') {
+                            imageUrl = singleImageUrl
+                            console.log("✅ Using image_url:", imageUrl)
                           }
                         }
                         
