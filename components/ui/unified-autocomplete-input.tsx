@@ -204,22 +204,28 @@ function UnifiedAutocompleteInputInner({
                 </CommandEmpty>
               ) : (
                 <CommandGroup>
-                  {suggestions.map((suggestion) => (
-                    <CommandItem
-                      key={suggestion}
-                      value={suggestion}
-                      onSelect={() => handleSelect(suggestion)}
-                      className="cursor-pointer"
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          inputValue === suggestion ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {suggestion}
-                    </CommandItem>
-                  ))}
+                  {Array.isArray(suggestions) && suggestions.length > 0 ? (
+                    suggestions.map((suggestion, index) => (
+                      <CommandItem
+                        key={`${suggestion}-${index}`}
+                        value={suggestion}
+                        onSelect={() => handleSelect(suggestion)}
+                        className="cursor-pointer"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            inputValue === suggestion ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {suggestion}
+                      </CommandItem>
+                    ))
+                  ) : (
+                    <CommandEmpty>
+                      {type === "brand" ? "브랜드를 검색하세요" : "제품을 검색하세요"}
+                    </CommandEmpty>
+                  )}
                 </CommandGroup>
               )}
             </CommandList>

@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Force complete rebuild - bypass all caches
+  generateBuildId: async () => {
+    return `build-${Date.now()}-${Math.random().toString(36).substring(7)}`
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
