@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, Suspense } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -65,40 +65,40 @@ function UnifiedAutocompleteInputInner({
     if (inputValue !== value) {
       onChange(inputValue)
     }
-  }, [inputValue, value, onChange])
+  }, [inputValue, value]) // onChange를 의존성에서 제거하여 무한 루프 방지
 
   // 외부에서 value가 변경될 때 inputValue 동기화
   useEffect(() => {
     setInputValue(value)
   }, [value])
 
-  const handleSelect = (selectedValue: string) => {
+  const handleSelect = useCallback((selectedValue: string) => {
     setInputValue(selectedValue)
     setOpen(false)
     if (inputRef.current) {
       inputRef.current.focus()
     }
-  }
+  }, [])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setInputValue(newValue)
     setOpen(true)
-  }
+  }, [])
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       setOpen(false)
     }
-  }
+  }, [])
 
-  const getSuggestions = () => {
+  const getSuggestions = useCallback(() => {
     if (type === "brand") {
       return searchBrands(inputValue)
     } else {
       return searchProducts(inputValue, selectedBrand)
     }
-  }
+  }, [type, inputValue, selectedBrand, searchBrands, searchProducts])
 
   const suggestions = getSuggestions()
   const hasSuggestions = suggestions.length > 0

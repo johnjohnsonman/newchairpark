@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,8 @@ import { createClient } from "@/lib/supabase/client"
 import type { Product, Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
-import { UnifiedAutocompleteInput } from "@/components/ui/unified-autocomplete-input"
+import { SafeAutocompleteInput } from "@/components/ui/safe-autocomplete-input"
+import { useUnifiedBrandProduct } from "@/hooks/use-unified-brand-product"
 import { ProductOptionsManager } from "@/components/admin/product-options-manager"
 
 interface ProductFormProps {
@@ -44,6 +45,9 @@ export function ProductForm({ product, brands }: ProductFormProps) {
   
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
+  
+  // 통합 브랜드/제품 데이터 훅
+  const { brands: allBrands, products: allProducts, searchBrands, searchProducts } = useUnifiedBrandProduct()
   
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
@@ -251,13 +255,13 @@ export function ProductForm({ product, brands }: ProductFormProps) {
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4">
-            <UnifiedAutocompleteInput
+            <SafeAutocompleteInput
               label="Product Name *"
               placeholder="예: Aeron Chair, Gesture Chair"
               value={formData.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
-              type="product"
-              selectedBrand={selectedBrandName}
+              onChange={useCallback((value) => setFormData(prev => ({ ...prev, name: value })), [])}
+              suggestions={searchProducts(formData.name, selectedBrandName)}
+              isLoading={false}
             />
 
             <div className="grid gap-2">
@@ -311,16 +315,17 @@ export function ProductForm({ product, brands }: ProductFormProps) {
               )}
             </div>
 
-            <UnifiedAutocompleteInput
+            <SafeAutocompleteInput
               label="Brand"
               placeholder="예: Herman Miller, Steelcase"
               value={selectedBrandName || ""}
-              onChange={(value) => {
+              onChange={useCallback((value) => {
                 // 브랜드 이름으로 브랜드 ID 찾기
                 const brand = brands.find(b => b.name === value)
-                setFormData({ ...formData, brand_id: brand ? brand.id : null })
-              }}
-              type="brand"
+                setFormData(prev => ({ ...prev, brand_id: brand ? brand.id : null }))
+              }, [brands])}
+              suggestions={searchBrands(selectedBrandName)}
+              isLoading={false}
             />
 
             <div className="grid gap-2">

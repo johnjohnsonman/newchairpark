@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { createBrowserClient } from "@/lib/supabase/client"
 
 interface BrandProductData {
@@ -146,18 +146,18 @@ export function useUnifiedBrandProduct() {
     fetchData()
   }, [isMounted])
 
-  const getProductsByBrand = (brand: string): string[] => {
+  const getProductsByBrand = useCallback((brand: string): string[] => {
     return data.brandProducts[brand] || []
-  }
+  }, [data.brandProducts])
 
-  const searchBrands = (query: string): string[] => {
+  const searchBrands = useCallback((query: string): string[] => {
     if (!query.trim()) return data.brands
     return data.brands.filter(brand => 
       brand.toLowerCase().includes(query.toLowerCase())
     )
-  }
+  }, [data.brands])
 
-  const searchProducts = (query: string, brand?: string): string[] => {
+  const searchProducts = useCallback((query: string, brand?: string): string[] => {
     if (!query.trim()) {
       return brand ? getProductsByBrand(brand) : data.products
     }
@@ -166,7 +166,7 @@ export function useUnifiedBrandProduct() {
     return searchTarget.filter(product => 
       product.toLowerCase().includes(query.toLowerCase())
     )
-  }
+  }, [data.products, getProductsByBrand])
 
   return {
     ...data,
@@ -175,10 +175,11 @@ export function useUnifiedBrandProduct() {
     getProductsByBrand,
     searchBrands,
     searchProducts,
-    refetch: () => {
+    refetch: useCallback(() => {
       // 데이터를 다시 가져오는 로직은 useEffect에서 처리됨
       // 여기서는 단순히 상태만 초기화
       setError(null)
-    }
+      setIsMounted(false) // refetch 시 마운트 상태를 리셋하여 다시 가져오도록 함
+    }, [])
   }
 }
