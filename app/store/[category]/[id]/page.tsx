@@ -151,7 +151,7 @@ export default async function ProductDetailPage({
                       src={img || "/placeholder.svg"}
                       alt={`${product.name} ${idx + 1}`}
                       fill
-                      className="object-cover"
+                      className="object-contain p-2"
                     />
                   </button>
                 ))}

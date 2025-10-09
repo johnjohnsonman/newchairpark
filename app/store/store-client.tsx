@@ -617,7 +617,7 @@ export default function StoreClientPage({
                           src={mainImage || "/placeholder.svg"}
                           alt={product.name}
                           fill
-                          className="object-cover transition-transform group-hover:scale-105"
+                          className="object-contain p-4 transition-transform group-hover:scale-105"
                         />
                       </div>
                     </Link>
