@@ -5,11 +5,12 @@ import { ArrowRight, Store, Award, Wrench, Recycle, Newspaper, Sparkles, Trendin
 import Image from "next/image"
 import { StructuredData } from "@/components/structured-data"
 import { NaverBookingButtonWhite } from "@/components/naver-booking-button"
+import { PremiumCarousel } from "@/components/ui/premium-carousel"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "체어파크 | 프리미엄 오피스 가구 전문점 - 허먼밀러, 스틸케이스 정품",
-  description: "허먼밀러 에어론, 스틸케이스 제스처 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에 만나보세요. 정품 보증, 전국 매장, 렌탈 서비스, 중고 거래까지 원스톱 가구 솔루션을 제공합니다.",
+  title: "체어파크 | 월드 프리미엄 체어 스토어 - 허먼밀러, 스틸케이스 정품",
+  description: "허먼밀러 에어론, 스틸케이스 제스처 등 세계적인 프리미엄 오피스 체어를 합리적인 가격에 만나보세요. 정품 보증, 전국 매장, 렌탈 서비스, 중고 거래까지 원스톱 체어 솔루션을 제공합니다.",
   keywords: [
     "허먼밀러",
     "스틸케이스", 
@@ -17,10 +18,10 @@ export const metadata: Metadata = {
     "제스처 체어",
     "프리미엄 오피스 체어",
     "인체공학 의자",
-    "오피스 가구",
-    "스탠딩 데스크",
-    "가구 렌탈",
-    "중고 가구",
+    "오피스 체어",
+    "에르고노믹 체어",
+    "체어 렌탈",
+    "중고 체어",
     "체어파크"
   ],
   openGraph: {
@@ -66,128 +67,31 @@ export default function Home() {
       <StructuredData type="organization" />
       <StructuredData type="website" />
       <div className="flex flex-col">
-      <section className="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden">
-        {/* 배경 이미지 */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/modern-office-with-premium-chairs.jpg"
-            alt="프리미엄 오피스 배경"
-            fill
-            className="object-cover opacity-10"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-white/85" />
-        </div>
-        <div className="container mx-auto flex flex-col lg:flex-row relative z-10">
-          <div className="flex flex-1 items-center px-4 py-8 sm:px-6 lg:py-10">
-            <div className="w-full max-w-2xl text-center lg:text-left">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium shadow-sm border">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span>프리미엄 오피스 가구 전문</span>
-              </div>
-              <h1 className="mb-3 text-balance text-2xl font-bold leading-tight tracking-tight sm:text-3xl lg:text-4xl">
-                chairpark
-                <br />
-                <span className="text-primary">world premium chair store</span>
-              </h1>
-              <p className="mb-5 max-w-xl mx-auto lg:mx-0 text-pretty text-sm leading-relaxed text-foreground/80 sm:text-base">
-                허먼밀러, 스틸케이스 등 세계적인 브랜드부터 합리적인 중고 가구까지
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <Button size="default" className="shadow-lg" asChild>
-                  <Link href="/store">
-                    제품 둘러보기 <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button size="default" variant="outline" className="bg-white shadow-sm" asChild>
-                  <Link href="/gallery">갤러리 보기</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex w-56 flex-col gap-2.5 bg-slate-900 p-5 text-white">
-            <div className="mb-1">
-              <h3 className="text-xs font-semibold uppercase tracking-wider opacity-60">빠른 메뉴</h3>
-            </div>
-            <Link
-              href="/store"
-              className="group flex items-center justify-between rounded-lg bg-white/10 p-4 transition-all hover:bg-white/20"
-            >
-              <span className="text-sm font-semibold">스토어</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="/recycle"
-              className="group flex items-center justify-between rounded-lg bg-white/10 p-4 transition-all hover:bg-white/20"
-            >
-              <span className="text-sm font-semibold">리싸이클</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="/rental"
-              className="group flex items-center justify-between rounded-lg bg-white/10 p-4 transition-all hover:bg-white/20"
-            >
-              <span className="text-sm font-semibold">렌탈</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="/brand"
-              className="group flex items-center justify-between rounded-lg bg-white/10 p-4 transition-all hover:bg-white/20"
-            >
-              <span className="text-sm font-semibold">브랜드</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </Link>
-
-            <div className="my-3 border-t border-white/20" />
-
-            <div className="mb-1">
-              <h3 className="text-xs font-semibold uppercase tracking-wider opacity-60">인기 제품</h3>
-            </div>
-            <Link href="/store?category=office-chair" className="group rounded-lg bg-white/10 p-3 transition-all hover:bg-white/20">
-              <div className="mb-1.5 flex items-center gap-2">
-                <TrendingUp className="h-3.5 w-3.5" />
-                <span className="text-xs font-semibold">오피스 체어</span>
-              </div>
-              <p className="text-xs opacity-75">허먼밀러 에어론 외 다수</p>
-            </Link>
-            <Link href="/store/책상" className="group rounded-lg bg-white/10 p-3 transition-all hover:bg-white/20">
-              <div className="mb-1.5 flex items-center gap-2">
-                <Package className="h-3.5 w-3.5" />
-                <span className="text-xs font-semibold">스탠딩 데스크</span>
-              </div>
-              <p className="text-xs opacity-75">전동 높이조절 책상</p>
-            </Link>
-
-            <div className="my-3 border-t border-white/20" />
-
-            <Link href="/bulk-inquiry" className="rounded-lg bg-primary p-4 transition-all hover:bg-primary/90">
-              <p className="text-sm font-semibold mb-0.5">특판가 문의</p>
-              <p className="text-xs opacity-90">대량 구매 시 특별 할인</p>
-            </Link>
-          </div>
-        </div>
+      {/* 헤더 배너 캐러셀 */}
+      <section className="relative h-[60vh] md:h-[70vh] lg:h-[75vh] overflow-hidden">
+        <PremiumCarousel />
       </section>
+
 
       <section className="bg-white px-4 py-8 sm:py-12">
         <div className="container mx-auto">
           <div className="mb-8 text-center sm:mb-10">
-            <h2 className="mb-2 text-2xl font-bold sm:text-3xl">인기 카테고리</h2>
-            <p className="text-sm text-muted-foreground sm:text-base">체어파크에서 가장 사랑받는 제품들</p>
+            <h2 className="mb-2 text-2xl font-bold sm:text-3xl">월드 프리미엄 체어 컬렉션</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">세계 최고의 프리미엄 체어 브랜드들</p>
           </div>
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
             <Link href="/store?category=office-chair" className="group relative overflow-hidden rounded-2xl shadow-lg">
               <div className="relative h-64 sm:h-80">
                 <Image
                   src="/herman-miller-aeron.png"
-                  alt="프리미엄 오피스 체어"
+                  alt="월드 프리미엄 체어"
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4 sm:p-6 text-white">
-                  <h3 className="mb-2 text-xl font-bold sm:text-2xl">프리미엄 오피스 체어</h3>
-                  <p className="mb-3 text-xs sm:text-sm opacity-90">허먼밀러, 스틸케이스 정품 의자</p>
+                  <h3 className="mb-2 text-xl font-bold sm:text-2xl">월드 프리미엄 체어</h3>
+                  <p className="mb-3 text-xs sm:text-sm opacity-90">허먼밀러, 스틸케이스 월드 클래스 체어</p>
                   <span className="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 transition-transform group-hover:translate-x-1">
                     자세히 보기 <ArrowRight className="ml-2 h-3.5 w-3.5" />
                   </span>
@@ -198,15 +102,15 @@ export default function Home() {
             <Link href="/recycle" className="group relative overflow-hidden rounded-2xl shadow-lg">
               <div className="relative h-64 sm:h-80">
                 <Image
-                  src="/modern-gray-sofa.png"
-                  alt="리싸이클 마켓"
+                  src="/steelcase-gesture-chair.jpg"
+                  alt="프리미엄 중고 체어"
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4 sm:p-6 text-white">
-                  <h3 className="mb-2 text-xl font-bold sm:text-2xl">리싸이클 마켓</h3>
-                  <p className="mb-3 text-xs sm:text-sm opacity-90">합리적인 가격의 프리미엄 중고 가구</p>
+                  <h3 className="mb-2 text-xl font-bold sm:text-2xl">프리미엄 중고 체어</h3>
+                  <p className="mb-3 text-xs sm:text-sm opacity-90">월드 클래스 브랜드의 합리적 중고 체어</p>
                   <span className="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 transition-transform group-hover:translate-x-1">
                     지도에서 보기 <ArrowRight className="ml-2 h-3.5 w-3.5" />
                   </span>
@@ -220,23 +124,23 @@ export default function Home() {
       <section className="bg-slate-50 px-4 py-8 sm:py-12">
         <div className="container mx-auto">
           <div className="mb-8 text-center sm:mb-10">
-            <h2 className="mb-2 text-2xl font-bold sm:text-3xl">다양한 서비스</h2>
-            <p className="text-sm text-muted-foreground sm:text-base">체어파크가 제공하는 맞춤 솔루션</p>
+            <h2 className="mb-2 text-2xl font-bold sm:text-3xl">월드 클래스 서비스</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">프리미엄 체어 전문 맞춤 솔루션</p>
           </div>
           <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
             <Link href="/rental" className="group">
               <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
                 <div className="relative h-48">
                   <Image
-                    src="/office-desk.png"
-                    alt="가구 렌탈"
+                    src="/herman-miller-aeron.png"
+                    alt="허먼밀러 에어론 체어 렌탈"
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 <CardContent className="p-4 sm:p-6">
-                  <h3 className="mb-2 text-lg font-bold sm:text-xl">가구 렌탈 서비스</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">부담없이 시작하는 프리미엄 가구 렌탈</p>
+                  <h3 className="mb-2 text-lg font-bold sm:text-xl">프리미엄 체어 렌탈</h3>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">월드 클래스 체어 부담없이 체험하기</p>
                 </CardContent>
               </Card>
             </Link>
@@ -245,8 +149,8 @@ export default function Home() {
               <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
                 <div className="relative h-48">
                   <Image
-                    src="/conference-table-detail.jpg"
-                    alt="전문 수리 서비스"
+                    src="/steelcase-leap-chair.jpg"
+                    alt="스틸케이스 립 체어 전문 수리"
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -258,8 +162,8 @@ export default function Home() {
                   </div>
                 </div>
                 <CardContent className="p-4 sm:p-6">
-                  <h3 className="mb-2 text-lg font-bold sm:text-xl">전문 수리 서비스</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">오피스 체어 전문 수리 및 A/S</p>
+                  <h3 className="mb-2 text-lg font-bold sm:text-xl">프리미엄 체어 전문 수리</h3>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">월드 클래스 체어 전문 수리 및 A/S</p>
                 </CardContent>
               </Card>
             </Link>
@@ -268,8 +172,8 @@ export default function Home() {
               <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
                 <div className="relative h-48">
                   <Image
-                    src="/furniture-store-opening.jpg"
-                    alt="최신 소식"
+                    src="/herman-miller-embody-chair.jpg"
+                    alt="허먼밀러 엠보디 체어 뉴스"
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -281,8 +185,8 @@ export default function Home() {
                   </div>
                 </div>
                 <CardContent className="p-4 sm:p-6">
-                  <h3 className="mb-2 text-lg font-bold sm:text-xl">최신 소식</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">체어파크의 새로운 소식과 이벤트</p>
+                  <h3 className="mb-2 text-lg font-bold sm:text-xl">월드 프리미엄 뉴스</h3>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">최신 프리미엄 체어 트렌드와 뉴스</p>
                 </CardContent>
               </Card>
             </Link>
