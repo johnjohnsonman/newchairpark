@@ -66,8 +66,19 @@ export default function Home() {
       <StructuredData type="organization" />
       <StructuredData type="website" />
       <div className="flex flex-col">
-      <section className="relative bg-gradient-to-br from-slate-50 to-white">
-        <div className="container mx-auto flex flex-col lg:flex-row">
+      <section className="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden">
+        {/* 배경 이미지 */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/modern-office-with-premium-chairs.jpg"
+            alt="프리미엄 오피스 배경"
+            fill
+            className="object-cover opacity-10"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-white/85" />
+        </div>
+        <div className="container mx-auto flex flex-col lg:flex-row relative z-10">
           <div className="flex flex-1 items-center px-4 py-8 sm:px-6 lg:py-10">
             <div className="w-full max-w-2xl text-center lg:text-left">
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium shadow-sm border">
@@ -232,9 +243,18 @@ export default function Home() {
 
             <Link href="/repair" className="group">
               <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
-                <div className="relative h-40 sm:h-48" style={{ backgroundColor: "var(--pastel-lavender)" }}>
-                  <div className="flex h-full items-center justify-center">
-                    <Wrench className="h-16 w-16 text-primary sm:h-20 sm:w-20" />
+                <div className="relative h-48">
+                  <Image
+                    src="/conference-table-detail.jpg"
+                    alt="전문 수리 서비스"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute top-4 right-4">
+                    <div className="rounded-full bg-white/20 backdrop-blur-sm p-3">
+                      <Wrench className="h-8 w-8 text-white" />
+                    </div>
                   </div>
                 </div>
                 <CardContent className="p-4 sm:p-6">
@@ -246,9 +266,18 @@ export default function Home() {
 
             <Link href="/news" className="group">
               <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
-                <div className="relative h-40 sm:h-48" style={{ backgroundColor: "var(--warm-gray)" }}>
-                  <div className="flex h-full items-center justify-center">
-                    <Newspaper className="h-16 w-16 text-primary sm:h-20 sm:w-20" />
+                <div className="relative h-48">
+                  <Image
+                    src="/furniture-store-opening.jpg"
+                    alt="최신 소식"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute top-4 right-4">
+                    <div className="rounded-full bg-white/20 backdrop-blur-sm p-3">
+                      <Newspaper className="h-8 w-8 text-white" />
+                    </div>
                   </div>
                 </div>
                 <CardContent className="p-4 sm:p-6">
