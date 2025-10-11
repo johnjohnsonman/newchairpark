@@ -42,7 +42,7 @@ export default async function BrandPage() {
     if (error) {
       console.error('Brands fetch error:', error)
       return (
-        <div className="bg-white">
+        <div className="bg-background">
           <div className="container mx-auto px-4 py-12">
             <div className="py-16 text-center text-neutral-500">
               <p>브랜드를 불러오는 중 오류가 발생했습니다.</p>
@@ -54,7 +54,7 @@ export default async function BrandPage() {
     }
 
     return (
-      <div className="bg-white">
+      <div className="bg-background">
         <div className="container mx-auto px-4 py-12">
           <div className="mb-12 text-center">
             <h1 className="mb-4 text-4xl font-bold">프리미엄 가구 브랜드</h1>
@@ -68,7 +68,7 @@ export default async function BrandPage() {
                 <Link
                   key={brand.slug}
                   href={`/brand/${brand.slug}`}
-                  className="group relative overflow-hidden rounded-lg border bg-white p-6 transition-all hover:shadow-lg hover:scale-[1.02] duration-300"
+                  className="group relative overflow-hidden rounded-lg border bg-card p-6 transition-all hover:shadow-lg hover:scale-[1.02] duration-300"
                 >
                   <div className="relative aspect-square mb-4">
                     <Image
@@ -112,7 +112,7 @@ export default async function BrandPage() {
   } catch (error) {
     console.error('Brand page error:', error)
     return (
-      <div className="bg-white">
+      <div className="bg-background">
         <div className="container mx-auto px-4 py-12">
           <div className="py-16 text-center text-neutral-500">
             <p>페이지를 불러오는 중 오류가 발생했습니다.</p>

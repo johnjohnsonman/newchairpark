@@ -5,9 +5,9 @@
 
 :root {
   /* Restored original neutral theme for website */
-  --background: oklch(1 0 0); /* Pure white background */
+  --background: oklch(0.973 0.005 0); /* Medium-style background #F8F8F8 */
   --foreground: oklch(0.2 0.01 0); /* Dark gray text */
-  --card: oklch(1 0 0); /* Pure white cards */
+  --card: oklch(0.973 0.005 0); /* Medium-style cards #F8F8F8 */
   --card-foreground: oklch(0.2 0.01 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.01 0);

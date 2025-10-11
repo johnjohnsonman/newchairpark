@@ -73,7 +73,7 @@ export default function Home() {
       </section>
 
 
-      <section className="bg-white px-4 py-8 sm:py-12">
+      <section className="px-4 py-8 sm:py-12">
         <div className="container mx-auto">
           <div className="mb-8 text-center sm:mb-10">
             <h2 className="mb-2 text-2xl font-bold sm:text-3xl">월드 프리미엄 체어 컬렉션</h2>
@@ -121,7 +121,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-slate-50 px-4 py-8 sm:py-12">
+      <section className="px-4 py-8 sm:py-12">
         <div className="container mx-auto">
           <div className="mb-8 text-center sm:mb-10">
             <h2 className="mb-2 text-2xl font-bold sm:text-3xl">월드 클래스 서비스</h2>
@@ -129,7 +129,7 @@ export default function Home() {
           </div>
           <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
             <Link href="/rental" className="group">
-              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 bg-card">
                 <div className="relative h-48">
                   <Image
                     src="/herman-miller-aeron.png"
@@ -146,7 +146,7 @@ export default function Home() {
             </Link>
 
             <Link href="/repair" className="group">
-              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 bg-card">
                 <div className="relative h-48">
                   <Image
                     src="/steelcase-leap-chair.jpg"
@@ -169,7 +169,7 @@ export default function Home() {
             </Link>
 
             <Link href="/news" className="group">
-              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 bg-card">
                 <div className="relative h-48">
                   <Image
                     src="/herman-miller-embody-chair.jpg"
@@ -194,14 +194,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white px-4 py-8 sm:py-12">
+      <section className="px-4 py-8 sm:py-12">
         <div className="container mx-auto">
           <div className="mb-8 text-center sm:mb-10">
             <h2 className="mb-2 text-2xl font-bold sm:text-3xl">체어파크의 강점</h2>
             <p className="text-sm text-muted-foreground sm:text-base">고객님께 드리는 특별한 가치</p>
           </div>
           <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
-            <Card className="border-0 shadow-md">
+            <Card className="border-0 shadow-md bg-card">
               <CardContent className="p-4 text-center sm:p-6">
                 <div className="mb-3 flex justify-center sm:mb-4">
                   <div className="rounded-2xl bg-primary/10 p-2 sm:p-3">
@@ -215,7 +215,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md">
+            <Card className="border-0 shadow-md bg-card">
               <CardContent className="p-4 text-center sm:p-6">
                 <div className="mb-3 flex justify-center sm:mb-4">
                   <div className="rounded-2xl bg-primary/10 p-2 sm:p-3">
@@ -229,7 +229,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md">
+            <Card className="border-0 shadow-md bg-card">
               <CardContent className="p-4 text-center sm:p-6">
                 <div className="mb-3 flex justify-center sm:mb-4">
                   <div className="rounded-2xl bg-primary/10 p-2 sm:p-3">

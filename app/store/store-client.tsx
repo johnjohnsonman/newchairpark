@@ -277,7 +277,7 @@ export default function StoreClientPage({
 
   if (!selectedCategory) {
     return (
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-background">
         <div className="relative h-[calc(100vh-4rem)] overflow-hidden bg-neutral-900">
           {categoryBanners.length > 0 && (
             <>
@@ -387,7 +387,7 @@ export default function StoreClientPage({
     <div className="min-h-screen bg-neutral-50">
       {/* 카테고리 배너 캐러셀 */}
       {currentBanners.length > 0 && (
-        <div className="bg-white">
+        <div className="bg-background">
           <div className="w-full">
             <Carousel>
               <CarouselContent>
@@ -438,7 +438,7 @@ export default function StoreClientPage({
       )}
       
       {/* 제품 헤더 */}
-      <div className="border-b bg-white">
+      <div className="border-b bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-4">
@@ -468,7 +468,7 @@ export default function StoreClientPage({
       </div>
 
       <div className="flex">
-        <aside className="hidden w-72 border-r bg-white p-6 lg:block">
+        <aside className="hidden w-72 border-r bg-background p-6 lg:block">
           <div className="mb-6 flex items-center gap-2">
             <SlidersHorizontal className="h-5 w-5" />
             <h2 className="text-sm font-bold uppercase tracking-wide">필터</h2>
@@ -575,7 +575,7 @@ export default function StoreClientPage({
           </Button>
         </aside>
 
-        <main className="flex-1 bg-white p-6 lg:p-8">
+        <main className="flex-1 bg-background p-6 lg:p-8">
           <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <SlidersHorizontal className="h-5 w-5 lg:hidden" />
@@ -609,7 +609,7 @@ export default function StoreClientPage({
                 return (
                   <Card
                     key={product.id}
-                    className="group h-full overflow-hidden border-neutral-200 transition-shadow hover:shadow-lg"
+                    className="group h-full overflow-hidden border-neutral-200 transition-shadow hover:shadow-lg bg-card"
                   >
                     <Link href={`/products/${product.slug}`}>
                       <div className="relative aspect-square overflow-hidden bg-neutral-50">
