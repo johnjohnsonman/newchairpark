@@ -9,6 +9,10 @@ const categories = [
   { id: "conference-chair", name: "Conference Chair", displayName: "회의용 체어" },
   { id: "dining-chair", name: "Dining Chair", displayName: "다이닝 체어" },
   { id: "design-chair", name: "Design Chair", displayName: "디자인 체어" },
+  { id: "desk", name: "Desk", displayName: "데스크" },
+  { id: "office-accessories", name: "Office Accessories", displayName: "오피스 악세서리" },
+  { id: "rental", name: "Rental", displayName: "렌탈" },
+  { id: "demo", name: "Demo", displayName: "데모" },
 ]
 
 // 동적 메타데이터 생성
@@ -36,18 +40,23 @@ export default async function StorePage() {
   const supabase = await createServerClient()
 
   // 서버에서 미리 데이터 로드 (빠름!)
-  const [productsResult, brandsResult, bannersResult] = await Promise.all([
+  const [productsResult, brandsResult, bannersResult, rentalsResult] = await Promise.all([
     supabase
       .from("products")
       .select("*, brands(name, slug)")
       .order("created_at", { ascending: false }),
     supabase.from("brands").select("*").order("name"),
     supabase.from("category_banners").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("rentals")
+      .select("*, brands(name, slug)")
+      .order("created_at", { ascending: false }),
   ])
 
   const initialProducts = productsResult.data || []
   const initialBrands = brandsResult.data || []
   const categoryBanners = bannersResult.data || []
+  const initialRentals = rentalsResult.data || []
 
   return (
     <StoreClientPage 
@@ -55,6 +64,7 @@ export default async function StorePage() {
       initialProducts={initialProducts}
       initialBrands={initialBrands}
       categoryBanners={categoryBanners}
+      initialRentals={initialRentals}
     />
   )
 }

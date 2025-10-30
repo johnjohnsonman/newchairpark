@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { createBrowserClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,8 +14,12 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { ko } from "date-fns/locale"
+import { useRouter } from "next/navigation"
 
 export default function RentalPage() {
+  const router = useRouter()
+  const supabase = createBrowserClient()
+  const [loading, setLoading] = useState(false)
   const [serviceType, setServiceType] = useState<"rental" | "demo">("rental")
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [formData, setFormData] = useState({
@@ -29,7 +34,7 @@ export default function RentalPage() {
     message: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // 렌탈 선택시 렌탈 기간 필수 검증
@@ -37,9 +42,72 @@ export default function RentalPage() {
       alert("렌탈 기간을 선택해주세요.")
       return
     }
-    
-    // 폼 제출 로직
-    console.log("폼 제출:", { serviceType, selectedDate, formData })
+
+    if (!selectedDate) {
+      alert("희망 날짜를 선택해주세요.")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      alert("로그인이 필요합니다.")
+      router.push("/auth/login")
+      return
+    }
+
+      // API를 통해 렌탈 요청 생성
+      const response = await fetch("/api/rental-requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rental_id: formData.product || null, // 선택된 제품이 있다면
+          service_type: serviceType,
+          name: formData.name,
+          company: formData.company || null,
+          phone: formData.phone,
+          email: formData.email || null,
+          quantity: parseInt(formData.quantity) || 1,
+          rental_period: serviceType === "rental" ? formData.rentalPeriod : null,
+          preferred_date: selectedDate.toISOString().split('T')[0],
+          message: formData.message || null,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "신청 중 오류가 발생했습니다.")
+      }
+
+      alert("신청이 완료되었습니다! 빠른 시일 내에 연락드리겠습니다.")
+      
+      // Reset form
+      setFormData({
+        name: "",
+        company: "",
+        phone: "",
+        email: "",
+        product: "",
+        quantity: "",
+        rentalPeriod: "",
+        preferredDate: "",
+        message: "",
+      })
+      setSelectedDate(undefined)
+      
+    } catch (error) {
+      console.error("Error submitting rental request:", error)
+      alert(`신청 중 오류가 발생했습니다: ${error instanceof Error ? error.message : "알 수 없는 오류"}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -290,9 +358,13 @@ export default function RentalPage() {
 
               {/* 제출 버튼 */}
               <div className="pt-6">
-                <Button type="submit" className="w-full bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-800 hover:to-slate-600 text-white py-6 text-lg font-semibold">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-800 hover:to-slate-600 text-white py-6 text-lg font-semibold"
+                >
                   <Send className="mr-2 h-5 w-5" />
-                  {serviceType === "rental" ? "렌탈" : "데모"} 신청하기
+                  {loading ? "신청 중..." : `${serviceType === "rental" ? "렌탈" : "데모"} 신청하기`}
                 </Button>
               </div>
             </form>

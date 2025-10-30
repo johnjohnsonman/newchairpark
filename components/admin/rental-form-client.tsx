@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,14 +10,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createBrowserClient } from "@/lib/supabase/client"
-import type { Product, Brand } from "@/types/database"
+import type { Rental } from "@/types/rental"
+import type { Brand } from "@/types/database"
 import Link from "next/link"
 import { ImageUpload } from "@/components/admin/image-upload"
-import { ProductOptionsManager } from "@/components/admin/product-options-manager"
 import { cn } from "@/lib/utils"
 
-interface ProductFormClientProps {
-  product?: Product
+interface RentalFormClientProps {
+  rental?: Rental
   brands: Brand[]
 }
 
@@ -32,17 +32,11 @@ const categories = [
   { value: "office-accessories", label: "Office Accessories" },
 ]
 
-export function ProductFormClient({ product, brands }: ProductFormClientProps) {
+export function RentalFormClient({ rental, brands }: RentalFormClientProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isClientReady, setIsClientReady] = useState(true)
-  
-  // 브랜드 이름 표시용
-  const [selectedBrandName, setSelectedBrandName] = useState("")
-  
-  // 제품 옵션 상태
-  const [productOptions, setProductOptions] = useState<any[]>([])
   
   // 슬러그 중복 체크 상태
   const [slugStatus, setSlugStatus] = useState<'checking' | 'available' | 'taken' | null>(null)
@@ -50,55 +44,41 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
   // images를 안전하게 초기화
   const [images, setImages] = useState<Array<{ url: string; order: number }>>(() => {
     try {
-      if (product?.images) {
-        if (typeof product.images === 'string') {
-          const parsed = JSON.parse(product.images)
+      if (rental?.images) {
+        if (typeof rental.images === 'string') {
+          const parsed = JSON.parse(rental.images)
           return Array.isArray(parsed) ? parsed : []
         }
-        if (Array.isArray(product.images)) {
-          return product.images
+        if (Array.isArray(rental.images)) {
+          return rental.images
         }
       }
       return []
     } catch (e) {
-      console.error('Failed to parse product images:', e)
+      console.error('Failed to parse rental images:', e)
       return []
     }
   })
 
-  // 클라이언트 준비 상태 설정 (제거)
-
-  // 폼 데이터 초기화 (실제 데이터베이스 필드만 사용)
+  // 폼 데이터 초기화
   const [formData, setFormData] = useState({
-    name: product?.name || "",
-    slug: product?.slug || "",
-    brand_id: product?.brand_id || "no-brand",
-    category: product?.category || "office-chair",
-    price: product?.price || 0,
-    original_price: product?.original_price || 0,
-    description: product?.description || "",
-    in_stock: product?.in_stock ?? true,
-    featured: product?.featured ?? false,
+    name: rental?.name || "",
+    slug: rental?.slug || "",
+    brand_id: rental?.brand_id || "no-brand",
+    category: rental?.category || "office-chair",
+    type: rental?.type || "rental",
+    price_monthly: rental?.price_monthly || 0,
+    price_daily: rental?.price_daily || 0,
+    original_price: rental?.original_price || 0,
+    description: rental?.description || "",
+    min_rental_period: rental?.min_rental_period || 3,
+    available: rental?.available ?? true,
+    featured: rental?.featured ?? false,
   })
-
-  // 제품 옵션 변경 핸들러 (무한 루프 방지)
-  const handleOptionsChange = useCallback((options: any[]) => {
-    setProductOptions(options)
-  }, [])
-
-  // 브랜드 이름 설정
-  useEffect(() => {
-    if (product?.brand_id) {
-      const brand = brands.find(b => b.id === product.brand_id)
-      if (brand) {
-        setSelectedBrandName(brand.name)
-      }
-    }
-  }, [product?.brand_id, brands])
 
   // 제품명 변경 시 슬러그 자동 업데이트
   useEffect(() => {
-    if (formData.name && !product) {
+    if (formData.name && !rental) {
       const autoSlug = formData.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
@@ -108,14 +88,14 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
         setFormData(prev => ({ ...prev, slug: autoSlug }))
       }
     }
-  }, [formData.name, product])
+  }, [formData.name, rental])
 
   // 슬러그 중복 실시간 체크
   useEffect(() => {
     if (!isClientReady) return
 
     const checkSlugAvailability = async () => {
-      if (!formData.slug || (product && formData.slug === product.slug)) {
+      if (!formData.slug || (rental && formData.slug === rental.slug)) {
         setSlugStatus(null)
         return
       }
@@ -124,13 +104,13 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
       
       try {
         const supabase = createBrowserClient()
-        const { data: existingProduct } = await supabase
-          .from('products')
+        const { data: existingRental } = await supabase
+          .from('rentals')
           .select('id')
           .eq('slug', formData.slug)
           .maybeSingle()
         
-        setSlugStatus(existingProduct ? 'taken' : 'available')
+        setSlugStatus(existingRental ? 'taken' : 'available')
       } catch (error) {
         console.error('Error checking slug:', error)
         setSlugStatus(null)
@@ -139,7 +119,7 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     
     const timeoutId = setTimeout(checkSlugAvailability, 500)
     return () => clearTimeout(timeoutId)
-  }, [formData.slug, product, isClientReady])
+  }, [formData.slug, rental, isClientReady])
 
   const generateSlug = async () => {
     const supabase = createBrowserClient()
@@ -152,16 +132,15 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     let slug = baseSlug
     let counter = 1
     
-    // 중복 체크하여 고유한 슬러그 생성
     while (true) {
-      const { data: existingProduct } = await supabase
-        .from('products')
+      const { data: existingRental } = await supabase
+        .from('rentals')
         .select('id')
         .eq('slug', slug)
         .maybeSingle()
       
-      if (!existingProduct || (product && existingProduct.id === product.id)) {
-        break // 사용 가능한 슬러그
+      if (!existingRental || (rental && existingRental.id === rental.id)) {
+        break
       }
       
       slug = `${baseSlug}-${counter}`
@@ -174,13 +153,11 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // 슬러그 중복 체크
     if (slugStatus === 'taken') {
       setError('이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해주세요.')
       return
     }
     
-    // 슬러그 체크 중인 경우 대기
     if (slugStatus === 'checking') {
       setError('슬러그 중복 체크 중입니다. 잠시 후 다시 시도해주세요.')
       return
@@ -190,92 +167,70 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     setError(null)
 
     try {
-      const supabase = createBrowserClient()
-      
-      // images를 JSONB 형식으로 변환
       const dataToSave = {
         name: formData.name,
         slug: formData.slug,
         brand_id: formData.brand_id === "no-brand" ? null : formData.brand_id,
         category: formData.category,
-        price: formData.price,
-        original_price: formData.original_price,
+        type: formData.type,
+        price_monthly: formData.price_monthly || null,
+        price_daily: formData.price_daily || null,
+        original_price: formData.original_price || null,
         description: formData.description,
-        in_stock: formData.in_stock,
+        min_rental_period: formData.min_rental_period,
+        available: formData.available,
         featured: formData.featured,
-        images: JSON.stringify(images), // JSONB로 저장
+        images: images,
         image_url: images.length > 0 ? images[0].url : "/placeholder.svg",
-        updated_at: new Date().toISOString(),
       }
 
-      console.log('💾 Saving product data:', dataToSave)
-
-      let savedProduct;
+      let response;
       
-      if (product) {
-        console.log('🔄 Updating existing product:', product.id)
-        const { data, error } = await supabase
-          .from("products")
-          .update(dataToSave)
-          .eq("id", product.id)
-          .select()
-          .single()
-        
-        console.log('✅ Update result:', { data, error })
-        if (error) throw error
-        savedProduct = data
+      if (rental) {
+        // 수정
+        response = await fetch(`/api/rentals/${rental.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSave),
+        })
       } else {
-        console.log('✨ Creating new product')
-        const { data, error } = await supabase
-          .from("products")
-          .insert([dataToSave])
-          .select()
-          .single()
-        
-        console.log('✅ Insert result:', { data, error })
-        if (error) throw error
-        savedProduct = data
+        // 생성
+        response = await fetch("/api/rentals", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSave),
+        })
       }
 
-      console.log('🎉 Product saved successfully!', savedProduct)
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "렌탈 저장에 실패했습니다.")
+      }
       
-      // 성공 메시지 표시
-      alert('제품이 성공적으로 저장되었습니다!')
-      
-      // 리다이렉트
-      router.push("/admin/products")
+      alert('렌탈/데모 상품이 성공적으로 저장되었습니다!')
+      router.push("/admin/rentals")
       router.refresh()
     } catch (err) {
-      console.error('❌ Product save error:', err)
-      let errorMessage = "An error occurred"
+      console.error('❌ Rental save error:', err)
+      
+      let errorMessage = "오류가 발생했습니다"
 
       if (err instanceof Error) {
-        if (err.message.includes("duplicate key value violates unique constraint")) {
-          if (err.message.includes("products_slug_key")) {
-            errorMessage = `이 슬러그(${formData.slug})는 이미 사용 중입니다. 다른 슬러그를 사용해주세요.`
-          } else {
-            errorMessage = "중복된 값이 있습니다. 다른 값을 입력해주세요."
-          }
-        } else {
-          errorMessage = err.message
-        }
+        errorMessage = err.message
+      } else {
+        errorMessage = String(err)
       }
 
       setError(errorMessage)
+      alert(errorMessage)
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (!isClientReady) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600">폼을 불러오는 중...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -284,19 +239,19 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Product Name *</Label>
+              <Label htmlFor="name">상품명 *</Label>
               <Input
                 id="name"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="예: Aeron Chair, Gesture Chair"
+                placeholder="예: 허먼밀러 에어론 체어"
               />
             </div>
 
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="slug">Slug *</Label>
+                <Label htmlFor="slug">슬러그 *</Label>
                 <Button 
                   type="button" 
                   variant="ghost" 
@@ -304,7 +259,7 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
                   onClick={generateSlug}
                   disabled={!formData.name}
                 >
-                  Generate from name
+                  이름에서 생성
                 </Button>
               </div>
               <div className="relative">
@@ -337,22 +292,29 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
                   </div>
                 )}
               </div>
-              {slugStatus === 'taken' && (
-                <p className="text-sm text-red-600">이 슬러그는 이미 사용 중입니다.</p>
-              )}
-              {slugStatus === 'available' && (
-                <p className="text-sm text-green-600">사용 가능한 슬러그입니다.</p>
-              )}
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="brand">Brand</Label>
+              <Label htmlFor="type">서비스 타입 *</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) => setFormData({ ...formData, type: value as "rental" | "demo" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rental">렌탈 (장기 이용)</SelectItem>
+                  <SelectItem value="demo">데모 (단기 체험)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="brand">브랜드</Label>
               <Select
                 value={formData.brand_id || "no-brand"}
-                onValueChange={(value) => {
-                  console.log('🏷️ Brand selected:', value)
-                  setFormData(prev => ({ ...prev, brand_id: value }))
-                }}
+                onValueChange={(value) => setFormData({ ...formData, brand_id: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="브랜드를 선택하세요" />
@@ -372,18 +334,10 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
                   )}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                기존 브랜드 중에서 선택하거나 "브랜드 없음"을 선택하세요.
-                {brands && (
-                  <span className="block text-green-600 mt-1">
-                    로드된 브랜드: {brands.length}개 ({brands.map(b => b.name).join(', ')})
-                  </span>
-                )}
-              </p>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="category">Category *</Label>
+              <Label htmlFor="category">카테고리 *</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -401,31 +355,53 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">Price *</Label>
+                <Label htmlFor="price_monthly">월 렌탈료</Label>
                 <Input
-                  id="price"
+                  id="price_monthly"
                   type="number"
-                  step="0.01"
-                  required
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: Number.parseFloat(e.target.value) })}
-                  placeholder="1299.99"
+                  step="1"
+                  value={formData.price_monthly || ""}
+                  onChange={(e) => setFormData({ ...formData, price_monthly: Number.parseFloat(e.target.value) || 0 })}
+                  placeholder="100000"
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="original_price">Original Price</Label>
+                <Label htmlFor="price_daily">일 데모료</Label>
+                <Input
+                  id="price_daily"
+                  type="number"
+                  step="1"
+                  value={formData.price_daily || ""}
+                  onChange={(e) => setFormData({ ...formData, price_daily: Number.parseFloat(e.target.value) || 0 })}
+                  placeholder="10000"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="original_price">구매가 (참고용)</Label>
                 <Input
                   id="original_price"
                   type="number"
-                  step="0.01"
+                  step="1"
                   value={formData.original_price || ""}
                   onChange={(e) => setFormData({ ...formData, original_price: Number.parseFloat(e.target.value) || 0 })}
-                  placeholder="1499.99"
+                  placeholder="1500000"
                 />
               </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="min_rental_period">최소 렌탈 기간 (개월)</Label>
+              <Input
+                id="min_rental_period"
+                type="number"
+                min="1"
+                value={formData.min_rental_period}
+                onChange={(e) => setFormData({ ...formData, min_rental_period: Number.parseInt(e.target.value) || 3 })}
+              />
             </div>
 
             <div className="grid gap-2">
@@ -437,12 +413,12 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">설명</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Product description..."
+                placeholder="상품 설명..."
                 rows={4}
               />
             </div>
@@ -451,11 +427,11 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={formData.in_stock}
-                  onChange={(e) => setFormData({ ...formData, in_stock: e.target.checked })}
+                  checked={formData.available}
+                  onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-sm">In Stock</span>
+                <span className="text-sm">대여 가능</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -465,25 +441,25 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
                   onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-sm">Featured</span>
+                <span className="text-sm">추천 상품</span>
               </label>
             </div>
           </div>
 
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-              <p className="font-semibold">Error:</p>
+              <p className="font-semibold">오류:</p>
               <p>{error}</p>
             </div>
           )}
 
           <div className="flex gap-3">
             <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? "Saving..." : product ? "Update Product" : "Create Product"}
+              {isLoading ? "저장 중..." : rental ? "렌탈/데모 수정" : "렌탈/데모 추가"}
             </Button>
-            <Link href="/admin/products">
+            <Link href="/admin/rentals">
               <Button type="button" variant="outline">
-                Cancel
+                취소
               </Button>
             </Link>
           </div>
@@ -492,3 +468,4 @@ export function ProductFormClient({ product, brands }: ProductFormClientProps) {
     </Card>
   )
 }
+

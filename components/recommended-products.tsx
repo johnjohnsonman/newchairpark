@@ -137,7 +137,7 @@ export function RecommendedProducts({
                           }
                         }
                         
-                        return imageUrl ? (
+                        return (imageUrl && imageUrl.trim()) ? (
                           <Image
                             src={imageUrl}
                             alt={product.name}

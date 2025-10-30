@@ -10,11 +10,12 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SlidersHorizontal, Star, ShoppingCart, ArrowRight, Store, Award, Package } from "lucide-react"
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SlidersHorizontal, Star, ShoppingCart, ArrowRight, Store, Award, Package, Calendar } from "lucide-react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { NaverBookingButtonWhite } from "@/components/naver-booking-button"
 import { useSearchParams } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/client"
+import type { Rental } from "@/types/rental"
 
 interface Category {
   id: string
@@ -60,13 +61,19 @@ interface StoreClientPageProps {
   initialProducts?: Product[]
   initialBrands?: Brand[]
   categoryBanners?: CategoryBanner[]
+  initialRentals?: Rental[]
+}
+
+type CombinedItem = (Product | Rental) & {
+  itemType: "product" | "rental"
 }
 
 export default function StoreClientPage({ 
   categories, 
   initialProducts = [],
   initialBrands = [],
-  categoryBanners = []
+  categoryBanners = [],
+  initialRentals = []
 }: StoreClientPageProps) {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
@@ -116,6 +123,10 @@ export default function StoreClientPage({
         return "다이닝룸과 식사 공간을 아름답게 만드는 다이닝 체어"
       case "design-chair":
         return "독특한 디자인과 예술적 가치를 지닌 디자인 체어"
+      case "desk":
+        return "업무 효율을 높이는 프리미엄 데스크"
+      case "office-accessories":
+        return "오피스 공간을 완성하는 필수 악세서리"
       default:
         return "최고의 품질과 디자인을 경험하세요"
     }
@@ -146,28 +157,44 @@ export default function StoreClientPage({
   const [heroCarouselIndex, setHeroCarouselIndex] = useState(0)
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [rentals, setRentals] = useState<Rental[]>(initialRentals)
   const [brands, setBrands] = useState<Brand[]>(initialBrands)
   const [loading, setLoading] = useState(false)
 
   // 초기 데이터가 없을 때만 로드
   useEffect(() => {
-    if (initialProducts.length === 0) {
-      const fetchProducts = async () => {
+    if (initialProducts.length === 0 || initialRentals.length === 0) {
+      const fetchData = async () => {
         setLoading(true)
-        const { data, error } = await supabase
-          .from("products")
-          .select("*, brands(name, slug)")
-          .order("created_at", { ascending: false })
+        
+        if (initialProducts.length === 0) {
+          const { data: productsData } = await supabase
+            .from("products")
+            .select("*, brands(name, slug)")
+            .order("created_at", { ascending: false })
 
-        if (data) {
-          setProducts(data)
+          if (productsData) {
+            setProducts(productsData)
+          }
         }
+
+        if (initialRentals.length === 0) {
+          const { data: rentalsData } = await supabase
+            .from("rentals")
+            .select("*, brands(name, slug)")
+            .order("created_at", { ascending: false })
+
+          if (rentalsData) {
+            setRentals(rentalsData as Rental[])
+          }
+        }
+        
         setLoading(false)
       }
 
-      fetchProducts()
+      fetchData()
     }
-  }, [initialProducts.length])
+  }, [initialProducts.length, initialRentals.length])
 
   useEffect(() => {
     if (initialBrands.length === 0) {
@@ -229,6 +256,79 @@ export default function StoreClientPage({
     fetchReviewStats()
   }, [])
 
+  // Combine products and rentals based on selected category
+  const getCombinedItems = (): CombinedItem[] => {
+    let items: CombinedItem[] = []
+
+    // If rental or demo category is selected, only show rentals
+    if (selectedCategory === "rental" || selectedCategory === "demo") {
+      const filteredRentals = rentals.filter((rental) => {
+        if (selectedCategory === "rental" && rental.type !== "rental") return false
+        if (selectedCategory === "demo" && rental.type !== "demo") return false
+        
+        const brandMatch = selectedBrands.length === 0 || selectedBrands.some((b) => rental.brands?.name === b)
+        const price = rental.type === "rental" 
+          ? Number(rental.price_monthly) || 0 
+          : Number(rental.price_daily) || 0
+        const priceMatch = price >= priceRange[0] && price <= priceRange[1]
+        
+        return brandMatch && priceMatch
+      })
+
+      return filteredRentals.map(rental => ({ ...rental, itemType: "rental" as const }))
+    }
+
+    // Otherwise show products
+    const filteredProducts = products.filter((product) => {
+      const categoryMatch = !selectedCategory || selectedCategory === "all" || product.category === selectedCategory
+      const brandMatch = selectedBrands.length === 0 || selectedBrands.some((b) => product.brands?.name === b)
+      const price = Number(product.price) || 0
+      const priceMatch = price >= priceRange[0] && price <= priceRange[1]
+      return categoryMatch && brandMatch && priceMatch
+    })
+
+    return filteredProducts.map(product => ({ ...product, itemType: "product" as const }))
+  }
+
+  const filteredItems = getCombinedItems()
+
+  // 정렬 적용: 추천순(기본), 가격 낮은/높은순, 이름순
+  const sortedItems = (() => {
+    const items = [...filteredItems]
+    switch (sortBy) {
+      case "price-low":
+        return items.sort((a, b) => {
+          const aPrice = (a as any).itemType === "rental"
+            ? Number((a as any).type === "rental" ? (a as any).price_monthly : (a as any).price_daily) || 0
+            : Number((a as any).price) || 0
+          const bPrice = (b as any).itemType === "rental"
+            ? Number((b as any).type === "rental" ? (b as any).price_monthly : (b as any).price_daily) || 0
+            : Number((b as any).price) || 0
+          return aPrice - bPrice
+        })
+      case "price-high":
+        return items.sort((a, b) => {
+          const aPrice = (a as any).itemType === "rental"
+            ? Number((a as any).type === "rental" ? (a as any).price_monthly : (a as any).price_daily) || 0
+            : Number((a as any).price) || 0
+          const bPrice = (b as any).itemType === "rental"
+            ? Number((b as any).type === "rental" ? (b as any).price_monthly : (b as any).price_daily) || 0
+            : Number((b as any).price) || 0
+          return bPrice - aPrice
+        })
+      case "name":
+        return items.sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+      case "featured":
+      default:
+        // 제품의 featured 우선, 그 다음 최신순 느낌으로 이름순 보조
+        return items.sort((a: any, b: any) => {
+          const aFeatured = a.itemType === "product" && !!a.featured
+          const bFeatured = b.itemType === "product" && !!b.featured
+          if (aFeatured !== bFeatured) return aFeatured ? -1 : 1
+          return (b.created_at ? new Date(b.created_at).getTime() : 0) - (a.created_at ? new Date(a.created_at).getTime() : 0)
+        })
+    }
+  })()
   const filteredProducts = products.filter((product) => {
     const categoryMatch = !selectedCategory || selectedCategory === "all" || product.category === selectedCategory
     const brandMatch = selectedBrands.length === 0 || selectedBrands.some((b) => product.brands?.name === b)
@@ -468,7 +568,7 @@ export default function StoreClientPage({
       </div>
 
       <div className="flex">
-        <aside className="hidden w-72 border-r bg-background p-6 lg:block">
+        <aside className="hidden w-72 border-r bg-background p-6 lg:block sticky top-24 h-[calc(100vh-6rem)] overflow-auto">
           <div className="mb-6 flex items-center gap-2">
             <SlidersHorizontal className="h-5 w-5" />
             <h2 className="text-sm font-bold uppercase tracking-wide">필터</h2>
@@ -576,35 +676,102 @@ export default function StoreClientPage({
         </aside>
 
         <main className="flex-1 bg-background p-6 lg:p-8">
-          <div className="mb-6 flex items-center justify-between border-b pb-4">
-            <div className="flex items-center gap-4">
-              <SlidersHorizontal className="h-5 w-5 lg:hidden" />
-              <p className="text-sm font-semibold">
-                <span className="font-bold">{filteredProducts.length}</span> 결과
-              </p>
-              <button className="text-sm text-neutral-600 hover:text-neutral-900 hover:underline">Most Relevant</button>
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-4">
+                <SlidersHorizontal className="h-5 w-5 lg:hidden" />
+                <p className="text-sm font-semibold">
+                  <span className="font-bold">{filteredItems.length}</span> 결과
+                </p>
+                <button className="text-sm text-neutral-600 hover:text-neutral-900 hover:underline">Most Relevant</button>
+              </div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="rounded border border-neutral-300 px-3 py-1.5 text-sm focus:border-neutral-900 focus:outline-none"
+              >
+                <option value="featured">추천순</option>
+                <option value="price-low">가격 낮은순</option>
+                <option value="price-high">가격 높은순</option>
+                <option value="name">이름순</option>
+              </select>
             </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="rounded border border-neutral-300 px-3 py-1.5 text-sm focus:border-neutral-900 focus:outline-none"
-            >
-              <option value="featured">추천순</option>
-              <option value="price-low">가격 낮은순</option>
-              <option value="price-high">가격 높은순</option>
-              <option value="name">이름순</option>
-            </select>
-          </div>
 
-          {loading ? (
-            <div className="py-12 text-center">
-              <p className="text-neutral-600">제품을 불러오는 중...</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredProducts.map((product) => {
+            {loading ? (
+              <div className="py-12 text-center">
+                <p className="text-neutral-600">제품을 불러오는 중...</p>
+              </div>
+            ) : (
+              <div className="grid gap-6 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {sortedItems.map((item) => {
+                const mainImage = item.images?.[0]?.url || item.image_url || "/placeholder.svg"
+                const isRental = item.itemType === "rental"
+                const rental = isRental ? (item as Rental) : null
+
+                if (isRental && rental) {
+                  // Render rental item
+                  const displayPrice = rental.type === "rental" 
+                    ? rental.price_monthly 
+                    : rental.price_daily
+
+                  return (
+                    <Card
+                      key={rental.id}
+                      className="group h-full overflow-hidden border-neutral-200 transition-shadow hover:shadow-lg bg-card"
+                    >
+                      <div className="relative aspect-square overflow-hidden bg-neutral-50">
+                        <Image
+                          src={(mainImage && mainImage.trim()) || "/placeholder.svg"}
+                          alt={rental.name}
+                          fill
+                          className="object-contain p-4 transition-transform group-hover:scale-105"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                            rental.type === "rental" 
+                              ? "bg-blue-100 text-blue-800" 
+                              : "bg-green-100 text-green-800"
+                          }`}>
+                            {rental.type === "rental" ? "렌탈" : "데모"}
+                          </span>
+                        </div>
+                      </div>
+                      <CardContent className="flex flex-col p-4">
+                        <div className="mb-2 flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                              {rental.brands?.name || "브랜드 없음"}
+                            </p>
+                            <h3 className="mb-1 text-base font-bold text-neutral-900 line-clamp-2">
+                              {rental.name}
+                            </h3>
+                            <p className="text-xs text-neutral-600">{rental.category}</p>
+                          </div>
+                        </div>
+                        <div className="mt-auto pt-3 flex items-center justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-bold text-neutral-900">
+                              ₩{Number(displayPrice).toLocaleString()}
+                            </p>
+                            <p className="text-xs text-neutral-500">
+                              {rental.type === "rental" ? "/월" : "/일"}
+                            </p>
+                          </div>
+                          <Link href="/rental">
+                            <Button size="sm" variant="outline" className="gap-1 bg-transparent">
+                              <Calendar className="h-4 w-4" />
+                              신청
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                }
+
+                // Render product item
+                const product = item as Product
                 const stats = reviewStats[product.id] || { count: 0, average: 0 }
-                const mainImage = product.images?.[0]?.url || product.image_url || "/placeholder.svg"
 
                 return (
                   <Card
@@ -614,7 +781,7 @@ export default function StoreClientPage({
                     <Link href={`/products/${product.slug}`}>
                       <div className="relative aspect-square overflow-hidden bg-neutral-50">
                         <Image
-                          src={mainImage || "/placeholder.svg"}
+                          src={(mainImage && mainImage.trim()) || "/placeholder.svg"}
                           alt={product.name}
                           fill
                           className="object-contain p-4 transition-transform group-hover:scale-105"
@@ -666,14 +833,15 @@ export default function StoreClientPage({
                   </Card>
                 )
               })}
-            </div>
-          )}
+              </div>
+            )}
 
-          {filteredProducts.length === 0 && (
-            <div className="py-12 text-center">
-              <p className="text-neutral-600">선택한 필터에 맞는 제품이 없습니다.</p>
-            </div>
-          )}
+            {filteredItems.length === 0 && !loading && (
+              <div className="py-12 text-center">
+                <p className="text-neutral-600">선택한 필터에 맞는 제품이 없습니다.</p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
 

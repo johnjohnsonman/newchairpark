@@ -5,6 +5,10 @@ import "./globals.css"
 import Navigation from "@/components/navigation"
 import { Suspense } from "react"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { initializeApp } from "@/lib/app-init"
+
+// 앱 초기화
+initializeApp()
 
 const notoSans = Noto_Sans({
   subsets: ["latin", "latin-ext"],
