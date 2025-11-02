@@ -26,6 +26,11 @@ export default async function ReviewsPage({
     : []
   const ageMin = searchParams.ageMin ? Number(searchParams.ageMin) : null
   const ageMax = searchParams.ageMax ? Number(searchParams.ageMax) : null
+  const heightMin = searchParams.heightMin ? Number(searchParams.heightMin) : null
+  const heightMax = searchParams.heightMax ? Number(searchParams.heightMax) : null
+  const weightMin = searchParams.weightMin ? Number(searchParams.weightMin) : null
+  const weightMax = searchParams.weightMax ? Number(searchParams.weightMax) : null
+  const gender = searchParams.gender ? String(searchParams.gender) : null
   const occupations = searchParams.occupations ? String(searchParams.occupations).split(",") : []
   const sittingStyles = searchParams.sittingStyles ? String(searchParams.sittingStyles).split(",") : []
   const sortBy = searchParams.sortBy || "recent"
@@ -123,6 +128,21 @@ export default async function ReviewsPage({
   // Apply age filter
   if (ageMin !== null && ageMax !== null) {
     query = query.gte("age", ageMin).lte("age", ageMax)
+  }
+
+  // Apply gender filter
+  if (gender) {
+    query = query.eq("gender", gender)
+  }
+
+  // Apply height filter
+  if (heightMin !== null && heightMax !== null) {
+    query = query.gte("height", heightMin).lte("height", heightMax)
+  }
+
+  // Apply weight filter
+  if (weightMin !== null && weightMax !== null) {
+    query = query.gte("weight", weightMin).lte("weight", weightMax)
   }
 
   // Apply occupation filter

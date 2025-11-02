@@ -32,6 +32,11 @@ export default function ReviewFilters({ productInfo, brandInfo, availableBrands 
   const currentRatings = searchParams.get("ratings")?.split(",").filter(Boolean).map(Number) || []
   const currentAgeMin = Number(searchParams.get("ageMin")) || 20
   const currentAgeMax = Number(searchParams.get("ageMax")) || 60
+  const currentHeightMin = Number(searchParams.get("heightMin")) || 150
+  const currentHeightMax = Number(searchParams.get("heightMax")) || 200
+  const currentWeightMin = Number(searchParams.get("weightMin")) || 40
+  const currentWeightMax = Number(searchParams.get("weightMax")) || 100
+  const currentGender = searchParams.get("gender") || ""
   const currentOccupations = searchParams.get("occupations")?.split(",").filter(Boolean) || []
   const currentSittingStyles = searchParams.get("sittingStyles")?.split(",").filter(Boolean) || []
   const currentSortBy = searchParams.get("sortBy") || "recent"
@@ -73,6 +78,14 @@ export default function ReviewFilters({ productInfo, brandInfo, availableBrands 
       ? currentSittingStyles.filter((s) => s !== style)
       : [...currentSittingStyles, style]
     updateURL({ sittingStyles: newStyles })
+  }
+
+  const handleGenderChange = (gender: string) => {
+    if (gender === currentGender) {
+      updateURL({ gender: null })
+    } else {
+      updateURL({ gender })
+    }
   }
 
   const handleBrandChange = (brandSlug: string) => {
@@ -246,6 +259,60 @@ export default function ReviewFilters({ productInfo, brandInfo, availableBrands 
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>{currentAgeMin}세</span>
             <span>{currentAgeMax}세</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">성별</h3>
+        <div className="space-y-2">
+          {["남자", "여자"].map((gender) => (
+            <div key={gender} className="flex items-center space-x-2">
+              <Checkbox
+                id={`gender-${gender}`}
+                checked={currentGender === gender}
+                onCheckedChange={() => handleGenderChange(gender)}
+              />
+              <Label htmlFor={`gender-${gender}`} className="text-sm cursor-pointer">
+                {gender}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">키</h3>
+        <div className="space-y-4">
+          <Slider
+            min={150}
+            max={200}
+            step={5}
+            value={[currentHeightMin, currentHeightMax]}
+            onValueChange={(value) => updateURL({ heightMin: value[0], heightMax: value[1] })}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>{currentHeightMin}cm</span>
+            <span>{currentHeightMax}cm</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">몸무게</h3>
+        <div className="space-y-4">
+          <Slider
+            min={40}
+            max={100}
+            step={5}
+            value={[currentWeightMin, currentWeightMax]}
+            onValueChange={(value) => updateURL({ weightMin: value[0], weightMax: value[1] })}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>{currentWeightMin}kg</span>
+            <span>{currentWeightMax}kg</span>
           </div>
         </div>
       </div>

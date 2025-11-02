@@ -134,6 +134,7 @@ export interface Review {
   age: number | null
   height: number | null
   weight: number | null
+  gender: string | null
   occupation: string | null
   sitting_style: string | null
   previous_chair: string | null
