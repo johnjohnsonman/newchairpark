@@ -117,7 +117,7 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
     return (
       <div className="bg-white">
         {/* 브랜드 정보 섹션 */}
-        <div className="relative bg-slate-100">
+        <div className="relative bg-slate-100 pt-8 sm:pt-12">
           <div className="container mx-auto">
             <div className="grid lg:grid-cols-2">
               <div className="flex items-center px-6 py-16 lg:px-12">
@@ -128,7 +128,7 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
                   </p>
                 </div>
               </div>
-              <div className="relative h-80 lg:h-auto">
+              <div className="relative h-96 lg:h-[600px] xl:h-[700px]">
                 <BrandBannerCarousel 
                   banners={banners || []} 
                   brandName={brand.name}
