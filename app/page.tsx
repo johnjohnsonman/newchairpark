@@ -121,72 +121,193 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-4 py-8 sm:py-12">
+      <section className="px-4 py-8 sm:py-12 bg-gradient-to-b from-background to-muted/30">
         <div className="container mx-auto">
-          <div className="mb-8 text-center sm:mb-10">
-            <h2 className="mb-2 text-2xl font-bold sm:text-3xl">월드 클래스 서비스</h2>
-            <p className="text-sm text-muted-foreground sm:text-base">프리미엄 체어 전문 맞춤 솔루션</p>
+          <div className="mb-8 text-center sm:mb-12">
+            <h2 className="mb-2 text-2xl font-bold sm:text-3xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">스토어 카테고리</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">프리미엄 체어를 카테고리별로 만나보세요</p>
           </div>
-          <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
-            <Link href="/rental" className="group">
-              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 bg-card">
-                <div className="relative h-48">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Link href="/store?category=office-chair" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-blue-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-blue-100 to-blue-50">
                   <Image
                     src="/herman-miller-aeron.png"
-                    alt="허먼밀러 에어론 체어 렌탈"
+                    alt="오피스 체어"
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <CardContent className="p-4 sm:p-6">
-                  <h3 className="mb-2 text-lg font-bold sm:text-xl">프리미엄 체어 렌탈</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">월드 클래스 체어 부담없이 체험하기</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/repair" className="group">
-              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 bg-card">
-                <div className="relative h-48">
-                  <Image
-                    src="/steelcase-leap-chair.jpg"
-                    alt="스틸케이스 립 체어 전문 수리"
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute top-4 right-4">
-                    <div className="rounded-full bg-white/20 backdrop-blur-sm p-3">
-                      <Wrench className="h-8 w-8 text-white" />
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-blue-100 p-2 group-hover:bg-blue-200 transition-colors">
+                      <Store className="h-5 w-5 text-blue-700" />
                     </div>
+                    <h3 className="text-lg font-bold sm:text-xl">오피스 체어</h3>
                   </div>
-                </div>
-                <CardContent className="p-4 sm:p-6">
-                  <h3 className="mb-2 text-lg font-bold sm:text-xl">프리미엄 체어 전문 수리</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">월드 클래스 체어 전문 수리 및 A/S</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">장시간 업무에 최적화된 인체공학 체어</p>
                 </CardContent>
               </Card>
             </Link>
 
-            <Link href="/news" className="group">
-              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1 bg-card">
-                <div className="relative h-48">
+            <Link href="/store?category=executive-chair" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-amber-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-amber-100 to-amber-50">
                   <Image
                     src="/herman-miller-embody-chair.jpg"
-                    alt="허먼밀러 엠보디 체어 뉴스"
+                    alt="임원용 체어"
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute top-4 right-4">
-                    <div className="rounded-full bg-white/20 backdrop-blur-sm p-3">
-                      <Newspaper className="h-8 w-8 text-white" />
-                    </div>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <CardContent className="p-4 sm:p-6">
-                  <h3 className="mb-2 text-lg font-bold sm:text-xl">월드 프리미엄 뉴스</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">최신 프리미엄 체어 트렌드와 뉴스</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-amber-100 p-2 group-hover:bg-amber-200 transition-colors">
+                      <Award className="h-5 w-5 text-amber-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">임원용 체어</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">프리미엄 디자인의 고급스러운 체어</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/store?category=lounge-chair" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-purple-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-purple-100 to-purple-50">
+                  <Image
+                    src="/steelcase-gesture-chair.jpg"
+                    alt="라운지 체어"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-purple-100 p-2 group-hover:bg-purple-200 transition-colors">
+                      <Sparkles className="h-5 w-5 text-purple-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">라운지 체어</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">휴식과 편안함을 위한 럭셔리 체어</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/store?category=conference-chair" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-emerald-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-emerald-100 to-emerald-50">
+                  <Image
+                    src="/steelcase-leap-chair.jpg"
+                    alt="회의용 체어"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-emerald-100 p-2 group-hover:bg-emerald-200 transition-colors">
+                      <TrendingUp className="h-5 w-5 text-emerald-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">회의용 체어</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">효율적인 회의 공간을 위한 체어</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/store?category=dining-chair" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-rose-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-rose-100 to-rose-50">
+                  <Image
+                    src="/herman-miller-aeron.png"
+                    alt="다이닝 체어"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-rose-100 p-2 group-hover:bg-rose-200 transition-colors">
+                      <Package className="h-5 w-5 text-rose-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">다이닝 체어</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">식사 공간을 아름답게 만드는 체어</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/store?category=design-chair" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-indigo-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-indigo-100 to-indigo-50">
+                  <Image
+                    src="/herman-miller-embody-chair.jpg"
+                    alt="디자인 체어"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-indigo-100 p-2 group-hover:bg-indigo-200 transition-colors">
+                      <Sparkles className="h-5 w-5 text-indigo-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">디자인 체어</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">아이코닉한 디자인의 특별한 체어</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/store?category=desk" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-teal-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-teal-100 to-teal-50">
+                  <Image
+                    src="/steelcase-gesture-chair.jpg"
+                    alt="데스크"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-teal-100 p-2 group-hover:bg-teal-200 transition-colors">
+                      <Package className="h-5 w-5 text-teal-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">데스크</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">업무 효율을 높이는 프리미엄 데스크</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/store?category=office-accessories" className="group">
+              <Card className="overflow-hidden border-0 shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-orange-50 to-white h-full">
+                <div className="relative h-48 bg-gradient-to-br from-orange-100 to-orange-50">
+                  <Image
+                    src="/herman-miller-aeron.png"
+                    alt="오피스 악세서리"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="rounded-lg bg-orange-100 p-2 group-hover:bg-orange-200 transition-colors">
+                      <Package className="h-5 w-5 text-orange-700" />
+                    </div>
+                    <h3 className="text-lg font-bold sm:text-xl">오피스 악세서리</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">오피스 공간을 완성하는 필수 아이템</p>
                 </CardContent>
               </Card>
             </Link>
