@@ -21,9 +21,11 @@ interface ReviewFiltersProps {
     name: string
     slug: string
   } | null
+  availableBrands?: Array<{ id: string; name: string; slug: string }>
+  availableProducts?: Array<{ id: number; name: string; brandId: string }>
 }
 
-export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersProps) {
+export default function ReviewFilters({ productInfo, brandInfo, availableBrands = [], availableProducts = [] }: ReviewFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -33,6 +35,8 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
   const currentOccupations = searchParams.get("occupations")?.split(",").filter(Boolean) || []
   const currentSittingStyles = searchParams.get("sittingStyles")?.split(",").filter(Boolean) || []
   const currentSortBy = searchParams.get("sortBy") || "recent"
+  const currentBrand = searchParams.get("brand") || ""
+  const currentProduct = searchParams.get("product") || ""
 
   const updateURL = (updates: Record<string, string | string[] | number | null>) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -70,6 +74,30 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
       : [...currentSittingStyles, style]
     updateURL({ sittingStyles: newStyles })
   }
+
+  const handleBrandChange = (brandSlug: string) => {
+    if (brandSlug === currentBrand) {
+      updateURL({ brand: null, product: null })
+    } else {
+      updateURL({ brand: brandSlug, product: null })
+    }
+  }
+
+  const handleProductChange = (productId: string) => {
+    if (productId === currentProduct) {
+      updateURL({ product: null })
+    } else {
+      updateURL({ product: productId })
+    }
+  }
+
+  // 선택된 브랜드에 맞는 제품 목록 필터링
+  const filteredProducts = currentBrand
+    ? availableProducts.filter((p) => {
+        const brand = availableBrands.find((b) => b.slug === currentBrand)
+        return brand && p.brandId === brand.id
+      })
+    : availableProducts
 
   const resetFilters = () => {
     router.push("/reviews")
@@ -124,6 +152,50 @@ export default function ReviewFilters({ productInfo, brandInfo }: ReviewFiltersP
             </TouchOptimizedButton>
           </div>
           <p className="text-xs text-muted-foreground">이 제품의 리뷰만 표시 중</p>
+        </div>
+      )}
+
+      {availableBrands.length > 0 && (
+        <div className="border-t pt-6">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">브랜드</h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {availableBrands.map((brand) => (
+              <div key={brand.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`brand-${brand.id}`}
+                  checked={currentBrand === brand.slug}
+                  onCheckedChange={() => handleBrandChange(brand.slug)}
+                />
+                <Label htmlFor={`brand-${brand.id}`} className="text-sm cursor-pointer">
+                  {brand.name}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(filteredProducts.length > 0 || currentProduct) && (
+        <div className="border-t pt-6">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">제품명</h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <div key={product.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`product-${product.id}`}
+                    checked={currentProduct === String(product.id)}
+                    onCheckedChange={() => handleProductChange(String(product.id))}
+                  />
+                  <Label htmlFor={`product-${product.id}`} className="text-sm cursor-pointer">
+                    {product.name}
+                  </Label>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground">브랜드를 선택하면 제품이 표시됩니다.</p>
+            )}
+          </div>
         </div>
       )}
 

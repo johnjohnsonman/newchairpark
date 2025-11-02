@@ -48,18 +48,70 @@ export default async function ReviewsPage({
     .order("view_count", { ascending: false })
     .limit(4)
 
-  let query = supabase.from("reviews").select("*")
+  // 리뷰에 사용된 브랜드와 제품 목록 가져오기
+  const { data: reviewsForFilter } = await supabase
+    .from("reviews")
+    .select("product_id, products(id, name, brand_id, brands(id, name, slug))")
+    .not("product_id", "is", null)
 
-  if (productId) {
-    query = query.eq("product_id", productId)
+  // 브랜드 목록 추출 및 중복 제거
+  const brandMap = new Map<string, { id: string; name: string; slug: string }>()
+  const productMap = new Map<number, { id: number; name: string; brandId: string }>()
+
+  if (reviewsForFilter) {
+    reviewsForFilter.forEach((review: any) => {
+      if (review.products?.brands) {
+        const brand = review.products.brands
+        if (!brandMap.has(brand.id)) {
+          brandMap.set(brand.id, {
+            id: brand.id,
+            name: brand.name,
+            slug: brand.slug,
+          })
+        }
+      }
+      if (review.products) {
+        const product = review.products
+        if (!productMap.has(product.id)) {
+          productMap.set(product.id, {
+            id: product.id,
+            name: product.name,
+            brandId: product.brand_id,
+          })
+        }
+      }
+    })
   }
 
-  if (brandSlug && !productId) {
-    const { data: brandProducts } = await supabase.from("products").select("id").eq("brands.slug", brandSlug)
+  const availableBrands = Array.from(brandMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+  const availableProducts = Array.from(productMap.values()).sort((a, b) => a.name.localeCompare(b.name))
 
-    if (brandProducts && brandProducts.length > 0) {
-      const productIds = brandProducts.map((p) => p.id)
-      query = query.in("product_id", productIds)
+  let query = supabase.from("reviews").select("*")
+
+  // 제품 필터 처리
+  if (productId) {
+    query = query.eq("product_id", productId)
+  } else if (brandSlug && !productId) {
+    // 브랜드만 선택된 경우: 해당 브랜드의 제품들에 대한 리뷰 필터링
+    const { data: brandData } = await supabase
+      .from("brands")
+      .select("id")
+      .eq("slug", brandSlug)
+      .single()
+
+    if (brandData) {
+      const { data: brandProducts } = await supabase
+        .from("products")
+        .select("id")
+        .eq("brand_id", brandData.id)
+
+      if (brandProducts && brandProducts.length > 0) {
+        const productIds = brandProducts.map((p) => p.id)
+        query = query.in("product_id", productIds)
+      } else {
+        // 해당 브랜드의 제품이 없으면 빈 결과
+        query = query.eq("product_id", -1)
+      }
     }
   }
 
@@ -128,7 +180,12 @@ export default async function ReviewsPage({
         <div className="flex gap-8">
           <aside className="hidden w-64 flex-shrink-0 lg:block">
             <div className="sticky top-4">
-              <ReviewFilters productInfo={productInfo} brandInfo={brandInfo} />
+              <ReviewFilters 
+                productInfo={productInfo} 
+                brandInfo={brandInfo}
+                availableBrands={availableBrands}
+                availableProducts={availableProducts}
+              />
             </div>
           </aside>
 
