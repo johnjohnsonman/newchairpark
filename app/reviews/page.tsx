@@ -15,7 +15,7 @@ export default async function ReviewsPage({
 }) {
   const supabase = await createServerClient()
 
-  const productId = searchParams.product ? Number(searchParams.product) : null
+  const productId = searchParams.product ? String(searchParams.product) : null
   const brandSlug = searchParams.brand ? String(searchParams.brand) : null
 
   const ratings = searchParams.ratings
@@ -40,7 +40,16 @@ export default async function ReviewsPage({
 
   if (productId) {
     const { data } = await supabase.from("products").select("id, name, brands(name, slug)").eq("id", productId).single()
-    productInfo = data
+    if (data) {
+      productInfo = {
+        id: String(data.id),
+        name: data.name,
+        brands: data.brands ? {
+          name: data.brands.name,
+          slug: data.brands.slug,
+        } : undefined,
+      }
+    }
   } else if (brandSlug) {
     const { data } = await supabase.from("brands").select("name, slug").eq("slug", brandSlug).single()
     brandInfo = data
@@ -53,43 +62,58 @@ export default async function ReviewsPage({
     .order("view_count", { ascending: false })
     .limit(4)
 
-  // 리뷰에 사용된 브랜드와 제품 목록 가져오기
-  const { data: reviewsForFilter } = await supabase
+  // 리뷰에 사용된 제품 ID 목록 가져오기
+  const { data: reviewProductIds } = await supabase
     .from("reviews")
-    .select("product_id, products(id, name, brand_id, brands(id, name, slug))")
+    .select("product_id")
     .not("product_id", "is", null)
 
-  // 브랜드 목록 추출 및 중복 제거
-  const brandMap = new Map<string, { id: string; name: string; slug: string }>()
-  const productMap = new Map<number, { id: number; name: string; brandId: string }>()
+  // 고유한 product_id 추출
+  const uniqueProductIds = Array.from(
+    new Set((reviewProductIds || []).map((r: any) => r.product_id).filter(Boolean))
+  )
 
-  if (reviewsForFilter) {
-    reviewsForFilter.forEach((review: any) => {
-      if (review.products?.brands) {
-        const brand = review.products.brands
-        if (!brandMap.has(brand.id)) {
-          brandMap.set(brand.id, {
-            id: brand.id,
-            name: brand.name,
-            slug: brand.slug,
-          })
-        }
-      }
-      if (review.products) {
-        const product = review.products
+  // 제품 정보 가져오기 (브랜드 정보 포함)
+  let availableBrands: Array<{ id: string; name: string; slug: string }> = []
+  let availableProducts: Array<{ id: string; name: string; brandId: string }> = []
+
+  if (uniqueProductIds.length > 0) {
+    const { data: productsData } = await supabase
+      .from("products")
+      .select("id, name, brand_id, brands(id, name, slug)")
+      .in("id", uniqueProductIds)
+
+    if (productsData) {
+      const brandMap = new Map<string, { id: string; name: string; slug: string }>()
+      const productMap = new Map<string, { id: string; name: string; brandId: string }>()
+
+      productsData.forEach((product: any) => {
+        // 제품 추가
         if (!productMap.has(product.id)) {
           productMap.set(product.id, {
-            id: product.id,
+            id: String(product.id),
             name: product.name,
-            brandId: product.brand_id,
+            brandId: product.brand_id || "",
           })
         }
-      }
-    })
-  }
 
-  const availableBrands = Array.from(brandMap.values()).sort((a, b) => a.name.localeCompare(b.name))
-  const availableProducts = Array.from(productMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+        // 브랜드 추가
+        if (product.brands && product.brands.id) {
+          const brand = product.brands
+          if (!brandMap.has(brand.id)) {
+            brandMap.set(brand.id, {
+              id: brand.id,
+              name: brand.name,
+              slug: brand.slug,
+            })
+          }
+        }
+      })
+
+      availableBrands = Array.from(brandMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+      availableProducts = Array.from(productMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+    }
+  }
 
   let query = supabase.from("reviews").select("*")
 

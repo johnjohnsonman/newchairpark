@@ -22,7 +22,7 @@ interface ReviewFiltersProps {
     slug: string
   } | null
   availableBrands?: Array<{ id: string; name: string; slug: string }>
-  availableProducts?: Array<{ id: number; name: string; brandId: string }>
+  availableProducts?: Array<{ id: string; name: string; brandId: string }>
 }
 
 export default function ReviewFilters({ productInfo, brandInfo, availableBrands = [], availableProducts = [] }: ReviewFiltersProps) {
@@ -168,11 +168,11 @@ export default function ReviewFilters({ productInfo, brandInfo, availableBrands 
         </div>
       )}
 
-      {availableBrands.length > 0 && (
-        <div className="border-t pt-6">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">브랜드</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {availableBrands.map((brand) => (
+      <div className="border-t pt-6">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">브랜드</h3>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {availableBrands.length > 0 ? (
+            availableBrands.map((brand) => (
               <div key={brand.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={`brand-${brand.id}`}
@@ -183,34 +183,36 @@ export default function ReviewFilters({ productInfo, brandInfo, availableBrands 
                   {brand.name}
                 </Label>
               </div>
-            ))}
-          </div>
+            ))
+          ) : (
+            <p className="text-xs text-muted-foreground">리뷰가 있는 브랜드가 없습니다.</p>
+          )}
         </div>
-      )}
+      </div>
 
-      {(filteredProducts.length > 0 || currentProduct) && (
-        <div className="border-t pt-6">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">제품명</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <div key={product.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`product-${product.id}`}
-                    checked={currentProduct === String(product.id)}
-                    onCheckedChange={() => handleProductChange(String(product.id))}
-                  />
-                  <Label htmlFor={`product-${product.id}`} className="text-sm cursor-pointer">
-                    {product.name}
-                  </Label>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-muted-foreground">브랜드를 선택하면 제품이 표시됩니다.</p>
-            )}
-          </div>
+      <div className="border-t pt-6">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">제품명</h3>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <div key={product.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`product-${product.id}`}
+                  checked={currentProduct === String(product.id)}
+                  onCheckedChange={() => handleProductChange(String(product.id))}
+                />
+                <Label htmlFor={`product-${product.id}`} className="text-sm cursor-pointer">
+                  {product.name}
+                </Label>
+              </div>
+            ))
+          ) : currentBrand ? (
+            <p className="text-xs text-muted-foreground">선택한 브랜드에 리뷰가 있는 제품이 없습니다.</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">브랜드를 선택하면 제품이 표시됩니다.</p>
+          )}
         </div>
-      )}
+      </div>
 
       <div>
         <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">정렬</h3>
