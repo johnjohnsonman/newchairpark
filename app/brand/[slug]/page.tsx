@@ -120,7 +120,7 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
         <div className="relative bg-slate-100 pt-8 sm:pt-12">
           <div className="container mx-auto">
             <div className="grid lg:grid-cols-2">
-              <div className="flex items-center px-6 py-16 lg:px-12">
+              <div className="flex items-center px-6 py-8 lg:px-12 lg:py-10">
                 <div>
                   <div className="mb-4 text-4xl font-bold">{brand.name}</div>
                   <p className="max-w-md text-pretty leading-relaxed text-muted-foreground">
@@ -128,7 +128,7 @@ export default async function BrandDetailPage({ params }: BrandDetailPageProps) 
                   </p>
                 </div>
               </div>
-              <div className="relative h-96 lg:h-[600px] xl:h-[700px]">
+              <div className="relative h-48 lg:h-[300px] xl:h-[350px]">
                 <BrandBannerCarousel 
                   banners={banners || []} 
                   brandName={brand.name}
